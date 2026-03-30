@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { client } from '@/lib/Client';
+import { Client } from '@/lib/Client';
 import styles from './page.module.css';
-
-// Supabaseクライアントの初期化
-//const supabase = client(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 // 初期状態の定義
 const initialFormState = {
@@ -25,7 +22,7 @@ const initialFormState = {
   image_url: ''
 };
 
-export default function InputBooks() {
+export default function InsertBooks() {
   const [formData, setFormData] = useState(initialFormState);
 
   // 汎用的な入力変更ハンドラ
@@ -75,7 +72,7 @@ export default function InputBooks() {
         image_url: formData.image_url || null
       };
 
-      const { error } = await client.from('t_books').insert([insertData]);
+      const { error } = await Client.from('t_books').insert([insertData]);
 
       if (error) throw error;
 
@@ -91,9 +88,10 @@ export default function InputBooks() {
     <div className={styles.container}>
       <h1>書籍管理</h1>
       <h2>ID</h2>
-
-      <label htmlFor="ndc_cd"> 十進分類</label>
-      <input id="ndc_cd" type="text" maxLength={10} value={formData.ndc_cd} onChange={handleChange} />
+      <div className="inputItems" id="ndc_cd">
+        <label> 十進分類</label>
+        <input type="text" maxLength={10} value={formData.ndc_cd} onChange={handleChange} />
+      </div>
 
       <label htmlFor="isbn10"> ISBN(10)</label>
       <input id="isbn10" type="text" maxLength={13} value={formData.isbn10} onChange={handleChange} />
@@ -149,10 +147,10 @@ export default function InputBooks() {
       <input id="image_url" type="text" value={formData.image_url} onChange={handleChange} />
 
       <br />
-      <button type="button" onClick={handleRegister}>
+      <button id="button_insert" type="button" onClick={handleRegister}>
         登録
       </button>
-      <button type="button" onClick={handleClear}>
+      <button id="button_clear" type="button" onClick={handleClear}>
         クリア
       </button>
     </div>

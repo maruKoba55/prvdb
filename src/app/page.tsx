@@ -1,12 +1,11 @@
 'use client';
 import { useState, useRef } from 'react';
-import styles from './page.module.css';
-import InputBooks from './input_books';
+import InsertBooks from '@/components/insert_books';
 
-export default function FormPage() {
+export default function Home() {
   return (
     <div>
-      <InputBooks />
+      <InsertBooks />
     </div>
   );
 }

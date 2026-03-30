@@ -2,28 +2,24 @@
   padding: 20px;
 }
 
-.table {
-  border: solid 1px gray;
-  border-collapse: collapse;
+.inputItems {
+  color: firebrick;
 }
 
-.table td {
-  border: solid 1px gray;
-  padding: 10px 5px;
+#ndc_cd {
+  border: 1px solid #ccc; /* 薄いグレーの枠線 */
+  padding: 8px; /* 入力エリアの余白 */
+  border-radius: 4px; /* 角丸 */
+  outline: none; /* デフォルトの青い枠線を消す */
 }
 
-.output {
-  border: solid 3px gold;
-  padding: 20px 10px;
-  margin: 20px 0;
+/* 2. マウスホバー時の枠線 */
+#ndc_cd:hover {
+  border-color: #999; /* ホバー時に濃くする */
 }
 
-.form {
-  background-color: antiquewhite;
-  padding: 20px;
-  margin: 20px 0;
-}
-
-.form p {
-  margin-top: 0;
+/* 3. フォーカス時（クリック・入力時）の枠線 */
+#ndc_cd:focus {
+  border-color: #007bff; /* 青い枠線に変更 */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* 枠外にぼかし */
 }
