@@ -24,7 +24,6 @@ const initialFormState = {
 
 export default function InsertBooks() {
   const [formData, setFormData] = useState(initialFormState);
-  const [registeredBook, setRegisteredBook] = useState<any>(null);
 
   // 汎用的な入力変更ハンドラ
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -38,74 +37,50 @@ export default function InsertBooks() {
     }));
   };
 
-  // 共通の登録ロジック
-  const insertBookData = async () => {
-    if (!formData.title.trim()) {
-      alert('題名は必須入力です。');
-      return null;
-    }
-
-    const insertData = {
-      ...formData,
-      first_publish_year: formData.first_publish_year ? parseInt(formData.first_publish_year) : null,
-      ndc_cd: formData.ndc_cd || null,
-      isbn10: formData.isbn10 || null,
-      isbn13: formData.isbn13 || null,
-      c_cd: formData.c_cd || null,
-      original_title: formData.original_title || null,
-      colophon: formData.colophon || null,
-      publisher: formData.publisher || null,
-      publish_series: formData.publish_series || null,
-      publish_series_no: formData.publish_series_no || null,
-      remarks: formData.remarks || null,
-      image_url: formData.image_url || null
-    };
-
-    // insertし、そのデータを取得
-    const { data, error } = await Client.from('books').insert([insertData]).select();
-    if (error) throw error;
-    return data ? data[0] : null;
-  };
-
-  // 基本情報のみ登録
-  const handleRegisterOnly = async () => {
-    try {
-      const data = await insertBookData();
-      if (data) {
-        setRegisteredBook(data); // 画面に表示
-        alert('基本情報の登録が完了しました！');
-        setFormData(initialFormState);
-      }
-    } catch (error) {
-      console.error(error);
-      alert('登録に失敗しました。');
-    }
-  };
-
-  // 基本情報 ＋ 所有情報登録（別窓）
-  const handleRegisterWithOwnership = async () => {
-    try {
-      const data = await insertBookData();
-      if (data) {
-        setRegisteredBook(data); // 画面に表示
-        // 別ウィンドウを開く（URLやパラメータは環境に合わせて調整してください）
-        // 例: /ownership/new?book_id=123
-        const ownershipUrl = `/ownership/new?book_id=${data.book_id}`;
-        window.open(ownershipUrl, '_blank', 'width=800,height=600');
-
-        alert('基本情報を登録しました。所有情報入力画面を開きます。');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('登録に失敗しました。');
-    }
-  };
-
   // クリアボタンの処理
   const handleClear = () => {
     if (confirm('入力内容をすべて消去しますか？')) {
       setFormData(initialFormState);
-      setRegisteredBook(null);
+    }
+  };
+
+  // 登録ボタンの処理
+  const handleRegister = async () => {
+    // 必須チェック（titleはNOT NULL制約があるため）
+    if (!formData.title.trim()) {
+      alert('題名は必須入力です。');
+      return;
+    }
+
+    try {
+      // 数値型への変換と空文字のnull変換処理
+      const insertData = {
+        ...formData,
+        // 数値型カラムの変換（空文字ならnull）
+        first_publish_year: formData.first_publish_year ? parseInt(formData.first_publish_year) : null,
+        // その他の文字列カラムで空文字があればnullに変換（任意）
+        ndc_cd: formData.ndc_cd || null,
+        isbn10: formData.isbn10 || null,
+        isbn13: formData.isbn13 || null,
+        c_cd: formData.c_cd || null,
+        original_title: formData.original_title || null,
+        colophon: formData.colophon || null,
+        publisher: formData.publisher || null,
+        publish_series: formData.publish_series || null,
+        publish_series_no: formData.publish_series_no || null,
+        remarks: formData.remarks || null,
+        image_url: formData.image_url || null
+      };
+
+      const { error } = await Client.from('books').insert([insertData]);
+
+      if (error) throw error;
+
+      alert('登録が完了しました！');
+      setFormData(initialFormState); // 登録後にフォームをリセット
+    } catch (error) {
+      console.error('Error inserting data:', error);
+      alert('登録に失敗しました。');
     }
   };
 
@@ -280,29 +255,18 @@ export default function InsertBooks() {
             />
           </span>
           <br />
-          <div className="p-2 border-t mt-4">
-            <span className="float-end text-gray-500">
-              （データID：{registeredBook ? registeredBook.book_id : '---'}）
-            </span>
-            <div className="clear-both"></div>
-          </div>
+          <span className="float-end">（データID）</span>
         </div>
-
         <br />
         <div className="flex justify-around">
-          <button id="button_insert" type="button" className={styles.btnSolidBlue} onClick={handleRegisterOnly}>
+          <button id="button_insert" type="button" className={styles.btnSolidBlue} onClick={handleRegister}>
             基本情報のみ登録
           </button>
-          <button
-            id="button_possese"
-            type="button"
-            className={styles.btnSolidOrange}
-            onClick={handleRegisterWithOwnership}
-          >
+          <button id="button_possese" type="button" className={styles.btnSolidOrange}>
             基本情報に続けて所有情報を登録
           </button>
           <button id="button_clear" type="button" className={styles.btnOutline} onClick={handleClear}>
-            画面クリア
+            基本情報クリア
           </button>
         </div>
         <br />
