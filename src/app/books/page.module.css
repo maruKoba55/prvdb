@@ -50,6 +50,12 @@
 .btnSolidOrange:active {
   transform: translateY(0);
 }
+.btnSolidOrange:disabled {
+  background-color: #e2e8f0; /* グレーアウト */
+  color: #94a3b8;
+  cursor: not-allowed; /* 禁止マークのカーソル */
+  border-color: #cbd5e1;
+}
 
 .btnOutline {
   background: transparent;
@@ -71,31 +77,14 @@
   transform: translateY(0);
 }
 
-.btnFlat {
+.btnOutlineMini {
   background: transparent;
   color: #007bff;
-  border: none;
-  padding: 12px 32px;
+  border: 2px solid #007bff;
+  padding: 5px 8px;
   font-size: 16px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  position: relative;
-}
-.btnFlat::after {
-  content: '';
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
-  background: #007bff;
-  transition: width 0.3s ease;
-}
-.btnFlat:hover::after {
-  width: 80%;
-}
-.btnFlat:hover {
-  color: #0056b3;
 }

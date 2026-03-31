@@ -1,11 +1,11 @@
 'use client';
 import { useState, useRef } from 'react';
-import InsertBooks from '@/app/books/insert_books';
+import InsertPossese from '@/app/books/possese/insert_possese';
 
 export default function Home() {
   return (
     <div>
-      <InsertBooks />
+      <InsertPossese />
     </div>
   );
 }

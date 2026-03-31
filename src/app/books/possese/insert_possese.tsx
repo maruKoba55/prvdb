@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Client } from '@/lib/Client';
 import styles from './page.module.css';
+import { useSearchParams } from 'next/navigation';
 
 // 初期状態の定義
 const initialFormState = {
@@ -23,14 +24,18 @@ const initialFormState = {
 };
 
 export default function InsertBooks() {
+  const searchParams = useSearchParams();
+  const bookId = searchParams.get('book_id');
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
+
+  // 書影表示用URL（登録済みデータ＞入力中URL）
+  const displayImageUrl = registeredBook?.image_url || formData.image_url;
 
   // 汎用的な入力変更ハンドラ
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-
     setFormData((prev) => ({
       ...prev,
       // チェックボックスの場合はchecked、それ以外はvalueを格納
@@ -38,13 +43,12 @@ export default function InsertBooks() {
     }));
   };
 
-  // 共通の登録ロジック
+  // 画面内容をTable 'books' へ登録
   const insertBookData = async () => {
-    if (!formData.title.trim()) {
-      alert('題名は必須入力です。');
+    if (!formData.title.trim() || !formData.publisher.trim() || !formData.first_publish_year.trim()) {
+      alert('題名、出版社、初版年は入力必須です。');
       return null;
     }
-
     const insertData = {
       ...formData,
       first_publish_year: formData.first_publish_year ? parseInt(formData.first_publish_year) : null,
@@ -60,48 +64,53 @@ export default function InsertBooks() {
       remarks: formData.remarks || null,
       image_url: formData.image_url || null
     };
-
-    // insertし、そのデータを取得
+    // Table 'books'をinsertし、その内容を取得
     const { data, error } = await Client.from('books').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
   };
 
-  // 基本情報のみ登録
-  const handleRegisterOnly = async () => {
+  // 奥付消去ボタンの処理
+  const handleClearColophon = () => {
+    setFormData((prev) => ({
+      ...prev, // 現在の入力内容をコピー
+      colophon: ''
+    }));
+  };
+
+  // 基本情報登録ボタンの処理
+  const handleRegister = async () => {
     try {
       const data = await insertBookData();
       if (data) {
         setRegisteredBook(data); // 画面に表示
-        alert('基本情報の登録が完了しました！');
-        setFormData(initialFormState);
+        alert('書籍基本情報を登録しました');
       }
     } catch (error) {
       console.error(error);
-      alert('登録に失敗しました。');
-    }
-  };
-
-  // 基本情報 ＋ 所有情報登録（別窓）
-  const handleRegisterWithOwnership = async () => {
-    try {
-      const data = await insertBookData();
-      if (data) {
-        setRegisteredBook(data); // 画面に表示
-        // 別ウィンドウを開く（URLやパラメータは環境に合わせて調整してください）
-        // 例: /ownership/new?book_id=123
-        const ownershipUrl = `/ownership/new?book_id=${data.book_id}`;
-        window.open(ownershipUrl, '_blank', 'width=800,height=600');
-
-        alert('基本情報を登録しました。所有情報入力画面を開きます。');
+      if (error.code === '23505') {
+        alert('このデータは登録済みです');
+      } else {
+        alert('登録に失敗しました');
       }
-    } catch (error) {
-      console.error(error);
-      alert('登録に失敗しました。');
     }
   };
 
-  // クリアボタンの処理
+  // 所有情報登録ウィンドウを開く
+  const handlePossese = () => {
+    // URLやパラメータは環境に合わせて調整
+    const posseseUrl = `/possese/new?book_id=${registeredBook.book_id}`;
+    window.open(posseseUrl, '_blank', 'width=800,height=600');
+  };
+
+  // 役割情報登録ウィンドウを開く
+  const handleRole = () => {
+    // URLやパラメータは環境に合わせて調整
+    const roleUrl = `/role/new?book_id=${registeredBook.book_id}`;
+    window.open(roleUrl, '_blank', 'width=800,height=600');
+  };
+
+  // 画面初期化ボタンの処理
   const handleClear = () => {
     if (confirm('入力内容をすべて消去しますか？')) {
       setFormData(initialFormState);
@@ -109,14 +118,23 @@ export default function InsertBooks() {
     }
   };
 
+  // 閉じるボタンの処理
+  const handleClose = () => {
+    window.close();
+  };
+
   return (
-    <div>
-      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
+    <div className="min-w-[880px] w-full">
+      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍所有情報（登録）</h1>
       <div className="border-solid border-2 rounded-lg m-4">
         <div>
-          <h2 className="text-xl font-bold text-blue-500 m-2">書籍基本情報</h2>
+          <span className="text-xl font-bold text-blue-500 m-2">書籍基本情報</span>
+          <span className="text-gray-500">（データID：{bookId ? bookId : '---'}）</span>
+          <br />
           <span className="ml-2">
-            <label htmlFor="isbn10">ISBN-10</label>
+            <label htmlFor="isbn10" className="inline-block w-15">
+              ISBN-10
+            </label>
             <input
               id="isbn10"
               className={styles.items}
@@ -165,7 +183,9 @@ export default function InsertBooks() {
           </span>
           <br />
           <span className="ml-2">
-            <label htmlFor="title">題　名</label>
+            <label htmlFor="title" className="inline-block w-15">
+              題　名
+            </label>
             <input
               id="title"
               className={styles.items}
@@ -177,7 +197,9 @@ export default function InsertBooks() {
           </span>
           <br />
           <span className="ml-2">
-            <label htmlFor="original_title">原題名</label>
+            <label htmlFor="original_title" className="inline-block w-15">
+              原題名
+            </label>
             <input
               id="original_title"
               className={styles.items}
@@ -189,21 +211,33 @@ export default function InsertBooks() {
           </span>
           <br />
           <span className="ml-2">
-            <label htmlFor="colophon" className="align-top">
+            <label htmlFor="colophon" className="inline-block w-15 align-top">
               奥　付
             </label>
             <textarea
               id="colophon"
               className={styles.items}
-              cols={95}
+              cols={80}
               rows={4}
               value={formData.colophon}
               onChange={handleChange}
             ></textarea>
           </span>
+          <span className="ml-2 align-top">
+            <button
+              id="button_clear_colophon"
+              type="button"
+              className={styles.btnOutlineMini}
+              onClick={handleClearColophon}
+            >
+              奥付消去
+            </button>
+          </span>
           <br />
           <span className="ml-2">
-            <label htmlFor="publisher">出版社</label>
+            <label htmlFor="publisher" className="inline-block w-15">
+              出版社
+            </label>
             <input
               id="publisher"
               className={styles.items}
@@ -212,8 +246,10 @@ export default function InsertBooks() {
               value={formData.publisher}
               onChange={handleChange}
             />
+            &nbsp;※不明の場合 ･･･（不明）または（自費出版）
           </span>
-          <span className="ml-4">
+          <br />
+          <span className="ml-19">
             <label htmlFor="publish_series">出版シリーズ</label>
             <input
               id="publish_series"
@@ -239,20 +275,23 @@ export default function InsertBooks() {
           </span>
           <br />
           <span className="ml-2">
-            <label htmlFor="first_publish_year">初版年</label>
+            <label htmlFor="first_publish_year" className="inline-block w-15">
+              初版年
+            </label>
             <input
               id="first_publish_year"
               className={styles.items}
               type="number"
-              min={1900}
+              min={0}
               max={9999}
               value={formData.first_publish_year}
               onChange={handleChange}
             />
+            &nbsp;※不明の場合 ･･･ 0（zero）
           </span>
           <br />
           <span className="ml-2">
-            <label htmlFor="remarks" className="align-top">
+            <label htmlFor="remarks" className="inline-block w-15 align-top">
               備　考
             </label>
             <textarea
@@ -279,30 +318,37 @@ export default function InsertBooks() {
               onChange={handleChange}
             />
           </span>
-          <br />
-          <div className="p-2 border-t mt-4">
-            <span className="float-end text-gray-500">
-              （データID：{registeredBook ? registeredBook.book_id : '---'}）
-            </span>
-            <div className="clear-both"></div>
-          </div>
         </div>
-
         <br />
         <div className="flex justify-around">
-          <button id="button_insert" type="button" className={styles.btnSolidBlue} onClick={handleRegisterOnly}>
-            基本情報のみ登録
+          <button id="button_insert" type="button" className={styles.btnSolidBlue} onClick={handleRegister}>
+            基本情報を登録
           </button>
           <button
             id="button_possese"
             type="button"
+            title="基本情報の登録後、所有する書籍に関する情報を入力"
             className={styles.btnSolidOrange}
-            onClick={handleRegisterWithOwnership}
+            disabled={!registeredBook?.book_id}
+            onClick={handlePossese}
           >
-            基本情報に続けて所有情報を登録
+            所有情報登録へ
+          </button>
+          <button
+            id="button_role"
+            type="button"
+            title="基本情報の登録後、検索用の著者名などを入力"
+            className={styles.btnSolidOrange}
+            disabled={!registeredBook?.book_id}
+            onClick={handleRole}
+          >
+            役割情報登録へ
           </button>
           <button id="button_clear" type="button" className={styles.btnOutline} onClick={handleClear}>
-            画面クリア
+            画面初期化
+          </button>
+          <button id="button_close" type="button" className={styles.btnOutline} onClick={handleClose}>
+            閉じる
           </button>
         </div>
         <br />
