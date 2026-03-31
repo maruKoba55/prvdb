@@ -141,7 +141,7 @@ export default function InsertBooks() {
               id="isbn10"
               className={styles.items}
               type="text"
-              size="13"
+              size={13}
               maxLength={13}
               value={formData.isbn10}
               onChange={handleChange}
