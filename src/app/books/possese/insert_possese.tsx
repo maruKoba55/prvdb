@@ -88,7 +88,9 @@ export default function InsertBooks() {
       }
     } catch (error) {
       console.error(error);
-      if (error.code === '23505') {
+      if (error instanceof Error && (error as any).code === '23505') {
+        alert('このデータは登録済みです');
+      } else if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
         alert('このデータは登録済みです');
       } else {
         alert('登録に失敗しました');
