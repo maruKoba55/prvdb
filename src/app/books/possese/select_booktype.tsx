@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import styles from './page.module.css';
-import { BookTypeList } from './options.booktype.tsx';
+import { BookTypeList } from './options.booktype';
 
 export default function selectBookType() {
   return (
