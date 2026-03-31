@@ -153,7 +153,7 @@ export default function InsertBooks() {
               id="isbn13"
               className={styles.items}
               type="text"
-              size="17"
+              size={17}
               maxLength={17}
               value={formData.isbn13}
               onChange={handleChange}
@@ -165,7 +165,7 @@ export default function InsertBooks() {
               id="c_cd"
               className={styles.items}
               type="text"
-              size="5"
+              size={5}
               maxLength={5}
               value={formData.c_cd}
               onChange={handleChange}
@@ -177,7 +177,7 @@ export default function InsertBooks() {
               id="ndc_cd"
               className={styles.items}
               type="text"
-              size="10"
+              size={10}
               maxLength={10}
               value={formData.ndc_cd}
               onChange={handleChange}
