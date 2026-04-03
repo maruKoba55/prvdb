@@ -109,7 +109,13 @@ export default function InsertPossess() {
 
   // 保有情報登録ウィンドウを開く
   const handlePossess = () => {
-    const possessUrl = `/books/possess?book_id=${registeredBook.book_id}`;
+    const { book_id, title, isbn13 } = registeredBook;
+    const params = new URLSearchParams({
+      book_id: book_id.toString(),
+      title: title || '',
+      isbn13: isbn13 || ''
+    });
+    const possessUrl = `/books/possess?${params.toString()}`;
     window.open(possessUrl, '_blank', 'width=800,height=600');
   };
 
@@ -134,13 +140,14 @@ export default function InsertPossess() {
 
   return (
     <div className="min-w-[1100px] w-full">
-      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理（登録）</h1>
+      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
       <div className="border-solid border-2 rounded-lg m-4 p-2">
         <div className="flex">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <span className="text-xl font-bold text-blue-500 m-2">書籍基本情報</span>
             <span className="text-gray-500">（データID：{registeredBook ? registeredBook.book_id : '---'}）</span>
+            <br />
             <br />
             <span className="ml-2">
               <label htmlFor="isbn10" className="inline-block w-15">
