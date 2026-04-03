@@ -98,11 +98,11 @@ export default function InsertBooks() {
     }
   };
 
-  // 所有情報登録ウィンドウを開く
-  const handlePossese = () => {
+  // 保有情報登録ウィンドウを開く
+  const handlepossess = () => {
     // URLやパラメータは環境に合わせて調整
-    const posseseUrl = `/possese/new?book_id=${registeredBook.book_id}`;
-    window.open(posseseUrl, '_blank', 'width=800,height=600');
+    const possessUrl = `/possess/new?book_id=${registeredBook.book_id}`;
+    window.open(possessUrl, '_blank', 'width=800,height=600');
   };
 
   // 役割情報登録ウィンドウを開く
@@ -127,7 +127,7 @@ export default function InsertBooks() {
 
   return (
     <div className="min-w-[880px] w-full">
-      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍所有情報（登録）</h1>
+      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍保有情報（登録）</h1>
       <div className="border-solid border-2 rounded-lg m-4">
         <div>
           <span className="text-xl font-bold text-blue-500 m-2">書籍基本情報</span>
@@ -327,14 +327,14 @@ export default function InsertBooks() {
             基本情報を登録
           </button>
           <button
-            id="button_possese"
+            id="button_possess"
             type="button"
-            title="基本情報の登録後、所有する書籍に関する情報を入力"
+            title="基本情報の登録後、保有する書籍に関する情報を入力"
             className={styles.btnSolidOrange}
             disabled={!registeredBook?.book_id}
-            onClick={handlePossese}
+            onClick={handlepossess}
           >
-            所有情報登録へ
+            保有情報登録へ
           </button>
           <button
             id="button_role"

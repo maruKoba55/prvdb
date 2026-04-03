@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { Client } from '@/lib/Client';
-import { CommonButton } from '@/components/ui/button';
 import { toWarekiYear } from '@/utils/toWarekiYear';
-import Image from 'next/image';
 import styles from './page.module.css';
 
 // 初期状態の定義
@@ -29,20 +27,16 @@ export default function InsertPossess() {
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
 
-  // 書影表示用：image_url入力確定時にpreviewUrlを更新
-  // 画像取得403エラー回避のため、プロキシAPIを経由する
-  const [previewUrl, setPreviewUrl] = useState(formData.image_url);
-  const handleBlur = () => {
-    setPreviewUrl(`/api/proxy?url=${encodeURIComponent(formData.image_url.trim())}`);
-  };
+  // 書影表示用URL（登録済みデータ＞入力中URL）
+  const displayImageUrl = registeredBook?.image_url || formData.image_url;
 
   // 汎用的な入力変更ハンドラ
-  // チェックボックスの場合はchecked、それ以外はvalueを格納
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     setFormData((prev) => ({
       ...prev,
+      // チェックボックスの場合はchecked、それ以外はvalueを格納
       [id]: type === 'checkbox' ? checked : value
     }));
   };
@@ -50,11 +44,7 @@ export default function InsertPossess() {
   // 画面内容をTable 'books' へ登録
   const insertBookData = async () => {
     if (!formData.title.trim() || !formData.publisher.trim() || !formData.first_publish_year.trim()) {
-      alert('題名、出版社、初版年は入力必須です');
-      return null;
-    }
-    if (Number(formData.first_publish_year.trim()) > new Date().getFullYear() + 1) {
-      alert('初版年を確認してください');
+      alert('題名、出版社、初版年は入力必須です。');
       return null;
     }
     const insertData = {
@@ -72,7 +62,7 @@ export default function InsertPossess() {
       remarks: formData.remarks || null,
       image_url: formData.image_url || null
     };
-    // Table 'books'にinsertし、その内容を取得
+    // Table 'books'をinsertし、その内容を取得
     const { data, error } = await Client.from('books').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
@@ -91,30 +81,31 @@ export default function InsertPossess() {
     try {
       const data = await insertBookData();
       if (data) {
-        setRegisteredBook(data);
-        alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
+        setRegisteredBook(data); // 画面に表示
+        alert('書籍基本情報を登録しました');
       }
     } catch (error) {
       console.error(error);
-      if (
-        (error instanceof Error && (error as any).code === '23505') ||
-        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
-      ) {
-        alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は登録済みです`);
+      if (error instanceof Error && (error as any).code === '23505') {
+        alert('このデータは登録済みです');
+      } else if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+        alert('このデータは登録済みです');
       } else {
-        alert(`登録失敗（Insert to Table 'books' error.code=${(error as any).code || 'unknown'}）`);
+        alert('登録に失敗しました');
       }
     }
   };
 
   // 保有情報登録ウィンドウを開く
-  const handlePossess = () => {
+  const handlepossess = () => {
+    // URLやパラメータは環境に合わせて調整
     const possessUrl = `/books/possess?book_id=${registeredBook.book_id}`;
     window.open(possessUrl, '_blank', 'width=800,height=600');
   };
 
   // 役割情報登録ウィンドウを開く
   const handleRole = () => {
+    // URLやパラメータは環境に合わせて調整
     const roleUrl = `/books/role?book_id=${registeredBook.book_id}`;
     window.open(roleUrl, '_blank', 'width=800,height=600');
   };
@@ -235,11 +226,7 @@ export default function InsertPossess() {
               ></textarea>
             </span>
             <span className="ml-2 align-top">
-              <button
-                type="button"
-                className="py-2 px-3 text-base rounded-md font-semibold bg-blue-300"
-                onClick={handleClearColophon}
-              >
+              <button type="button" className={styles.btnOutlineMini} onClick={handleClearColophon}>
                 奥付消去
               </button>
             </span>
@@ -256,7 +243,7 @@ export default function InsertPossess() {
                 value={formData.publisher}
                 onChange={handleChange}
               />
-              &nbsp;※不詳の場合はカッコで括り、（不明）（自費出版）等
+              &nbsp;※不詳の場合 ･･･（）で括り、（不明）（自費出版）等
             </span>
             <br />
             <span className="ml-19">
@@ -302,7 +289,7 @@ export default function InsertPossess() {
                 <span>（{toWarekiYear(formData.first_publish_year ? parseInt(formData.first_publish_year) : 0)}）</span>
               )}
             </span>
-            &nbsp;※不詳の場合は 0（zero）
+            &nbsp;※不詳の場合 ･･･ 0（zero）
             <br />
             <span className="ml-2">
               <label htmlFor="remarks" className="inline-block w-15 align-top">
@@ -325,67 +312,66 @@ export default function InsertPossess() {
 
           {/* 右側：画像表示エリア */}
           <div className="w-[200px] flex flex-col items-center justify-start ml-2 p-2">
-            <div className="w-full h-[220px] flex items-center justify-center mb-4">
-              {!previewUrl || previewUrl.endsWith('url=') ? (
-                <div>
-                  <Image src="/images/book_NoImage.jpg" alt="No_Image" width={170} height={200} />
-                </div>
-              ) : (
-                <Image
-                  src={previewUrl}
-                  alt="Book Cover"
-                  width={170}
-                  height={200}
-                  className="object-contain"
-                  unoptimized
-                  onError={(e) => {
-                    //  console.log(`Failed to load image : ${previewUrl}`);
-                    if (e.currentTarget.src.includes('book_unavailable')) {
-                      return;
-                    } else {
-                      e.currentTarget.onerror = null;
-                      setPreviewUrl('/images/book_unavailable.jpg');
-                    }
-                  }}
-                />
-              )}
-            </div>
-            <div className="w-full flex flex-col">
-              <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex mb-1">
+            {displayImageUrl ? (
+              <img
+                src={displayImageUrl}
+                alt="Book Cover"
+                className="max-w-full h-auto border shadow-md"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-[150px] h-[200px] bg-gray-100 flex items-center justify-center text-gray-400 border border-dashed text-xs text-center">
+                画像なし
+              </div>
+            )}
+            <span className="flex flex-col mb-4">
+              <label htmlFor="image_url" className="text-sm font-medium text-gray-700 mb-1">
                 (書影URL)
               </label>
               <textarea
                 id="image_url"
-                className={`${styles.items} w-full resize-none`}
+                className={styles.items}
                 cols={20}
                 rows={3}
                 value={formData.image_url}
                 onChange={handleChange}
-                onBlur={handleBlur} // 確定時にプレビュー更新
               ></textarea>
-            </div>
+            </span>
           </div>
         </div>
 
-        {/* 下段：ボタンエリア */}
         <div className="flex justify-around">
-          <CommonButton label="基本情報を登録" variant="blue" onClick={handleRegister} />
-          <CommonButton
-            label="保有情報登録へ"
-            variant="red"
-            onClick={handlePossess}
+          <button id="button_insert" type="button" className={styles.btnSolidBlue} onClick={handleRegister}>
+            基本情報を登録
+          </button>
+          <button
+            id="button_possess"
+            type="button"
+            title="基本情報の登録後、保有する書籍に関する情報を入力"
+            className={styles.btnSolidOrange}
             disabled={!registeredBook?.book_id}
-            title="基本情報の登録後、保有する書籍の情報を入力"
-          />
-          <CommonButton
-            label="役割情報登録へ"
-            variant="orange"
-            onClick={handleRole}
-            disabled={!registeredBook?.book_id}
+            onClick={handlepossess}
+          >
+            保有情報登録へ
+          </button>
+          <button
+            id="button_role"
+            type="button"
             title="基本情報の登録後、検索用の著者名などを入力"
-          />
-          <CommonButton label="画面初期化" variant="outline" onClick={handleClear} />
-          <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
+            className={styles.btnSolidOrange}
+            disabled={!registeredBook?.book_id}
+            onClick={handleRole}
+          >
+            役割情報登録へ
+          </button>
+          <button id="button_clear" type="button" className={styles.btnOutline} onClick={handleClear}>
+            画面初期化
+          </button>
+          <button id="button_close" type="button" className={styles.btnOutline} onClick={handleClose}>
+            閉じる
+          </button>
         </div>
       </div>
     </div>
