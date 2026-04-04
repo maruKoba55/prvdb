@@ -50,7 +50,7 @@ export default function InsertPossess() {
   // 画面内容をTable 'books' へ登録
   const insertBookData = async () => {
     if (!formData.title.trim() || !formData.publisher.trim() || !formData.first_publish_year.trim()) {
-      alert('題名、出版社、初版年は入力必須です');
+      alert('必須項目が未入力です');
       return null;
     }
     if (Number(formData.first_publish_year.trim()) > new Date().getFullYear() + 1) {
@@ -148,7 +148,9 @@ export default function InsertPossess() {
             <span className="text-xl font-bold text-blue-500 m-2">書籍基本情報</span>
             <span className="text-gray-500">（データID：{registeredBook ? registeredBook.book_id : '---'}）</span>
             <br />
-            <br />
+            <p className="ml-6">
+              （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
+            </p>
             <span className="ml-2">
               <label htmlFor="isbn10" className="inline-block w-15">
                 ISBN-10
@@ -201,13 +203,14 @@ export default function InsertPossess() {
             </span>
             <br />
             <span className="ml-2">
-              <label htmlFor="title" className="inline-block w-15">
+              <label htmlFor="title" className="inline-block w-15 font-bold text-orange-500">
                 題　名
               </label>
               <input
                 id="title"
                 className={styles.items}
                 type="text"
+                required
                 size={94}
                 value={formData.title}
                 onChange={handleChange}
@@ -252,13 +255,14 @@ export default function InsertPossess() {
             </span>
             <br />
             <span className="ml-2">
-              <label htmlFor="publisher" className="inline-block w-15">
+              <label htmlFor="publisher" className="inline-block w-15 font-bold text-orange-500">
                 出版社
               </label>
               <input
                 id="publisher"
                 className={styles.items}
                 type="text"
+                required
                 size={24}
                 value={formData.publisher}
                 onChange={handleChange}
@@ -292,13 +296,14 @@ export default function InsertPossess() {
             </span>
             <br />
             <span className="ml-2">
-              <label htmlFor="first_publish_year" className="inline-block w-15">
+              <label htmlFor="first_publish_year" className="inline-block w-15 font-bold text-orange-500">
                 初版年
               </label>
               <input
                 id="first_publish_year"
                 className={styles.items}
                 type="number"
+                required
                 size={4}
                 min={0}
                 max={9999}
@@ -394,6 +399,7 @@ export default function InsertPossess() {
           <CommonButton label="画面初期化" variant="outline" onClick={handleClear} />
           <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
         </div>
+        <br />
       </div>
     </div>
   );

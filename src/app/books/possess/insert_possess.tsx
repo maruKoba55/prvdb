@@ -1,37 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Client } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
-import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import styles from '../page.module.css';
 
+// 本日日付（ローカル）
+const todayLocal = [
+  new Date().getFullYear(),
+  String(new Date().getMonth() + 1).padStart(2, '0'),
+  String(new Date().getDate()).padStart(2, '0')
+].join('-');
+
 // 初期状態の定義
 const initialFormState = {
-  ndc_cd: '',
-  isbn10: '',
-  isbn13: '',
-  c_cd: '',
-  title: '',
-  original_title: '',
-  colophon: '年月日初版発行\n著者：\n訳者：\n発行所：',
-  publisher: '',
-  publish_series: '',
-  publish_series_no: '',
-  first_publish_year: '',
+  booktype_cd: '',
+  get_date: todayLocal,
+  dispose_date: '',
   remarks: '',
-  comic_f: false,
-  image_url: ''
+  image_url: '',
+  urlUp_f: false
 };
 
-export default function InsertBooks() {
+type BookTypeMaster = {
+  booktype_cd: string;
+  booktype: string;
+  selectable: boolean;
+};
+
+export default function InsertPossess() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const title = searchParams.get('title');
   const isbn13 = searchParams.get('isbn13');
   const [formData, setFormData] = useState(initialFormState);
-  const [registeredBook, setRegisteredBook] = useState<any>(null);
+  const [registeredPossess, setRegisteredPossess] = useState<any>(null);
+  const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
 
   // 書影表示用：image_url入力確定時にpreviewUrlを更新
   // 画像取得403エラー回避のため、プロキシAPIを経由する
@@ -51,78 +57,84 @@ export default function InsertBooks() {
     }));
   };
 
-  // 画面内容をTable 'books' へ登録
-  const insertBookData = async () => {
-    if (!formData.title.trim() || !formData.publisher.trim() || !formData.first_publish_year.trim()) {
-      alert('題名、出版社、初版年は入力必須です。');
+  // 画面内容をTable 'book_possess' へ登録
+  const insertPossessData = async () => {
+    if (!formData.booktype_cd || !formData.get_date.trim()) {
+      alert('必須項目が未入力です');
+      return null;
+    }
+    if (formData.get_date > formData.dispose_date) {
+      alert('処分日を確認してください');
       return null;
     }
     const insertData = {
-      ...formData,
-      first_publish_year: formData.first_publish_year ? parseInt(formData.first_publish_year) : null,
-      ndc_cd: formData.ndc_cd || null,
-      isbn10: formData.isbn10 || null,
-      isbn13: formData.isbn13 || null,
-      c_cd: formData.c_cd || null,
-      original_title: formData.original_title || null,
-      colophon: formData.colophon || null,
-      publisher: formData.publisher || null,
-      publish_series: formData.publish_series || null,
-      publish_series_no: formData.publish_series_no || null,
+      book_id: bookId || null,
+      booktype_cd: formData.booktype_cd || null,
+      get_date: formData.get_date || null,
+      dispose_date: formData.dispose_date || null,
       remarks: formData.remarks || null,
       image_url: formData.image_url || null
     };
-    // Table 'books'をinsertし、その内容を取得
-    const { data, error } = await Client.from('books').insert([insertData]).select();
+
+    // Table 'book_possess'をinsert
+    const { data, error } = await Client.from('book_possess').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
   };
 
-  // 基本情報登録ボタンの処理
+  // 保有情報登録ボタンの処理
   const handleRegister = async () => {
     try {
-      const data = await insertBookData();
+      const data = await insertPossessData();
       if (data) {
-        setRegisteredBook(data); // 画面に表示
-        alert('書籍基本情報を登録しました');
+        setRegisteredPossess(data); // 画面に表示
+        alert('書籍保有情報を登録しました');
       }
     } catch (error) {
       console.error(error);
-      if (error instanceof Error && (error as any).code === '23505') {
-        alert('このデータは登録済みです');
-      } else if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+      if (
+        (error instanceof Error && (error as any).code === '23505') ||
+        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
+      ) {
         alert('このデータは登録済みです');
       } else {
-        alert('登録に失敗しました');
+        alert(`登録失敗（Insert to Table 'book_possess' error.code=${(error as any).code || 'unknown'}）`);
       }
     }
-  };
-
-  // 保有情報登録ウィンドウを開く
-  const handlepossess = () => {
-    // URLやパラメータは環境に合わせて調整
-    const possessUrl = `/possess/new?book_id=${registeredBook.book_id}`;
-    window.open(possessUrl, '_blank', 'width=800,height=600');
-  };
-
-  // 役割情報登録ウィンドウを開く
-  const handleRole = () => {
-    // URLやパラメータは環境に合わせて調整
-    const roleUrl = `/role/new?book_id=${registeredBook.book_id}`;
-    window.open(roleUrl, '_blank', 'width=800,height=600');
   };
 
   // 画面初期化ボタンの処理
   const handleClear = () => {
     if (confirm('入力内容をすべて消去しますか？')) {
       setFormData(initialFormState);
-      setRegisteredBook(null);
+      setRegisteredPossess(null);
     }
   };
 
   // 閉じるボタンの処理
   const handleClose = () => {
     window.close();
+  };
+
+  // 書籍種別マスターの展開・取得
+  useEffect(() => {
+    const fetchBookTypes = async () => {
+      const { data, error } = await Client.from('booktype_master')
+        .select('*')
+        .order('booktype_cd', { ascending: true });
+      if (error) {
+        console.error('Error fetching book types:', error);
+      } else {
+        setBookTypes(data || []);
+      }
+    };
+    fetchBookTypes();
+  }, []);
+  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      booktype_cd: e.target.value // ここでbooktype_cdが取得される
+    });
   };
 
   return (
@@ -136,37 +148,45 @@ export default function InsertBooks() {
             &nbsp;
             <span className="text-xl font-bold text-gray-500">{title ? '『' + title + '』' : ''}</span>
             <span className="text-gray-500">（データID：{bookId ? bookId : '---'}）</span>
-            <br /> <br />
+            <br />
+            <p className="ml-6">
+              （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
+            </p>
             <span className="ml-2">
-              <label htmlFor="booktype">書籍種別</label>
+              <label htmlFor="booktype" className="font-bold text-orange-500">
+                書籍種別
+              </label>
               <select
                 id="booktype"
                 className={styles.items}
-                value={formData.booktype}
-                onChange={handleChange}
-                defaultValue="紙"
+                required
+                value={formData.booktype_cd}
+                onChange={handleSelect}
               >
-                <option value="紙">紙</option>
-                <option disabled>----------</option>
-                <option value="kindle">kindle</option>
-                <option value="honto">honto</option>
-                <option value="AppleBooks">AppleBooks</option>
-                <option value="BOOK☆WALKER">BOOK☆WALKER</option>
-                <option value="日経ストア">日経ストア</option>
-                <option disabled>----------</option>
-                <option value="PDF">PDF</option>
-                <option value="HTML">HTML</option>
+                <option value="">選択してください</option>
+                {bookTypes.map((item) =>
+                  item.selectable ? (
+                    <option key={item.booktype_cd} value={item.booktype_cd}>
+                      {item.booktype}
+                    </option>
+                  ) : (
+                    <option key={item.booktype_cd} disabled>
+                      ----------
+                    </option>
+                  )
+                )}
               </select>
             </span>
             <br />
             <span className="ml-2">
-              <label htmlFor="get_date" className="inline-block w-16">
+              <label htmlFor="get_date" className="inline-block w-16 font-bold text-orange-500">
                 入 手 日
               </label>
               <input
                 id="get_date"
                 className={styles.items}
                 type="date"
+                required
                 value={formData.get_date}
                 onChange={handleChange}
               />
@@ -242,8 +262,14 @@ export default function InsertBooks() {
                 onBlur={handleBlur} // 確定時にプレビュー更新
               ></textarea>
               <span className="justify-right  ml-4">
-                <label htmlFor="urlUp">基本情報の書影とする</label>
-                <input id="urlUp" className="ml-2" type="checkbox" checked={formData.urlUp} onChange={handleChange} />
+                <label htmlFor="urlUp_f">基本情報の書影とする</label>
+                <input
+                  id="urlUp_f"
+                  className="ml-2"
+                  type="checkbox"
+                  checked={formData.urlUp_f}
+                  onChange={handleChange}
+                />
               </span>
             </div>
           </div>
