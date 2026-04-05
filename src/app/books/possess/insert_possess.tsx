@@ -63,7 +63,7 @@ export default function InsertPossess() {
       alert('必須項目が未入力です');
       return null;
     }
-    if (formData.get_date > formData.dispose_date) {
+    if (formData.dispose_date && formData.dispose_date < formData.get_date) {
       alert('処分日を確認してください');
       return null;
     }
@@ -147,9 +147,9 @@ export default function InsertPossess() {
             <span className="text-xl font-bold text-blue-500 m-2">書籍保有情報</span>
             &nbsp;
             <span className="text-xl font-bold text-gray-500">{title ? '『' + title + '』' : ''}</span>
-            <span className="text-gray-500">（データID：{bookId ? bookId : '---'}）</span>
+            <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
             <br />
-            <p className="ml-6">
+            <p className="flex justify-end">
               （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
             </p>
             <span className="ml-2">

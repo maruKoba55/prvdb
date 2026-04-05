@@ -146,7 +146,7 @@ export default function InsertPossess() {
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <span className="text-xl font-bold text-blue-500 m-2">書籍基本情報</span>
-            <span className="text-gray-500">（データID：{registeredBook ? registeredBook.book_id : '---'}）</span>
+            <span className="text-gray-500">（書籍ID：{registeredBook ? registeredBook.book_id : '---'}）</span>
             <br />
             <p className="ml-6">
               （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
