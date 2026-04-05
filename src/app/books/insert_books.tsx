@@ -7,6 +7,8 @@ import { toWarekiYear } from '@/utils/toWarekiYear';
 import Image from 'next/image';
 import styles from './page.module.css';
 
+const windowWidth = '1100px';
+
 // 初期状態の定義
 const initialFormState = {
   ndc_cd: '',
@@ -140,8 +142,8 @@ export default function InsertPossess() {
 
   return (
     <div className="min-w-[1100px] w-full">
-      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
-      <div className="border-solid border-2 rounded-lg m-4 p-2">
+      <h1 className="w-[1108px] text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
+      <div className="w-[1092px] border-solid border-2 rounded-lg m-4 p-2">
         <div className="flex">
           {/* 左側：入力フォーム */}
           <div className="flex-1">

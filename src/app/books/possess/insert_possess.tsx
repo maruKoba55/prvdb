@@ -46,6 +46,13 @@ export default function InsertPossess() {
     setPreviewUrl(`/api/proxy?url=${encodeURIComponent(formData.image_url.trim())}`);
   };
 
+  // 書影URLを Table 'books' に反映
+  const updateBookImageUrl = async () => {
+    if (!bookId) return;
+    const { error } = await Client.from('books').update({ image_url: formData.image_url }).eq('book_id', bookId);
+    if (error) throw error;
+  };
+
   // 汎用的な入力変更ハンドラ
   // チェックボックスの場合はchecked、それ以外はvalueを格納
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -87,10 +94,13 @@ export default function InsertPossess() {
     try {
       const data = await insertPossessData();
       if (data) {
+        if (formData.urlUp_f) {
+          await updateBookImageUrl();
+        }
         setRegisteredPossess(data); // 画面に表示
         alert('書籍保有情報を登録しました');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       if (
         (error instanceof Error && (error as any).code === '23505') ||
@@ -261,7 +271,7 @@ export default function InsertPossess() {
                 onChange={handleChange}
                 onBlur={handleBlur} // 確定時にプレビュー更新
               ></textarea>
-              <span className="justify-right  ml-4">
+              <span className="flex justify-end">
                 <label htmlFor="urlUp_f">基本情報の書影とする</label>
                 <input
                   id="urlUp_f"
