@@ -1,9 +1,9 @@
 'use client';
-import { useState, useRef } from 'react';
-import InsertPossess from '@/app/books/possess/insert_possess';
+import dynamic from 'next/dynamic';
 
-//vercelによるdeploy時の <Error occurred prerendering page>避け
-export const dynamic = 'force-dynamic';
+const InsertPossess = dynamic(() => import('@/app/books/possess/insert_possess'), {
+  ssr: false // サーバーサイドレンダリングを無効化
+});
 
 export default function Home() {
   return (
