@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Client } from '@/lib/Client';
+import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
 import Image from 'next/image';
 import styles from '../page.module.css';
@@ -49,7 +49,10 @@ export default function InsertPossess() {
   // 書影URLを Table 'books' に反映
   const updateBookImageUrl = async () => {
     if (!bookId) return;
-    const { error } = await Client.from('books').update({ image_url: formData.image_url }).eq('book_id', bookId);
+    const { error } = await supabaseClient
+      .from('books')
+      .update({ image_url: formData.image_url })
+      .eq('book_id', bookId);
     if (error) throw error;
   };
 
@@ -84,7 +87,7 @@ export default function InsertPossess() {
     };
 
     // Table 'book_possess'をinsert
-    const { data, error } = await Client.from('book_possess').insert([insertData]).select();
+    const { data, error } = await supabaseClient.from('book_possess').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
   };
@@ -129,7 +132,8 @@ export default function InsertPossess() {
   // 書籍種別マスターの展開・取得
   useEffect(() => {
     const fetchBookTypes = async () => {
-      const { data, error } = await Client.from('booktype_master')
+      const { data, error } = await supabaseClient
+        .from('booktype_master')
         .select('*')
         .order('booktype_cd', { ascending: true });
       if (error) {
@@ -154,15 +158,16 @@ export default function InsertPossess() {
         <div className="flex">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
-            <span className="text-xl font-bold text-blue-500 m-2">書籍保有情報</span>
-            &nbsp;
-            <span className="text-xl font-bold text-gray-500">{title ? '『' + title + '』' : ''}</span>
-            <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
-            <br />
+            <p>
+              <span className="text-xl font-bold text-blue-500 m-2">書籍保有情報</span>
+              &nbsp;
+              <span className="text-xl font-bold text-gray-500">{title ? '『' + title + '』' : ''}</span>
+              <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
+            </p>
             <p className="flex justify-end">
               （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
             </p>
-            <span className="ml-2">
+            <p className="ml-2">
               <label htmlFor="booktype" className="font-bold text-orange-500">
                 書籍種別
               </label>
@@ -186,9 +191,8 @@ export default function InsertPossess() {
                   )
                 )}
               </select>
-            </span>
-            <br />
-            <span className="ml-2">
+            </p>
+            <p className="ml-2">
               <label htmlFor="get_date" className="inline-block w-16 font-bold text-orange-500">
                 入 手 日
               </label>
@@ -201,9 +205,8 @@ export default function InsertPossess() {
                 onChange={handleChange}
               />
               &nbsp;※不明の場合 ･･･ 1/1/1
-            </span>
-            <br />
-            <span className="ml-2">
+            </p>
+            <p className="ml-2">
               <label htmlFor="dispose_date" className="inline-block w-16">
                 処 分 日
               </label>
@@ -214,9 +217,8 @@ export default function InsertPossess() {
                 value={formData.dispose_date}
                 onChange={handleChange}
               />
-            </span>
-            <br />
-            <span className="ml-2">
+            </p>
+            <p className="ml-2">
               <label htmlFor="remarks" className="inline-block w-16 align-top">
                 備　考
               </label>
@@ -228,11 +230,11 @@ export default function InsertPossess() {
                 value={formData.remarks}
                 onChange={handleChange}
               ></textarea>
-            </span>
+            </p>
           </div>
 
           {/* 右側：画像表示エリア */}
-          <div className="w-[200px] flex flex-col items-center justify-start ml-2 p-2">
+          <div className="w-[200px] flex flex-col ml-2 p-2">
             <div className="w-full h-[220px] flex items-center justify-center mb-4">
               {!previewUrl || previewUrl.endsWith('url=') ? (
                 <div>
@@ -286,12 +288,11 @@ export default function InsertPossess() {
         </div>
 
         {/* 下段：ボタンエリア */}
-        <div className="flex justify-around">
+        <div className="flex m-2 justify-around">
           <CommonButton label="保有情報を登録" variant="blue" onClick={handleRegister} />
           <CommonButton label="画面初期化" variant="outline" onClick={handleClear} />
           <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
         </div>
-        <br />
       </div>
     </div>
   );

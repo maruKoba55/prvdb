@@ -10,4 +10,4 @@ if (!supabaseKey) {
   throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_KEY');
 }
 
-export const Client = createClient(supabaseUrl, supabaseKey);
+export const supabaseClient = createClient(supabaseUrl, supabaseKey);

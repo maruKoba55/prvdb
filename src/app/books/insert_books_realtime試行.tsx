@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
 import { toWarekiYear } from '@/utils/toWarekiYear';
@@ -25,9 +25,10 @@ const initialFormState = {
   image_url: ''
 };
 
-export default function InsertBooks() {
+export default function InsertBooks({ bookId }: { bookId: string }) {
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
+  const [bookData, setBookData] = useState<any>(null);
 
   // 書影表示用：image_url入力確定時にpreviewUrlを更新
   // 画像取得403エラー回避のため、プロキシAPIを経由する
@@ -138,6 +139,49 @@ export default function InsertBooks() {
     window.close();
   };
 
+  // 最新のDBを取得し、画面に反映
+  const fetchBookData = useCallback(async () => {
+    const { data, error } = await supabaseClient
+      .from('books')
+      .select(
+        `
+        *,
+        book_possess (*) 
+      `
+      )
+      .eq('book_id', bookId)
+      .single();
+    if (!error && data) {
+      setBookData(data);
+    }
+  }, [bookId, supabaseClient]);
+  // 初回マウント時とRealtimeの購読設定
+  useEffect(() => {
+    fetchBookData(); // 初回データ取得
+    const channel = supabaseClient // book_possessの変更を監視
+      .channel('book_possess_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE すべて検知
+          schema: 'public',
+          table: 'book_possess',
+          filter: `book_id=eq.${bookId}`
+        },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchBookData(); // 変更があったら再読み込み
+        }
+      )
+      .subscribe();
+    // クリーンアップ（コンポーネント破棄時に購読停止）
+    return () => {
+      supabaseClient.removeChannel(channel);
+    };
+  }, [bookId, fetchBookData, supabaseClient]);
+
+  if (!bookData) return <div>Loading...</div>;
+
   return (
     <div className="min-w-[1100px] w-full">
       <h1 className="w-[1108px] text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
@@ -145,66 +189,64 @@ export default function InsertBooks() {
         <div className="flex">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
-            <p className="flex ml-2">
-              <span className="text-xl font-bold text-blue-500">書籍基本情報</span>
-              <span className="text-gray-500">（書籍ID：{registeredBook ? registeredBook.book_id : '---'}）</span>
-            </p>
+            <span className="text-xl font-bold text-blue-500 m-2">書籍基本情報</span>
+            <span className="text-gray-500">（書籍ID：{registeredBook ? registeredBook.book_id : '---'}）</span>
+            <br />
             <p className="ml-6">
               （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
             </p>
-            <p className="ml-2">
-              <span>
-                <label htmlFor="isbn10" className="inline-block w-15">
-                  ISBN-10
-                </label>
-                <input
-                  id="isbn10"
-                  className={styles.items}
-                  type="text"
-                  size={13}
-                  maxLength={13}
-                  value={formData.isbn10}
-                  onChange={handleChange}
-                />
-              </span>
-              <span className="ml-4">
-                <label htmlFor="isbn13">ISBN-13</label>
-                <input
-                  id="isbn13"
-                  className={styles.items}
-                  type="text"
-                  size={17}
-                  maxLength={17}
-                  value={formData.isbn13}
-                  onChange={handleChange}
-                />
-              </span>
-              <span className="ml-4">
-                <label htmlFor="c_cd">Cコード</label>
-                <input
-                  id="c_cd"
-                  className={styles.items}
-                  type="text"
-                  size={5}
-                  maxLength={5}
-                  value={formData.c_cd}
-                  onChange={handleChange}
-                />
-              </span>
-              <span className="ml-4">
-                <label htmlFor="ndc_cd">十進分類</label>
-                <input
-                  id="ndc_cd"
-                  className={styles.items}
-                  type="text"
-                  size={10}
-                  maxLength={10}
-                  value={formData.ndc_cd}
-                  onChange={handleChange}
-                />
-              </span>
-            </p>
-            <p className="ml-2">
+            <span className="ml-2">
+              <label htmlFor="isbn10" className="inline-block w-15">
+                ISBN-10
+              </label>
+              <input
+                id="isbn10"
+                className={styles.items}
+                type="text"
+                size={13}
+                maxLength={13}
+                value={formData.isbn10}
+                onChange={handleChange}
+              />
+            </span>
+            <span className="ml-4">
+              <label htmlFor="isbn13">ISBN-13</label>
+              <input
+                id="isbn13"
+                className={styles.items}
+                type="text"
+                size={17}
+                maxLength={17}
+                value={formData.isbn13}
+                onChange={handleChange}
+              />
+            </span>
+            <span className="ml-4">
+              <label htmlFor="c_cd">Cコード</label>
+              <input
+                id="c_cd"
+                className={styles.items}
+                type="text"
+                size={5}
+                maxLength={5}
+                value={formData.c_cd}
+                onChange={handleChange}
+              />
+            </span>
+            <span className="ml-4">
+              <label htmlFor="ndc_cd">十進分類</label>
+              <input
+                id="ndc_cd"
+                className={styles.items}
+                type="text"
+                size={10}
+                maxLength={10}
+                value={formData.ndc_cd}
+                onChange={handleChange}
+              />
+            </span>
+            <br />
+            <span className="ml-2">
               <label htmlFor="title" className="inline-block w-15 font-bold text-orange-500">
                 題　名
               </label>
@@ -217,8 +259,9 @@ export default function InsertBooks() {
                 value={formData.title}
                 onChange={handleChange}
               />
-            </p>
-            <p className="ml-2">
+            </span>
+            <br />
+            <span className="ml-2">
               <label htmlFor="original_title" className="inline-block w-15">
                 原題名
               </label>
@@ -230,32 +273,32 @@ export default function InsertBooks() {
                 value={formData.original_title}
                 onChange={handleChange}
               />
-            </p>
-            <p className="ml-2">
-              <span>
-                <label htmlFor="colophon" className="inline-block w-15 align-top">
-                  奥　付
-                </label>
-                <textarea
-                  id="colophon"
-                  className={styles.items}
-                  cols={80}
-                  rows={4}
-                  value={formData.colophon}
-                  onChange={handleChange}
-                ></textarea>
-              </span>
-              <span className="ml-2 align-top">
-                <button
-                  type="button"
-                  className="py-2 px-3 text-base rounded-md font-semibold bg-blue-300"
-                  onClick={handleClearColophon}
-                >
-                  奥付消去
-                </button>
-              </span>
-            </p>
-            <p className="ml-2">
+            </span>
+            <br />
+            <span className="ml-2">
+              <label htmlFor="colophon" className="inline-block w-15 align-top">
+                奥　付
+              </label>
+              <textarea
+                id="colophon"
+                className={styles.items}
+                cols={80}
+                rows={4}
+                value={formData.colophon}
+                onChange={handleChange}
+              ></textarea>
+            </span>
+            <span className="ml-2 align-top">
+              <button
+                type="button"
+                className="py-2 px-3 text-base rounded-md font-semibold bg-blue-300"
+                onClick={handleClearColophon}
+              >
+                奥付消去
+              </button>
+            </span>
+            <br />
+            <span className="ml-2">
               <label htmlFor="publisher" className="inline-block w-15 font-bold text-orange-500">
                 出版社
               </label>
@@ -269,34 +312,34 @@ export default function InsertBooks() {
                 onChange={handleChange}
               />
               &nbsp;※不詳の場合はカッコで括り、（不明）（自費出版）等
-            </p>
-            <p className="ml-19">
-              <span>
-                <label htmlFor="publish_series">出版シリーズ</label>
-                <input
-                  id="publish_series"
-                  className={styles.items}
-                  type="text"
-                  size={26}
-                  value={formData.publish_series}
-                  onChange={handleChange}
-                />
-              </span>
-              <span>
-                <label htmlFor="publish_series_no" className="ml-4">
-                  シリーズ番号
-                </label>
-                <input
-                  id="publish_series_no"
-                  className={styles.items}
-                  type="text"
-                  size={8}
-                  value={formData.publish_series_no}
-                  onChange={handleChange}
-                />
-              </span>
-            </p>
-            <p className="ml-2">
+            </span>
+            <br />
+            <span className="ml-19">
+              <label htmlFor="publish_series">出版シリーズ</label>
+              <input
+                id="publish_series"
+                className={styles.items}
+                type="text"
+                size={26}
+                value={formData.publish_series}
+                onChange={handleChange}
+              />
+            </span>
+            <span>
+              <label htmlFor="publish_series_no" className="ml-4">
+                シリーズ番号
+              </label>
+              <input
+                id="publish_series_no"
+                className={styles.items}
+                type="text"
+                size={8}
+                value={formData.publish_series_no}
+                onChange={handleChange}
+              />
+            </span>
+            <br />
+            <span className="ml-2">
               <label htmlFor="first_publish_year" className="inline-block w-15 font-bold text-orange-500">
                 初版年
               </label>
@@ -314,9 +357,10 @@ export default function InsertBooks() {
               {formData.first_publish_year && (
                 <span>（{toWarekiYear(formData.first_publish_year ? parseInt(formData.first_publish_year) : 0)}）</span>
               )}
-              &nbsp;※不詳の場合は 0（zero）
-            </p>
-            <p className="ml-2">
+            </span>
+            &nbsp;※不詳の場合は 0（zero）
+            <br />
+            <span className="ml-2">
               <label htmlFor="remarks" className="inline-block w-15 align-top">
                 備　考
               </label>
@@ -328,11 +372,15 @@ export default function InsertBooks() {
                 value={formData.remarks}
                 onChange={handleChange}
               ></textarea>
-            </p>
+            </span>
+            <span className="ml-4">
+              <label htmlFor="comic_f">コミック</label>
+              <input id="comic_f" className="ml-2" type="checkbox" checked={formData.comic_f} onChange={handleChange} />
+            </span>
           </div>
 
           {/* 右側：画像表示エリア */}
-          <div className="w-[200px] flex flex-col ml-2 p-2">
+          <div className="w-[200px] flex flex-col items-center justify-start ml-2 p-2">
             <div className="w-full h-[220px] flex items-center justify-center mb-4">
               {!previewUrl || previewUrl.endsWith('url=') ? (
                 <div>
@@ -372,15 +420,11 @@ export default function InsertBooks() {
                 onBlur={handleBlur} // 確定時にプレビュー更新
               ></textarea>
             </div>
-            <div className="flex mt-6 justify-end">
-              <label htmlFor="comic_f">コミック</label>
-              <input id="comic_f" className="ml-2" type="checkbox" checked={formData.comic_f} onChange={handleChange} />
-            </div>
           </div>
         </div>
 
         {/* 下段：ボタンエリア */}
-        <div className="flex m-2 justify-around">
+        <div className="flex justify-around">
           <CommonButton label="基本情報を登録" variant="blue" onClick={handleRegister} />
           <CommonButton
             label="保有情報登録へ"
@@ -398,6 +442,17 @@ export default function InsertBooks() {
           />
           <CommonButton label="画面初期化" variant="outline" onClick={handleClear} />
           <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
+        </div>
+        <br />
+        <h3>保有情報一覧</h3>
+        <div>
+          <ul>
+            {bookData.book_possess?.map((p: any) => (
+              <li key={p.book_possess_id}>
+                {p.get_date} - {p.remarks}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
