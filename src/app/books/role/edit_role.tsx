@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
-import Image from 'next/image';
 import styles from '../page.module.css';
 
 // 初期状態の定義

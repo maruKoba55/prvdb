@@ -1,6 +1,6 @@
 'use client';
 
-// api/proxy利用に伴うdeployエラー回避のため、dynamic呼び出し
+// api/proxy利用に伴うdeployエラー（Error occurred prerendering page）回避のため、dynamic呼び出し
 import dynamic from 'next/dynamic';
 
 const EditPossess = dynamic(() => import('@/app/books/possess/edit_possess'), {
