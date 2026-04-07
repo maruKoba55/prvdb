@@ -30,7 +30,7 @@ type BookTypeMaster = {
   selectable: boolean;
 };
 
-export default function InsertPossess() {
+export default function EditPossess() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const title = searchParams.get('title');
@@ -68,7 +68,7 @@ export default function InsertPossess() {
   };
 
   // 画面内容をTable 'book_possess' へ登録
-  const insertPossessData = async () => {
+  const editPossessData = async () => {
     if (!formData.booktype_cd || !formData.get_date.trim()) {
       alert('必須項目が未入力です');
       return null;
@@ -95,8 +95,9 @@ export default function InsertPossess() {
   // 保有情報登録ボタンの処理
   const handleRegister = async () => {
     try {
-      const data = await insertPossessData();
+      const data = await editPossessData();
       if (data) {
+        console.log('handleRegist urlUp_f=' + formData.urlUp_f);
         if (formData.urlUp_f) {
           await updateBookImageUrl();
         }
@@ -164,7 +165,7 @@ export default function InsertPossess() {
               <span className="text-xl font-bold text-gray-500">{title ? '『' + title + '』' : ''}</span>
               <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
             </p>
-            <p className="flex justify-end">
+            <p className="ml-6">
               （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
             </p>
             <p className="ml-2">
@@ -186,7 +187,7 @@ export default function InsertPossess() {
                     </option>
                   ) : (
                     <option key={item.booktype_cd} disabled>
-                      ----------
+                      {item.booktype}
                     </option>
                   )
                 )}
@@ -225,8 +226,8 @@ export default function InsertPossess() {
               <textarea
                 id="remarks"
                 className={styles.items}
-                cols={50}
-                rows={4}
+                cols={58}
+                rows={6}
                 value={formData.remarks}
                 onChange={handleChange}
               ></textarea>
@@ -235,11 +236,9 @@ export default function InsertPossess() {
 
           {/* 右側：画像表示エリア */}
           <div className="w-[200px] flex flex-col ml-2 p-2">
-            <div className="w-full h-[220px] flex items-center justify-center mb-4">
+            <p className="w-[170px] h-full flex items-center justify-center mb-4">
               {!previewUrl || previewUrl.endsWith('url=') ? (
-                <div>
-                  <Image src="/images/book_NoImage.jpg" alt="No_Image" width={170} height={200} />
-                </div>
+                <Image src="/images/book_NoImage.jpg" alt="No_Image" width={170} height={200} />
               ) : (
                 <Image
                   src={previewUrl}
@@ -259,8 +258,8 @@ export default function InsertPossess() {
                   }}
                 />
               )}
-            </div>
-            <div className="w-full flex flex-col">
+            </p>
+            <p className="w-full flex flex-col">
               <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex mb-1">
                 (書影URL)
               </label>
@@ -283,7 +282,7 @@ export default function InsertPossess() {
                   onChange={handleChange}
                 />
               </span>
-            </div>
+            </p>
           </div>
         </div>
 

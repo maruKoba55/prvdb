@@ -1,10 +1,10 @@
 'use client';
-import InsertRole from '@/app/books/role/insert_role';
+import EditRole from '@/app/books/role/edit_role';
 
 export default function Home() {
   return (
     <div>
-      <InsertRole />
+      <EditRole />
     </div>
   );
 }

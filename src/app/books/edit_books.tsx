@@ -25,7 +25,7 @@ const initialFormState = {
   image_url: ''
 };
 
-export default function InsertBooks() {
+export default function EditBooks() {
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
 
@@ -48,7 +48,7 @@ export default function InsertBooks() {
   };
 
   // 画面内容をTable 'books' へ登録
-  const insertBookData = async () => {
+  const editBookData = async () => {
     if (!formData.title.trim() || !formData.publisher.trim() || !formData.first_publish_year.trim()) {
       alert('必須項目が未入力です');
       return null;
@@ -89,7 +89,7 @@ export default function InsertBooks() {
   // 基本情報登録ボタンの処理
   const handleRegister = async () => {
     try {
-      const data = await insertBookData();
+      const data = await editBookData();
       if (data) {
         setRegisteredBook(data);
         alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
@@ -116,13 +116,18 @@ export default function InsertBooks() {
       isbn13: isbn13 || ''
     });
     const possessUrl = `/books/possess?${params.toString()}`;
-    window.open(possessUrl, '_blank', 'width=800,height=600');
+    window.open(possessUrl, '_blank', 'width=800,height=520');
   };
 
   // 役割情報登録ウィンドウを開く
   const handleRole = () => {
-    const roleUrl = `/books/role?book_id=${registeredBook.book_id}`;
-    window.open(roleUrl, '_blank', 'width=800,height=600');
+    const { book_id, title } = registeredBook;
+    const params = new URLSearchParams({
+      book_id: book_id.toString(),
+      title: title || ''
+    });
+    const roleUrl = `/books/role?${params.toString()}`;
+    window.open(roleUrl, '_blank', 'width=760,height=420');
   };
 
   // 画面初期化ボタンの処理
@@ -333,11 +338,9 @@ export default function InsertBooks() {
 
           {/* 右側：画像表示エリア */}
           <div className="w-[200px] flex flex-col ml-2 p-2">
-            <div className="w-full h-[220px] flex items-center justify-center mb-4">
+            <p className="w-[170px] h-full flex items-center justify-center mb-4">
               {!previewUrl || previewUrl.endsWith('url=') ? (
-                <div>
-                  <Image src="/images/book_NoImage.jpg" alt="No_Image" width={170} height={200} />
-                </div>
+                <Image src="/images/book_NoImage.jpg" alt="No_Image" width={170} height={200} />
               ) : (
                 <Image
                   src={previewUrl}
@@ -357,8 +360,8 @@ export default function InsertBooks() {
                   }}
                 />
               )}
-            </div>
-            <div className="w-full flex flex-col">
+            </p>
+            <p className="w-full flex flex-col">
               <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex mb-1">
                 (書影URL)
               </label>
@@ -366,16 +369,16 @@ export default function InsertBooks() {
                 id="image_url"
                 className={`${styles.items} w-full resize-none`}
                 cols={20}
-                rows={3}
+                rows={1}
                 value={formData.image_url}
                 onChange={handleChange}
                 onBlur={handleBlur} // 確定時にプレビュー更新
               ></textarea>
-            </div>
-            <div className="flex mt-6 justify-end">
+            </p>
+            <p className="flex mt-6 justify-end">
               <label htmlFor="comic_f">コミック</label>
               <input id="comic_f" className="ml-2" type="checkbox" checked={formData.comic_f} onChange={handleChange} />
-            </div>
+            </p>
           </div>
         </div>
 
