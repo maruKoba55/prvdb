@@ -68,13 +68,13 @@ export default function EditRole() {
         alert('書籍役割情報を登録しました');
       }
     } catch (error: any) {
-      console.error(error);
       if (
         (error instanceof Error && (error as any).code === '23505') ||
         (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
       ) {
         alert('このデータは登録済みです');
       } else {
+        console.error(error);
         alert(`登録失敗（Insert to Table 'book_role' error.code=${(error as any).code || 'unknown'}）`);
       }
     }

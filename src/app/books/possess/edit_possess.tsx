@@ -97,7 +97,6 @@ export default function EditPossess() {
     try {
       const data = await editPossessData();
       if (data) {
-        console.log('handleRegist urlUp_f=' + formData.urlUp_f);
         if (formData.urlUp_f) {
           await updateBookImageUrl();
         }
@@ -105,13 +104,13 @@ export default function EditPossess() {
         alert('書籍保有情報を登録しました');
       }
     } catch (error: any) {
-      console.error(error);
       if (
         (error instanceof Error && (error as any).code === '23505') ||
         (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
       ) {
         alert('このデータは登録済みです');
       } else {
+        console.error(error);
         alert(`登録失敗（Insert to Table 'book_possess' error.code=${(error as any).code || 'unknown'}）`);
       }
     }

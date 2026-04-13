@@ -1,14 +1,14 @@
 export function toWarekiYear(year: number) {
   if (year >= 2019) {
-    return `R${year - 2018}`;
+    return `令和${year - 2018}年`;
   } else if (year >= 1989) {
-    return `H${year - 1988}`;
+    return `平成${year - 1988}年`;
   } else if (year >= 1926) {
-    return `S${year - 1925}`;
+    return `昭和${year - 1925}年`;
   } else if (year >= 1912) {
-    return `T${year - 1911}`;
+    return `大正${year - 1911}年`;
   } else if (year >= 1868) {
-    return `M${year - 1867}`;
+    return `明治${year - 1867}年`;
   } else {
     return year.toString();
   }

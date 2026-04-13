@@ -1,11 +1,10 @@
 'use client';
-import { useState, useRef } from 'react';
-import EditBooks from '@/app/books/edit_books';
+import RegistBooks from '@/app/books/book_regist';
 
 export default function Home() {
   return (
     <div>
-      <EditBooks />
+      <RegistBooks />
     </div>
   );
 }

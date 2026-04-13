@@ -95,13 +95,13 @@ export default function EditBooks() {
         alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
       }
     } catch (error) {
-      console.error(error);
       if (
         (error instanceof Error && (error as any).code === '23505') ||
         (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
       ) {
         alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は登録済みです`);
       } else {
+        console.error(error);
         alert(`登録失敗（Insert to Table 'books' error.code=${(error as any).code || 'unknown'}）`);
       }
     }
