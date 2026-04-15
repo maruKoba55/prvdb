@@ -1,12 +1,11 @@
 import React from 'react';
 import { toWarekiYear } from '@/utils/toWarekiYear';
-import styles from '@/app/books/page.module.css';
 
 export type BookFormData = {
-  ndc_cd: string;
   isbn10: string;
   isbn13: string;
   c_cd: string;
+  ndc: string;
   title: string;
   original_title: string;
   colophon: string;
@@ -29,6 +28,9 @@ type Props = {
   extraFields?: React.ReactNode; // 追加表示項目
   buttons?: React.ReactNode; // ボタンエリア
 };
+
+const styleItems =
+  'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
 
 export const BookForm = ({
   screenTitle,
@@ -61,7 +63,7 @@ export const BookForm = ({
                 </label>
                 <input
                   id="isbn10"
-                  className={styles.items}
+                  className={styleItems}
                   type="text"
                   size={13}
                   maxLength={13}
@@ -74,7 +76,7 @@ export const BookForm = ({
                 <label htmlFor="isbn13">ISBN-13</label>
                 <input
                   id="isbn13"
-                  className={styles.items}
+                  className={styleItems}
                   type="text"
                   size={17}
                   maxLength={17}
@@ -87,7 +89,7 @@ export const BookForm = ({
                 <label htmlFor="c_cd">Cコード</label>
                 <input
                   id="c_cd"
-                  className={styles.items}
+                  className={styleItems}
                   type="text"
                   size={5}
                   maxLength={5}
@@ -97,15 +99,15 @@ export const BookForm = ({
                 />
               </span>
               <span className="ml-4">
-                <label htmlFor="ndc_cd">十進分類</label>
+                <label htmlFor="ndc">十進分類</label>
                 <input
-                  id="ndc_cd"
-                  className={styles.items}
+                  id="ndc"
+                  className={styleItems}
                   type="text"
                   size={10}
                   maxLength={10}
                   readOnly={isReadOnly}
-                  value={formData.ndc_cd}
+                  value={formData.ndc}
                   onChange={onChange}
                 />
               </span>
@@ -116,7 +118,7 @@ export const BookForm = ({
               </label>
               <input
                 id="title"
-                className={styles.items}
+                className={styleItems}
                 type="text"
                 required
                 size={94}
@@ -131,7 +133,7 @@ export const BookForm = ({
               </label>
               <input
                 id="original_title"
-                className={styles.items}
+                className={styleItems}
                 type="text"
                 size={94}
                 readOnly={isReadOnly}
@@ -146,7 +148,7 @@ export const BookForm = ({
                 </label>
                 <textarea
                   id="colophon"
-                  className={styles.items}
+                  className={styleItems}
                   cols={80}
                   rows={4}
                   readOnly={isReadOnly}
@@ -172,7 +174,7 @@ export const BookForm = ({
               </label>
               <input
                 id="publisher"
-                className={styles.items}
+                className={styleItems}
                 type="text"
                 required
                 size={24}
@@ -187,7 +189,7 @@ export const BookForm = ({
                 <label htmlFor="publish_series">出版シリーズ</label>
                 <input
                   id="publish_series"
-                  className={styles.items}
+                  className={styleItems}
                   type="text"
                   size={26}
                   readOnly={isReadOnly}
@@ -201,7 +203,7 @@ export const BookForm = ({
                 </label>
                 <input
                   id="publish_series_no"
-                  className={styles.items}
+                  className={styleItems}
                   type="text"
                   size={8}
                   readOnly={isReadOnly}
@@ -216,7 +218,7 @@ export const BookForm = ({
               </label>
               <input
                 id="first_publish_year"
-                className={styles.items}
+                className={styleItems}
                 type="number"
                 required
                 size={4}
@@ -226,7 +228,7 @@ export const BookForm = ({
                 value={formData.first_publish_year}
                 onChange={onChange}
               />
-              {isNaN(Number(toWarekiYear(parseInt(String(formData.first_publish_year)) || 0))) //数値でない＝和暦に変換成功
+              {toWarekiYear(parseInt(String(formData.first_publish_year))) //nullでない＝和暦変換成功
                 ? formData.first_publish_year && (
                     <span>（{toWarekiYear(parseInt(String(formData.first_publish_year)) || 0)}）</span>
                   )
@@ -239,7 +241,7 @@ export const BookForm = ({
               </label>
               <textarea
                 id="remarks"
-                className={styles.items}
+                className={styleItems}
                 cols={80}
                 rows={2}
                 readOnly={isReadOnly}
@@ -270,7 +272,7 @@ export const BookForm = ({
             <p className="w-full flex flex-col">
               <textarea
                 id="image_url"
-                className={`${styles.items} w-full resize-none`}
+                className={`${styleItems} w-full resize-none`}
                 cols={20}
                 rows={1}
                 readOnly={isReadOnly}

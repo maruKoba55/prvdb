@@ -10,6 +10,6 @@ export function toWarekiYear(year: number) {
   } else if (year >= 1868) {
     return `明治${year - 1867}年`;
   } else {
-    return year.toString();
+    return null;
   }
 }

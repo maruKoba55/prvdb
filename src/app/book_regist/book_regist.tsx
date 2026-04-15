@@ -7,10 +7,10 @@ import { BookForm } from '@/components/BookForm';
 
 // 初期状態の定義
 const initialFormState = {
-  ndc_cd: '',
   isbn10: '',
   isbn13: '',
   c_cd: '',
+  ndc: '',
   title: '',
   original_title: '',
   colophon: '年月日初版発行\n著者：\n翻訳者：\n発行所：',
@@ -25,10 +25,10 @@ const initialFormState = {
 
 // BookForm.tsx とのインターフェース
 interface BookFormData {
-  ndc_cd: string;
   isbn10: string;
   isbn13: string;
   c_cd: string;
+  ndc: string;
   title: string;
   original_title: string;
   colophon: string;
@@ -41,7 +41,7 @@ interface BookFormData {
   image_url: string;
 }
 
-export default function RegistBooks() {
+export default function RegistBook() {
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
 
@@ -68,10 +68,10 @@ export default function RegistBooks() {
     }
     const insertData = {
       ...formData,
-      ndc_cd: formData.ndc_cd || null,
       isbn10: formData.isbn10 || null,
       isbn13: formData.isbn13 || null,
       c_cd: formData.c_cd || null,
+      ndc: formData.ndc || null,
       original_title: formData.original_title || null,
       colophon: formData.colophon || null,
       first_publish_year: formData.first_publish_year || 0,
@@ -88,8 +88,8 @@ export default function RegistBooks() {
     return data ? data[0] : null;
   };
 
-  // 基本情報登録ボタンの処理
-  const handleRegister = async () => {
+  // ボタン［基本情報を登録］の処理
+  const handleBaseRegist = async () => {
     try {
       const data = await editBookData();
       if (data) {
@@ -109,7 +109,7 @@ export default function RegistBooks() {
     }
   };
 
-  // 保有情報登録ウィンドウを開く
+  // ボタン［保有情報登録へ］の処理
   const handlePossess = () => {
     const { book_id, title, isbn13 } = registeredBook;
     const params = new URLSearchParams({
@@ -117,22 +117,22 @@ export default function RegistBooks() {
       title: title || '',
       isbn13: isbn13 || ''
     });
-    const possessUrl = `/books/possess?${params.toString()}`;
+    const possessUrl = `/book_possess?${params.toString()}`;
     window.open(possessUrl, '_blank', 'width=800,height=520');
   };
 
-  // 役割情報登録ウィンドウを開く
+  // ボタン［役割情報登録へ］の処理
   const handleRole = () => {
     const { book_id, title } = registeredBook;
     const params = new URLSearchParams({
       book_id: book_id.toString(),
       title: title || ''
     });
-    const roleUrl = `/books/role?${params.toString()}`;
+    const roleUrl = `/book_role?${params.toString()}`;
     window.open(roleUrl, '_blank', 'width=760,height=420');
   };
 
-  // 画面初期化ボタンの処理
+  // ボタン［画面初期化］の処理
   const handleClear = () => {
     if (confirm('入力内容をすべて消去しますか？')) {
       setFormData(initialFormState);
@@ -140,7 +140,7 @@ export default function RegistBooks() {
     }
   };
 
-  // 閉じるボタンの処理
+  // ボタン［閉じる］の処理
   const handleClose = () => {
     window.close();
   };
@@ -162,7 +162,7 @@ export default function RegistBooks() {
       onClearField={handleClearField}
       buttons={
         <>
-          <CommonButton label="基本情報を登録" variant="blue" onClick={handleRegister} />
+          <CommonButton label="基本情報を登録" variant="blue" onClick={handleBaseRegist} />
           <CommonButton
             label="保有情報登録へ"
             variant="red"

@@ -5,7 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
 import Image from 'next/image';
-import styles from '../page.module.css';
+
+const styleItems =
+  'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
 
 // 本日日付（ローカル）
 const todayLocal = [
@@ -92,7 +94,7 @@ export default function EditPossess() {
     return data ? data[0] : null;
   };
 
-  // 保有情報登録ボタンの処理
+  // ボタン［保有情報を登録］の処理
   const handleRegister = async () => {
     try {
       const data = await editPossessData();
@@ -116,15 +118,13 @@ export default function EditPossess() {
     }
   };
 
-  // 画面初期化ボタンの処理
+  // ボタン［画面初期化］の処理
   const handleClear = () => {
-    if (confirm('入力内容をすべて消去しますか？')) {
-      setFormData(initialFormState);
-      setRegisteredPossess(null);
-    }
+    setFormData(initialFormState);
+    setRegisteredPossess(null);
   };
 
-  // 閉じるボタンの処理
+  // ボタン［閉じる］の処理
   const handleClose = () => {
     window.close();
   };
@@ -173,7 +173,7 @@ export default function EditPossess() {
               </label>
               <select
                 id="booktype"
-                className={styles.items}
+                className={styleItems}
                 required
                 value={formData.booktype_cd}
                 onChange={handleSelect}
@@ -198,7 +198,7 @@ export default function EditPossess() {
               </label>
               <input
                 id="get_date"
-                className={styles.items}
+                className={styleItems}
                 type="date"
                 required
                 value={formData.get_date}
@@ -212,7 +212,7 @@ export default function EditPossess() {
               </label>
               <input
                 id="dispose_date"
-                className={styles.items}
+                className={styleItems}
                 type="date"
                 value={formData.dispose_date}
                 onChange={handleChange}
@@ -224,7 +224,7 @@ export default function EditPossess() {
               </label>
               <textarea
                 id="remarks"
-                className={styles.items}
+                className={styleItems}
                 cols={58}
                 rows={6}
                 value={formData.remarks}
@@ -264,7 +264,7 @@ export default function EditPossess() {
               </label>
               <textarea
                 id="image_url"
-                className={`${styles.items} w-full resize-none`}
+                className={`${styleItems} w-full resize-none`}
                 cols={20}
                 rows={1}
                 value={formData.image_url}

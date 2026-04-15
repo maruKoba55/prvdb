@@ -3,7 +3,7 @@
 // api/proxy利用に伴うdeployエラー（Error occurred prerendering page）回避のため、dynamic呼び出し
 import dynamic from 'next/dynamic';
 
-const EditPossess = dynamic(() => import('@/app/books/possess/edit_possess'), {
+const EditPossess = dynamic(() => import('@/app/book_possess/edit_possess'), {
   ssr: false // サーバーサイドレンダリングを無効化
 });
 

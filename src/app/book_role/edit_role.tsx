@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
-import styles from '../page.module.css';
+
+const styleItems =
+  'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
 
 // 初期状態の定義
 const initialFormState = {
@@ -59,7 +61,7 @@ export default function EditRole() {
     return data ? data[0] : null;
   };
 
-  // 役割情報登録ボタンの処理
+  // ボタン［役割情報を登録］の処理
   const handleRegister = async () => {
     try {
       const data = await editRoleData();
@@ -80,15 +82,13 @@ export default function EditRole() {
     }
   };
 
-  // 画面初期化ボタンの処理
+  // ボタン［画面初期化］の処理
   const handleClear = () => {
-    if (confirm('入力内容をすべて消去しますか？')) {
-      setFormData(initialFormState);
-      setRegisteredRole(null);
-    }
+    setFormData(initialFormState);
+    setRegisteredRole(null);
   };
 
-  // 閉じるボタンの処理
+  // ボタン［閉じる］の処理
   const handleClose = () => {
     window.close();
   };
@@ -135,7 +135,7 @@ export default function EditRole() {
             <label htmlFor="role" className="font-bold text-orange-500">
               役　割
             </label>
-            <select id="role" className={styles.items} required value={formData.role_cd} onChange={handleSelect}>
+            <select id="role" className={styleItems} required value={formData.role_cd} onChange={handleSelect}>
               <option value="">選択してください</option>
               {roles.map((item) =>
                 item.selectable ? (
@@ -156,7 +156,7 @@ export default function EditRole() {
             </label>
             <input
               id="role_order"
-              className={styles.items}
+              className={styleItems}
               type="number"
               min={1}
               max={999}
@@ -168,7 +168,7 @@ export default function EditRole() {
             </label>
             <input
               id="person_name"
-              className={styles.items}
+              className={styleItems}
               type="text"
               size={38}
               required
@@ -182,7 +182,7 @@ export default function EditRole() {
             </label>
             <textarea
               id="remarks"
-              className={styles.items}
+              className={styleItems}
               cols={80}
               rows={4}
               value={formData.remarks}
