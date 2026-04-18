@@ -45,17 +45,19 @@ export const BookForm = ({
   return (
     <div className="min-w-[1100px] w-full">
       <h1 className="w-[1108px] text-center text-3xl font-bold underline bg-cyan-500">{screenTitle}</h1>
-      <div className="w-[1092px] border-solid border-2 rounded-lg m-4 p-2">
-        <div className="flex">
+      <div className="w-[1092px]">
+        <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <p className="flex ml-2">
               <span className="text-xl font-bold text-blue-500">書籍基本情報</span>
               <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
             </p>
-            <p className="ml-6">
-              （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
-            </p>
+            {isReadOnly ? null : (
+              <p className="ml-6">
+                （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
+              </p>
+            )}
             <p className="ml-2">
               <span>
                 <label htmlFor="isbn10" className="inline-block w-15">
@@ -113,7 +115,7 @@ export const BookForm = ({
               </span>
             </p>
             <p className="ml-2">
-              <label htmlFor="title" className="inline-block w-15 font-bold text-orange-500">
+              <label htmlFor="title" className={`inline-block w-15 font-bold  ${isReadOnly ? '' : 'text-orange-500'}`}>
                 題　名
               </label>
               <input
@@ -169,7 +171,10 @@ export const BookForm = ({
               </span>
             </p>
             <p className="ml-2">
-              <label htmlFor="publisher" className="inline-block w-15 font-bold text-orange-500">
+              <label
+                htmlFor="publisher"
+                className={`inline-block w-15 font-bold  ${isReadOnly ? '' : 'text-orange-500'}`}
+              >
                 出版社
               </label>
               <input
@@ -213,7 +218,10 @@ export const BookForm = ({
               </span>
             </p>
             <p className="ml-2">
-              <label htmlFor="first_publish_year" className="inline-block w-15 font-bold text-orange-500">
+              <label
+                htmlFor="first_publish_year"
+                className={`inline-block w-15 font-bold  ${isReadOnly ? '' : 'text-orange-500'}`}
+              >
                 初版年
               </label>
               <input
@@ -297,7 +305,10 @@ export const BookForm = ({
           </div>
         </div>
 
-        {/* 下段：ボタンエリア */}
+        {/* 付加情報エリア */}
+        <div className="flex m-2">{extraFields}</div>
+
+        {/* ボタンエリア */}
         <div className="flex m-2 justify-around">{buttons}</div>
       </div>
     </div>

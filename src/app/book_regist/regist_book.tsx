@@ -68,8 +68,8 @@ export default function RegistBook() {
     }
     const insertData = {
       ...formData,
-      isbn10: formData.isbn10 || null,
-      isbn13: formData.isbn13 || null,
+      isbn10: formData.isbn10.replaceAll('-', '') || null,
+      isbn13: formData.isbn13.replaceAll('-', '') || null,
       c_cd: formData.c_cd || null,
       ndc: formData.ndc || null,
       original_title: formData.original_title || null,
@@ -117,8 +117,7 @@ export default function RegistBook() {
       title: title || '',
       isbn13: isbn13 || ''
     });
-    const possessUrl = `/book_possess?${params.toString()}`;
-    window.open(possessUrl, '_blank', 'width=800,height=520');
+    window.open(`/book_possess?${params.toString()}`, '_blank', 'width=800,height=520');
   };
 
   // ボタン［役割情報登録へ］の処理
@@ -128,8 +127,7 @@ export default function RegistBook() {
       book_id: book_id.toString(),
       title: title || ''
     });
-    const roleUrl = `/book_role?${params.toString()}`;
-    window.open(roleUrl, '_blank', 'width=760,height=420');
+    window.open(`/book_role?${params.toString()}`, '_blank', 'width=760,height=420');
   };
 
   // ボタン［画面初期化］の処理

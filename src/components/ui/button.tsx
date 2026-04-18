@@ -1,5 +1,5 @@
 type Props = {
-  label: string;
+  label: React.ReactNode;
   variant?: 'blue' | 'red' | 'orange' | 'outline';
   onClick: () => void;
   title?: string;

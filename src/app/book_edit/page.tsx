@@ -1,14 +1,15 @@
 'use client';
+
 import dynamic from 'next/dynamic';
 
-const RegistBook = dynamic(() => import('@/app/book_regist/regist_book'), {
+const EditBook = dynamic(() => import('@/app/book_edit/edit_book'), {
   ssr: false // サーバーサイドレンダリングを無効化
 });
 
 export default function Home() {
   return (
     <div>
-      <RegistBook />
+      <EditBook />
     </div>
   );
 }
