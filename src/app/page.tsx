@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
 
 const styleItems =
   'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
+const screenMinW = 1100; //画面最小幅
 
 const initialFormState = {
   isbn13: '',
@@ -34,39 +36,20 @@ type RoleMaster = {
 
 export default function Home() {
   const [formData, setFormData] = useState(initialFormState);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  //  const [searchResults, setSearchResults] = useState<any[]>([]);
+  //  const [currentIndex, setCurrentIndex] = useState(0);
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
   const [roles, setRoles] = useState<RoleMaster[]>([]);
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
-  //［前のデータ］
-  // 入力変更ハンドラ；一般用
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: type === 'checkbox' ? checked : value
-    }));
-  };
-  // 入力変更ハンドラ；ラジオボタン用
-  const handleChangeR = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
-
-  // ボタン［検索実行］の処理
+  // ［検索実行］
   const handleSearch = async () => {
     if (formData.role_cd && !formData.person_name) {
       alert('役割を指定した場合、人（団体）名も入力してください');
       return null;
     }
 
-    // 基本query；子テーブルの検索条件有無により !inner を付けるか決定する
+    // 基本query；子テーブルの検索条件有無により !inner を付加
     const roleInner = formData.person_name ? '!inner' : '';
     const possessInner = formData.booktype_cd ? '!inner' : '';
     let query = supabaseClient.from('books').select(`
@@ -101,7 +84,6 @@ export default function Home() {
         query = query.eq('comic_f', false);
       }
     }
-
     const { data, error } = await query;
     //    console.log(data);
 
@@ -109,30 +91,63 @@ export default function Home() {
       alert('該当データがありません');
       return;
     }
-
-    // IDリストをカンマ区切りで渡す
+    // book_id をカンマ区切りで渡し、結果表示画面を開く
     const ids = data.map((item) => item.book_id).join(',');
     window.open(`/book_edit?ids=${ids}`, '_blank');
   };
-
-  // ボタン［検索条件クリア］の処理
-  const handleClear = () => {
+  useHotkeys('alt+s', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleSearch();
+  });
+  // ［検索条件消去］
+  const handleErase = () => {
     setFormData(initialFormState);
   };
-
-  // ボタン［書籍新規登録へ］の処理
+  useHotkeys('alt+e', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleErase();
+  });
+  // ［書籍新規登録へ］
   const handleRegist = () => {
     window.open(`/book_regist?`, '_blank');
   };
-
-  // ボタン［補助データメンテへ］の処理
+  useHotkeys('alt+r', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleRegist();
+  });
+  // ［補助データメンテへ］
   const handleAssistMaint = () => {
     null;
   };
-
-  // ボタン［閉じる］の処理
+  useHotkeys('alt+m', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleAssistMaint();
+  });
+  // ［閉じる］
   const handleClose = () => {
     window.close();
+  };
+  useHotkeys('alt+c', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleClose();
+  });
+
+  // 入力変更ハンドラ；一般用
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === 'checkbox' ? checked : value
+    }));
+  };
+  // 入力変更ハンドラ；ラジオボタン用
+  const handleChangeR = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
   };
 
   // 書籍種別マスターの展開・取得
@@ -181,9 +196,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-w-[1100px]">
-      <h1 className="w-[1108px] text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
-      <div className="flex w-[1092px] border-solid border-2 rounded-lg m-4 p-2">
+    <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
+      <h1 style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+        書籍管理
+      </h1>
+      <div style={{ width: `${screenMinW - 8}px` }} className="flex border-solid border-2 rounded-lg m-4 p-2">
         {/* 左側：書籍検索 */}
         <div className="flex-1 w-[600px] border-solid border-1 rounded-lg m-4 p-2">
           <h2 className="text-center text-xl font-bold text-blue-500 m-2">検索条件</h2>
@@ -269,63 +286,66 @@ export default function Home() {
               />
             </span>
           </p>
-          <p className="mt-2 ml-2">
-            <label htmlFor="role" className="inline-block w-19">
-              役　割
-            </label>
-            <select id="role" className={styleItems} value={formData.role_cd} onChange={handleRole}>
-              <option value="">選択してください</option>
-              {roles.map((item) =>
-                item.selectable ? (
-                  <option key={item.role_cd} value={item.role_cd}>
-                    {item.role_name}
-                  </option>
-                ) : (
-                  <option key={item.role_cd} disabled>
-                    {item.role_name}
-                  </option>
-                )
-              )}
-            </select>
-            <label htmlFor="person_name" className="inline-block ml-6">
-              人（団体）名
-            </label>
-            <input
-              id="person_name"
-              className={styleItems}
-              type="text"
-              size={38}
-              required
-              value={formData.person_name}
-              onChange={handleChange}
-            />
-          </p>
-          <p className="flex mt-1 ml-22">
-            <span className="flex px-2">
-              ※役割のみの指定は不可　　　　　　　　（
-              <label className="block ml-1">
-                <input
-                  type="radio"
-                  name="personSearch"
-                  value="top"
-                  checked={formData.personSearch === 'top'}
-                  onChange={handleChangeR}
-                  className="mr-1"
-                />
-                先頭一致
+          <p className="mt-2 ml-2 flex">
+            <span>
+              <label htmlFor="role" className="inline-block w-19">
+                役　割
               </label>
-              <label className="block ml-4">
-                <input
-                  type="radio"
-                  name="personSearch"
-                  value="part"
-                  checked={formData.personSearch === 'part'}
-                  onChange={handleChangeR}
-                  className="mr-1"
-                />
-                部分一致
+              <select id="role" className={styleItems} value={formData.role_cd} onChange={handleRole}>
+                <option value="">選択してください</option>
+                {roles.map((item) =>
+                  item.selectable ? (
+                    <option key={item.role_cd} value={item.role_cd}>
+                      {item.role_name}
+                    </option>
+                  ) : (
+                    <option key={item.role_cd} disabled>
+                      {item.role_name}
+                    </option>
+                  )
+                )}
+              </select>
+              <span className="flex ml-22">※役割のみの指定は不可</span>
+            </span>
+            <span>
+              <label htmlFor="person_name" className="inline-block ml-6">
+                人（団体）名
               </label>
-              ）
+              <input
+                id="person_name"
+                className={styleItems}
+                type="text"
+                size={38}
+                required
+                value={formData.person_name}
+                onChange={handleChange}
+              />
+              <span className="flex mt-1 ml-32 px-2">
+                （
+                <label className="block ml-1">
+                  <input
+                    type="radio"
+                    name="personSearch"
+                    value="top"
+                    checked={formData.personSearch === 'top'}
+                    onChange={handleChangeR}
+                    className="mr-1"
+                  />
+                  先頭一致
+                </label>
+                <label className="block ml-4">
+                  <input
+                    type="radio"
+                    name="personSearch"
+                    value="part"
+                    checked={formData.personSearch === 'part'}
+                    onChange={handleChangeR}
+                    className="mr-1"
+                  />
+                  部分一致
+                </label>
+                ）
+              </span>
             </span>
           </p>
           <p className="mt-2 ml-2">
@@ -394,16 +414,57 @@ export default function Home() {
             </span>
           </p>
           <div className="flex mt-2 ml-2 justify-around">
-            <CommonButton label="検索実行" variant="blue" onClick={handleSearch} />
-            <CommonButton label="条件クリア" variant="outline" onClick={handleClear} />
+            <CommonButton
+              label={
+                <>
+                  検索実行 (<u>S</u>)
+                </>
+              }
+              variant="blue"
+              onClick={handleSearch}
+            />
+            <CommonButton
+              label={
+                <>
+                  条件消去 (<u>E</u>)
+                </>
+              }
+              variant="outline"
+              onClick={handleErase}
+            />
           </div>
         </div>
 
         {/* 右側エリア */}
         <div className="w-[200px] flex flex-col ml-2 p-2 justify-around">
-          <CommonButton label="書籍新規登録へ" variant="blue" onClick={handleRegist} />
-          <CommonButton label="補助データメンテへ" variant="orange" onClick={handleAssistMaint} disabled={true} />
-          <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
+          <CommonButton
+            label={
+              <>
+                書籍新規登録へ (<u>R</u>)
+              </>
+            }
+            variant="blue"
+            onClick={handleRegist}
+          />
+          <CommonButton
+            label={
+              <>
+                補助データメンテへ (<u>M</u>)
+              </>
+            }
+            variant="orange"
+            onClick={handleAssistMaint}
+            disabled={true}
+          />
+          <CommonButton
+            label={
+              <>
+                閉じる (<u>C</u>)
+              </>
+            }
+            variant="outline"
+            onClick={handleClose}
+          />
         </div>
       </div>
     </div>

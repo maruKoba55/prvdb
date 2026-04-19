@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
 import { BookForm } from '@/components/BookForm';
 
-// 初期状態の定義
 const initialFormState = {
   isbn10: '',
   isbn13: '',
@@ -44,6 +44,78 @@ interface BookFormData {
 export default function RegistBook() {
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
+
+  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
+  // ［基本情報を登録］
+  const handleBaseRegist = async () => {
+    try {
+      const data = await editBookData();
+      if (data) {
+        setRegisteredBook(data);
+        alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
+      }
+    } catch (error) {
+      if (
+        (error instanceof Error && (error as any).code === '23505') ||
+        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
+      ) {
+        alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は登録済みです`);
+      } else {
+        console.error(error);
+        alert(`登録失敗（Insert to Table 'books' error.code=${(error as any).code || 'unknown'}）`);
+      }
+    }
+  };
+  useHotkeys('alt+r', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleBaseRegist();
+  });
+  // ［役割情報登録へ］
+  const handleRole = () => {
+    const { book_id, title } = registeredBook;
+    const params = new URLSearchParams({
+      book_id: book_id.toString(),
+      title: title || ''
+    });
+    window.open(`/book_role?${params.toString()}`, '_blank', 'width=760,height=420');
+  };
+  useHotkeys('alt+p', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleRole();
+  });
+  // ［保有情報登録へ］
+  const handlePossess = () => {
+    const { book_id, title, isbn13 } = registeredBook;
+    const params = new URLSearchParams({
+      book_id: book_id.toString(),
+      title: title || '',
+      isbn13: isbn13 || ''
+    });
+    window.open(`/book_possess?${params.toString()}`, '_blank', 'width=800,height=520');
+  };
+  useHotkeys('alt+q', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handlePossess();
+  });
+  // ［画面初期化］
+  const handleErase = () => {
+    if (confirm('入力内容をすべて消去しますか？')) {
+      setFormData(initialFormState);
+      setRegisteredBook(null);
+    }
+  };
+  useHotkeys('alt+e', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleErase();
+  });
+  // ［閉じる］
+  const handleClose = () => {
+    window.close();
+  };
+  useHotkeys('alt+c', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleClose();
+  });
 
   // 汎用的な入力変更ハンドラ
   // チェックボックスの場合はchecked、それ以外はvalueを格納
@@ -88,63 +160,8 @@ export default function RegistBook() {
     return data ? data[0] : null;
   };
 
-  // ボタン［基本情報を登録］の処理
-  const handleBaseRegist = async () => {
-    try {
-      const data = await editBookData();
-      if (data) {
-        setRegisteredBook(data);
-        alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
-      }
-    } catch (error) {
-      if (
-        (error instanceof Error && (error as any).code === '23505') ||
-        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
-      ) {
-        alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は登録済みです`);
-      } else {
-        console.error(error);
-        alert(`登録失敗（Insert to Table 'books' error.code=${(error as any).code || 'unknown'}）`);
-      }
-    }
-  };
-
-  // ボタン［保有情報登録へ］の処理
-  const handlePossess = () => {
-    const { book_id, title, isbn13 } = registeredBook;
-    const params = new URLSearchParams({
-      book_id: book_id.toString(),
-      title: title || '',
-      isbn13: isbn13 || ''
-    });
-    window.open(`/book_possess?${params.toString()}`, '_blank', 'width=800,height=520');
-  };
-
-  // ボタン［役割情報登録へ］の処理
-  const handleRole = () => {
-    const { book_id, title } = registeredBook;
-    const params = new URLSearchParams({
-      book_id: book_id.toString(),
-      title: title || ''
-    });
-    window.open(`/book_role?${params.toString()}`, '_blank', 'width=760,height=420');
-  };
-
-  // ボタン［画面初期化］の処理
-  const handleClear = () => {
-    if (confirm('入力内容をすべて消去しますか？')) {
-      setFormData(initialFormState);
-      setRegisteredBook(null);
-    }
-  };
-
-  // ボタン［閉じる］の処理
-  const handleClose = () => {
-    window.close();
-  };
-
   // フィールド名を指定して値を空にする関数
-  const handleClearField = (field: keyof BookFormData) => {
+  const handleEraseField = (field: keyof BookFormData) => {
     setFormData((prev) => ({
       ...prev,
       [field]: ''
@@ -157,26 +174,58 @@ export default function RegistBook() {
       bookId={registeredBook ? registeredBook.book_id : ''}
       formData={formData}
       onChange={handleChange}
-      onClearField={handleClearField}
+      onClearField={handleEraseField}
       buttons={
         <>
-          <CommonButton label="基本情報を登録" variant="blue" onClick={handleBaseRegist} />
           <CommonButton
-            label="保有情報登録へ"
+            label={
+              <>
+                基本情報を登録 (<u>R</u>)
+              </>
+            }
+            variant="blue"
+            onClick={handleBaseRegist}
+          />
+          <CommonButton
+            label={
+              <>
+                役割情報登録へ (<u>P</u>)
+              </>
+            }
+            variant="orange"
+            onClick={handleRole}
+            disabled={!registeredBook?.book_id}
+            title="基本情報の登録後、検索用の著者名などを入力"
+          />
+          <CommonButton
+            label={
+              <>
+                保有情報登録へ (<u>Q</u>)
+              </>
+            }
             variant="red"
             onClick={handlePossess}
             disabled={!registeredBook?.book_id}
             title="基本情報の登録後、保有する書籍の情報を入力"
           />
           <CommonButton
-            label="役割情報登録へ"
-            variant="orange"
-            onClick={handleRole}
-            disabled={!registeredBook?.book_id}
-            title="基本情報の登録後、検索用の著者名などを入力"
+            label={
+              <>
+                画面初期化 (<u>E</u>)
+              </>
+            }
+            variant="outline"
+            onClick={handleErase}
           />
-          <CommonButton label="画面初期化" variant="outline" onClick={handleClear} />
-          <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
+          <CommonButton
+            label={
+              <>
+                閉じる (<u>C</u>)
+              </>
+            }
+            variant="outline"
+            onClick={handleClose}
+          />
         </>
       }
     />

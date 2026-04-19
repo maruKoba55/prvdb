@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import Image from 'next/image';
 
 const styleItems =
   'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
+const screenMinW = 800; //画面最小幅
 
 // 本日日付（ローカル）
 const todayLocal = [
@@ -16,7 +18,6 @@ const todayLocal = [
   String(new Date().getDate()).padStart(2, '0')
 ].join('-');
 
-// 初期状態の定義
 const initialFormState = {
   booktype_cd: '',
   get_date: todayLocal,
@@ -40,6 +41,52 @@ export default function EditPossess() {
   const [formData, setFormData] = useState(initialFormState);
   const [registeredPossess, setRegisteredPossess] = useState<any>(null);
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
+
+  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
+  // ［保有情報を登録］
+  const handleRegist = async () => {
+    try {
+      const data = await editPossessData();
+      if (data) {
+        if (formData.urlUp_f) {
+          await updateBookImageUrl();
+        }
+        setRegisteredPossess(data); // 画面に表示
+        alert('書籍保有情報を登録しました');
+      }
+    } catch (error: any) {
+      if (
+        (error instanceof Error && (error as any).code === '23505') ||
+        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
+      ) {
+        alert('このデータは登録済みです');
+      } else {
+        console.error(error);
+        alert(`登録失敗（Insert to Table 'book_possess' error.code=${(error as any).code || 'unknown'}）`);
+      }
+    }
+  };
+  useHotkeys('alt+r', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleRegist();
+  });
+  // ［画面初期化］
+  const handleErase = () => {
+    setFormData(initialFormState);
+    setRegisteredPossess(null);
+  };
+  useHotkeys('alt+e', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleErase();
+  });
+  // ［閉じる］
+  const handleClose = () => {
+    window.close();
+  };
+  useHotkeys('alt+c', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleClose();
+  });
 
   // 書影表示用：image_url入力確定時にpreviewUrlを更新
   // 画像取得403エラー回避のため、プロキシAPIを経由する
@@ -94,41 +141,6 @@ export default function EditPossess() {
     return data ? data[0] : null;
   };
 
-  // ボタン［保有情報を登録］の処理
-  const handleRegister = async () => {
-    try {
-      const data = await editPossessData();
-      if (data) {
-        if (formData.urlUp_f) {
-          await updateBookImageUrl();
-        }
-        setRegisteredPossess(data); // 画面に表示
-        alert('書籍保有情報を登録しました');
-      }
-    } catch (error: any) {
-      if (
-        (error instanceof Error && (error as any).code === '23505') ||
-        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
-      ) {
-        alert('このデータは登録済みです');
-      } else {
-        console.error(error);
-        alert(`登録失敗（Insert to Table 'book_possess' error.code=${(error as any).code || 'unknown'}）`);
-      }
-    }
-  };
-
-  // ボタン［画面初期化］の処理
-  const handleClear = () => {
-    setFormData(initialFormState);
-    setRegisteredPossess(null);
-  };
-
-  // ボタン［閉じる］の処理
-  const handleClose = () => {
-    window.close();
-  };
-
   // 書籍種別マスターの展開・取得
   useEffect(() => {
     const fetchBookTypes = async () => {
@@ -152,7 +164,7 @@ export default function EditPossess() {
   };
 
   return (
-    <div className="min-w-[800px] w-full">
+    <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
       <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
       <div className="border-solid border-2 rounded-lg m-4 p-2">
         <div className="flex">
@@ -287,9 +299,33 @@ export default function EditPossess() {
 
         {/* 下段：ボタンエリア */}
         <div className="flex m-2 justify-around">
-          <CommonButton label="保有情報を登録" variant="blue" onClick={handleRegister} />
-          <CommonButton label="画面初期化" variant="outline" onClick={handleClear} />
-          <CommonButton label="閉じる" variant="outline" onClick={handleClose} />
+          <CommonButton
+            label={
+              <>
+                保有情報を登録 (<u>R</u>)
+              </>
+            }
+            variant="blue"
+            onClick={handleRegist}
+          />
+          <CommonButton
+            label={
+              <>
+                画面初期化 (<u>E</u>)
+              </>
+            }
+            variant="outline"
+            onClick={handleErase}
+          />
+          <CommonButton
+            label={
+              <>
+                閉じる (<u>C</u>)
+              </>
+            }
+            variant="outline"
+            onClick={handleClose}
+          />
         </div>
       </div>
     </div>

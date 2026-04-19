@@ -23,6 +23,8 @@ type Props = {
   bookId: string; // 表示対象の書籍ID
   formData: BookFormData;
   isReadOnly?: boolean; // 表示専用モード
+  totalCount?: number; // 総件数
+  currentCount?: number; // 現在件数
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onClearField?: (field: keyof BookFormData) => void; //入力内容消去ボタン用
   extraFields?: React.ReactNode; // 追加表示項目
@@ -31,27 +33,32 @@ type Props = {
 
 const styleItems =
   'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
+const screenMinW = 1100; //画面最小幅
 
 export const BookForm = ({
   screenTitle,
   bookId,
   formData,
   isReadOnly = false,
+  totalCount = 0,
+  currentCount = 0,
   onChange,
   onClearField,
   extraFields,
   buttons
 }: Props) => {
   return (
-    <div className="min-w-[1100px] w-full">
-      <h1 className="w-[1108px] text-center text-3xl font-bold underline bg-cyan-500">{screenTitle}</h1>
-      <div className="w-[1092px]">
+    <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
+      <h1 style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+        {screenTitle}
+      </h1>
+      <div style={{ width: `${screenMinW - 8}px` }}>
         <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <p className="flex ml-2">
               <span className="text-xl font-bold text-blue-500">書籍基本情報</span>
-              <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
+              <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
             </p>
             {isReadOnly ? null : (
               <p className="ml-6">
@@ -115,7 +122,7 @@ export const BookForm = ({
               </span>
             </p>
             <p className="ml-2">
-              <label htmlFor="title" className={`inline-block w-15 font-bold  ${isReadOnly ? '' : 'text-orange-500'}`}>
+              <label htmlFor="title" className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}>
                 題　名
               </label>
               <input
@@ -173,7 +180,7 @@ export const BookForm = ({
             <p className="ml-2">
               <label
                 htmlFor="publisher"
-                className={`inline-block w-15 font-bold  ${isReadOnly ? '' : 'text-orange-500'}`}
+                className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
               >
                 出版社
               </label>
@@ -220,7 +227,7 @@ export const BookForm = ({
             <p className="ml-2">
               <label
                 htmlFor="first_publish_year"
-                className={`inline-block w-15 font-bold  ${isReadOnly ? '' : 'text-orange-500'}`}
+                className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
               >
                 初版年
               </label>
@@ -260,7 +267,8 @@ export const BookForm = ({
           </div>
 
           {/* 右側：画像表示エリア */}
-          <div className="w-[200px] flex flex-col ml-2 p-2">
+          <div className="w-[200px] flex flex-col p-1">
+            <p className="ml-auto">{totalCount > 0 ? `( ${currentCount} / ${totalCount} )` : ''}</p>
             <p className="w-[170px] h-full flex items-center justify-center mb-2">
               {formData.image_url ? (
                 <img

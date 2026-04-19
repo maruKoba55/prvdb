@@ -20,19 +20,23 @@ export default function EditBooks() {
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
   //［前のデータ］
   const handlePrev = () => {
-    if (!isPrevDisabled) setCurrentIndex((i) => i - 1);
+    if (!isPrevDisabled) {
+      setCurrentIndex((i) => i - 1);
+    }
   };
   useHotkeys(
     'alt+p',
     (event) => {
       event.preventDefault(); // ブラウザのデフォルト挙動を防止
-      handlePrev(); // handleNext内の「!isNextDisabled」判定が通る時だけ実行される
+      handlePrev(); // handlePrev内の「!isNextDisabled」判定が通る時だけ実行される
     },
     [isPrevDisabled]
   );
   // ［次のデータ］
   const handleNext = () => {
-    if (!isNextDisabled) setCurrentIndex((i) => i + 1);
+    if (!isNextDisabled) {
+      setCurrentIndex((i) => i + 1);
+    }
   };
   useHotkeys(
     'alt+n',
@@ -56,9 +60,9 @@ export default function EditBooks() {
   }, [currentIndex]);
 
   const fetchBookData = async () => {
-    console.log(ids.length, currentIndex);
+    //    console.log(ids.length, currentIndex);
     if (ids.length === 0) return;
-
+    setBook(null);
     // 現在のIDに紐づく情報を全結合して取得
     const { data, error } = await supabaseClient
       .from('books')
@@ -82,6 +86,7 @@ export default function EditBooks() {
       .eq('book_id', ids[currentIndex])
       .order('role_cd', { referencedTable: 'book_role', ascending: true })
       .order('role_order', { referencedTable: 'book_role', ascending: true })
+      .order('booktype_cd', { referencedTable: 'book_possess', ascending: true })
       .order('get_date', { referencedTable: 'book_possess', ascending: true })
       .single();
 
@@ -95,13 +100,13 @@ export default function EditBooks() {
       bookId={book.book_id}
       formData={book}
       isReadOnly={readOnly_f}
-      // onChange={}
-      // onClearField={}
+      totalCount={ids.length}
+      currentCount={currentIndex + 1}
       extraFields={
         <div className="w-full">
           <div className="border-solid border-2 rounded-lg p-2">
             <h2 className="font-bold border-b mb-2">役割情報［検索用］</h2>
-            <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+            <div className="grid grid-cols-5 gap-x-4 gap-y-2">
               {book.book_role?.map((r: any) => (
                 <div key={r.id} className="flex items-start text-sm border-b border-gray-50 pb-1">
                   <span className="mr-2 shrink-0">{r.role_master?.role_name}：</span>
@@ -120,7 +125,7 @@ export default function EditBooks() {
                     <span>入手日：{p.get_date}</span>
                     <span>処分日：{p.dispose_date}</span>
                     <span>備　考：</span>
-                    <textarea className="ml-2" cols={20} rows={6} readOnly={readOnly_f}>
+                    <textarea className="ml-2" cols={20} rows={3} readOnly={readOnly_f}>
                       {p.remarks}
                     </textarea>
                   </span>
@@ -130,23 +135,20 @@ export default function EditBooks() {
                         <img
                           src={p.image_url}
                           alt="Book Cover"
-                          width={150}
+                          width={100}
                           className="object-contain"
                           onError={(e) => {
                             e.currentTarget.src = '/images/book_unavailable.jpg';
                           }}
                         />
                       ) : (
-                        <img src="/images/book_NoImage.jpg" alt="No Image" width={150} />
+                        <img src="/images/book_NoImage.jpg" alt="No Image" width={100} />
                       )}
                     </span>
                   </span>
                 </div>
               ))}
             </div>
-          </div>
-          <div className="flex justify-end">
-            ({currentIndex + 1} / {ids.length})
           </div>
         </div>
       }
@@ -155,7 +157,7 @@ export default function EditBooks() {
           <CommonButton
             label={
               <>
-                前のデータ (<u>p</u>)
+                前のデータ (<u>P</u>)
               </>
             }
             variant="blue"
@@ -165,7 +167,7 @@ export default function EditBooks() {
           <CommonButton
             label={
               <>
-                次のデータ (<u>n</u>)
+                次のデータ (<u>N</u>)
               </>
             }
             variant="blue"
@@ -175,7 +177,7 @@ export default function EditBooks() {
           <CommonButton
             label={
               <>
-                閉じる (<u>c</u>)
+                閉じる (<u>C</u>)
               </>
             }
             variant="outline"
