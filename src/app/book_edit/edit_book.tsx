@@ -9,20 +9,21 @@ import { BookForm } from '@/components/BookForm';
 
 export default function EditBooks() {
   const searchParams = useSearchParams();
-  const ids = searchParams.get('ids')?.split(',') || [];
+  const initialIds = searchParams.get('ids')?.split(',') || []; // 初期値としてのみ使用
+  const [bookIds, setBookIds] = useState<string[]>(initialIds);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [book, setBook] = useState<any>(null);
+  const [loading, setLoading] = useState(true); // 読み込み状態を管理
 
-  const isPrevDisabled = currentIndex <= 0;
-  const isNextDisabled = currentIndex >= ids.length - 1;
   const readOnly_f = true;
+  const isPrevDisabled = currentIndex <= 0;
+  const isNextDisabled = currentIndex >= bookIds.length - 1;
+  //  console.log('Before Delete:', bookIds);
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
   //［前のデータ］
   const handlePrev = () => {
-    if (!isPrevDisabled) {
-      setCurrentIndex((i) => i - 1);
-    }
+    if (!isPrevDisabled) setCurrentIndex((i) => i - 1);
   };
   useHotkeys(
     'alt+p',
@@ -34,9 +35,7 @@ export default function EditBooks() {
   );
   // ［次のデータ］
   const handleNext = () => {
-    if (!isNextDisabled) {
-      setCurrentIndex((i) => i + 1);
-    }
+    if (!isNextDisabled) setCurrentIndex((i) => i + 1);
   };
   useHotkeys(
     'alt+n',
@@ -46,24 +45,62 @@ export default function EditBooks() {
     },
     [isNextDisabled]
   );
+  //［読書ノートへ］
+  const handleNote = () => {
+    const { book_id, title } = book;
+    const params = new URLSearchParams({
+      book_id: book_id?.toString() || '',
+      title: title || ''
+    });
+    window.open(`/book_note?${params.toString()}`, '_blank', 'width=780,height=440');
+  };
+  //［書籍削除］
+  const handleDelete = async () => {
+    const confirmed = confirm(`『${book.title}』（${book.publisher}）を削除しますか？`);
+    if (!confirmed) return;
+    try {
+      const { error } = await supabaseClient.from('books').delete().eq('book_id', book.book_id);
+      if (error) throw error;
+      alert(`『${book.title}』（${book.publisher}）を削除しました`);
+      //削除したIDを除去した新しいリストを作成
+      const nextIds = bookIds.filter((_, index) => index !== currentIndex);
+      if (nextIds.length === 0) {
+        window.close();
+        return;
+      }
+      if (currentIndex >= nextIds.length) {
+        setCurrentIndex(nextIds.length - 1); // 末尾を削除した場合のインデックス調整
+      }
+      setBookIds(nextIds); // IDリストを更新 ⇒ useEffectがトリガーされてデータfetch
+      //      console.log('After Delete:', bookIds);
+    } catch (error: any) {
+      if (error.code === '23503') {
+        alert(`読書ノートが存在します。先に読書ノートを削除してください。`);
+      } else {
+        console.error('Delete error:', error.code);
+        alert(`削除失敗: ${error.message}`);
+      }
+    }
+  };
   //［閉じる］
   const handleClose = () => {
     window.close();
   };
   useHotkeys('alt+c', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleClose();
+    handleClose(); // handlePrev内の「!isNextDisabled」判定が通る時だけ実行される
   });
 
+  // bookIdsかcurrentIndexが変わったらデータ取得
   useEffect(() => {
-    fetchBookData();
-  }, [currentIndex]);
+    if (bookIds.length > 0 && bookIds[currentIndex]) {
+      fetchBookData(bookIds, currentIndex);
+    }
+  }, [currentIndex, bookIds]);
 
-  const fetchBookData = async () => {
-    //    console.log(ids.length, currentIndex);
-    if (ids.length === 0) return;
+  const fetchBookData = async (targetIds: string[], index: number) => {
     setBook(null);
-    // 現在のIDに紐づく情報を全結合して取得
+    setLoading(true);
     const { data, error } = await supabaseClient
       .from('books')
       .select(
@@ -83,16 +120,21 @@ export default function EditBooks() {
         )
         `
       )
-      .eq('book_id', ids[currentIndex])
+      .eq('book_id', targetIds[index])
       .order('role_cd', { referencedTable: 'book_role', ascending: true })
       .order('role_order', { referencedTable: 'book_role', ascending: true })
       .order('booktype_cd', { referencedTable: 'book_possess', ascending: true })
       .order('get_date', { referencedTable: 'book_possess', ascending: true })
       .single();
 
-    if (data) setBook(data);
+    if (data) {
+      setBook(data);
+    }
+    setLoading(false);
   };
-  if (!book) return <div>読み込み中...</div>;
+
+  if (bookIds.length === 0) return <div>データがありません</div>;
+  if (loading || !book) return <div>読み込み中...</div>;
 
   return (
     <BookForm
@@ -100,7 +142,7 @@ export default function EditBooks() {
       bookId={book.book_id}
       formData={book}
       isReadOnly={readOnly_f}
-      totalCount={ids.length}
+      totalCount={bookIds.length}
       currentCount={currentIndex + 1}
       extraFields={
         <div className="w-full">
@@ -108,18 +150,21 @@ export default function EditBooks() {
             <h2 className="font-bold border-b mb-2">役割情報［検索用］</h2>
             <div className="grid grid-cols-5 gap-x-4 gap-y-2">
               {book.book_role?.map((r: any) => (
-                <div key={r.id} className="flex items-start text-sm border-b border-gray-50 pb-1">
-                  <span className="mr-2 shrink-0">{r.role_master?.role_name}：</span>
-                  <span className="truncate">{r.person_name}</span>
+                <div key={r.id} className="flex items-start text-sm border-b border-gray-50 flex-col">
+                  <span>
+                    <span className="mr-2">{r.role_master?.role_name}：</span>
+                    <span>{r.person_name}</span>
+                  </span>
+                  <span className="ml-4">{r.remarks}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="border-solid border-2 rounded-lg mt-2 p-2">
+          <div className="border-solid border-2 rounded-lg mt-2 p-1">
             <h2 className="font-bold border-b mb-2">保有情報</h2>
             <div className="grid grid-cols-3 gap-x-4 gap-y-2 divide-x">
               {book.book_possess?.map((p: any) => (
-                <div key={p.book_possess_id} className="flex items-start text-sm border-b border-gray-50 pb-1">
+                <div key={p.book_possess_id} className="flex items-start text-sm border-b border-gray-50">
                   <span className="flex flex-col mr-2">
                     <span>種　別：{p.booktype_master?.booktype}</span>
                     <span>入手日：{p.get_date}</span>
@@ -173,6 +218,13 @@ export default function EditBooks() {
             variant="blue"
             onClick={handleNext}
             disabled={isNextDisabled}
+          />
+          <CommonButton label="読書ノートへ" variant="orange" onClick={handleNote} />
+          <CommonButton
+            label="書籍削除"
+            variant="red"
+            title="書籍情報を削除します。読書ノートが存在する場合は、先に削除してください。"
+            onClick={handleDelete}
           />
           <CommonButton
             label={

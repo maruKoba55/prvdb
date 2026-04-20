@@ -66,19 +66,11 @@ export default function EditPossess() {
       }
     }
   };
-  useHotkeys('alt+r', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleRegist();
-  });
   // ［画面初期化］
   const handleErase = () => {
     setFormData(initialFormState);
     setRegisteredPossess(null);
   };
-  useHotkeys('alt+e', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleErase();
-  });
   // ［閉じる］
   const handleClose = () => {
     window.close();
@@ -126,6 +118,7 @@ export default function EditPossess() {
       alert('処分日を確認してください');
       return null;
     }
+
     const insertData = {
       book_id: bookId || null,
       booktype_cd: formData.booktype_cd || null,
@@ -134,8 +127,6 @@ export default function EditPossess() {
       remarks: formData.remarks || null,
       image_url: formData.image_url || null
     };
-
-    // Table 'book_possess'をinsert
     const { data, error } = await supabaseClient.from('book_possess').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
@@ -165,21 +156,22 @@ export default function EditPossess() {
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
-      <div className="border-solid border-2 rounded-lg m-4 p-2">
+      <h1 style={{ minWidth: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+        書籍管理
+      </h1>
+      <div style={{ minWidth: `${screenMinW - 8}px` }} className="border-solid border-2 rounded-lg m-4 p-1">
         <div className="flex">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <p>
               <span className="text-xl font-bold text-blue-500 m-2">書籍保有情報</span>
-              &nbsp;
-              <span className="text-xl font-bold text-gray-500">{title ? '『' + title + '』' : ''}</span>
-              <span className="text-gray-500">（書籍ID：{bookId ? bookId : '---'}）</span>
+              <span className="text-xl font-bold text-gray-500 ml-1">{title ? `『${title}』` : ''}</span>
+              <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
             </p>
             <p className="ml-6">
               （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
             </p>
-            <p className="ml-2">
+            <p className="mt-1 ml-2">
               <label htmlFor="booktype" className="font-bold text-orange-500">
                 書籍種別
               </label>
@@ -204,7 +196,7 @@ export default function EditPossess() {
                 )}
               </select>
             </p>
-            <p className="ml-2">
+            <p className="mt-1 ml-2">
               <label htmlFor="get_date" className="inline-block w-16 font-bold text-orange-500">
                 入 手 日
               </label>
@@ -216,9 +208,9 @@ export default function EditPossess() {
                 value={formData.get_date}
                 onChange={handleChange}
               />
-              &nbsp;※不明の場合 ･･･ 1/1/1
+              <span className="ml-1">※不明の場合 ･･･ 1/1/1</span>
             </p>
-            <p className="ml-2">
+            <p className="mt-1 ml-2">
               <label htmlFor="dispose_date" className="inline-block w-16">
                 処 分 日
               </label>
@@ -230,7 +222,7 @@ export default function EditPossess() {
                 onChange={handleChange}
               />
             </p>
-            <p className="ml-2">
+            <p className="mt-1 ml-2">
               <label htmlFor="remarks" className="inline-block w-16 align-top">
                 備　考
               </label>
@@ -246,7 +238,7 @@ export default function EditPossess() {
           </div>
 
           {/* 右側：画像表示エリア */}
-          <div className="w-[200px] flex flex-col ml-2 p-2">
+          <div className="w-[200px] flex flex-col ml-2 p-1">
             <p className="w-[170px] h-full flex items-center justify-center mb-4">
               {!previewUrl || previewUrl.endsWith('url=') ? (
                 <Image src="/images/book_NoImage.jpg" alt="No_Image" width={170} height={200} />
@@ -299,24 +291,8 @@ export default function EditPossess() {
 
         {/* 下段：ボタンエリア */}
         <div className="flex m-2 justify-around">
-          <CommonButton
-            label={
-              <>
-                保有情報を登録 (<u>R</u>)
-              </>
-            }
-            variant="blue"
-            onClick={handleRegist}
-          />
-          <CommonButton
-            label={
-              <>
-                画面初期化 (<u>E</u>)
-              </>
-            }
-            variant="outline"
-            onClick={handleErase}
-          />
+          <CommonButton label="保有情報を登録" variant="blue" onClick={handleRegist} />
+          <CommonButton label="画面初期化" variant="outline" onClick={handleErase} />
           <CommonButton
             label={
               <>

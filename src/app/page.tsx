@@ -85,28 +85,26 @@ export default function Home() {
       }
     }
     const { data, error } = await query;
-    //    console.log(data);
-
-    if (error || !data || data.length === 0) {
+    if (error) {
+      alert(`データ取得失敗 error.code=${(error as any).code || 'unknown'}`);
+      return;
+    }
+    if (!data || data.length === 0) {
       alert('該当データがありません');
       return;
+    }
+    if (data.length > 50) {
+      const confirmed = confirm(`該当データが${data.length}件あります。`);
+      if (!confirmed) return;
     }
     // book_id をカンマ区切りで渡し、結果表示画面を開く
     const ids = data.map((item) => item.book_id).join(',');
     window.open(`/book_edit?ids=${ids}`, '_blank');
   };
-  useHotkeys('alt+s', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleSearch();
-  });
   // ［検索条件消去］
   const handleErase = () => {
     setFormData(initialFormState);
   };
-  useHotkeys('alt+e', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleErase();
-  });
   // ［書籍新規登録へ］
   const handleRegist = () => {
     window.open(`/book_regist?`, '_blank');
@@ -200,7 +198,7 @@ export default function Home() {
       <h1 style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
         書籍管理
       </h1>
-      <div style={{ width: `${screenMinW - 8}px` }} className="flex border-solid border-2 rounded-lg m-4 p-2">
+      <div style={{ width: `${screenMinW - 8}px` }} className="flex border-solid border-2 rounded-lg m-4 p-1">
         {/* 左側：書籍検索 */}
         <div className="flex-1 w-[600px] border-solid border-1 rounded-lg m-4 p-2">
           <h2 className="text-center text-xl font-bold text-blue-500 m-2">検索条件</h2>
@@ -413,25 +411,9 @@ export default function Home() {
               </label>
             </span>
           </p>
-          <div className="flex mt-2 ml-2 justify-around">
-            <CommonButton
-              label={
-                <>
-                  検索実行 (<u>S</u>)
-                </>
-              }
-              variant="blue"
-              onClick={handleSearch}
-            />
-            <CommonButton
-              label={
-                <>
-                  条件消去 (<u>E</u>)
-                </>
-              }
-              variant="outline"
-              onClick={handleErase}
-            />
+          <div className="flex mt-2 ml-2 p-2 justify-around">
+            <CommonButton label="検索実行" variant="blue" onClick={handleSearch} />
+            <CommonButton label="条件消去" variant="outline" onClick={handleErase} />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
@@ -8,37 +8,36 @@ import { CommonButton } from '@/components/ui/button';
 
 const styleItems =
   'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
-const screenMinW = 720; //画面最小幅
+const screenMinW = 760; //画面最小幅
+
+// 本日日付（ローカル）
+const todayLocal = [
+  new Date().getFullYear(),
+  String(new Date().getMonth() + 1).padStart(2, '0'),
+  String(new Date().getDate()).padStart(2, '0')
+].join('-');
 
 const initialFormState = {
-  role_cd: '',
-  role_order: '',
-  person_name: '',
-  remarks: ''
+  read_st_date: todayLocal,
+  read_ed_date: '',
+  note: ''
 };
 
-type RoleMaster = {
-  role_cd: string;
-  role_name: string;
-  selectable: boolean;
-};
-
-export default function EditRole() {
+export default function EditNote() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const title = searchParams.get('title');
   const [formData, setFormData] = useState(initialFormState);
-  const [registeredRole, setRegisteredRole] = useState<any>(null);
-  const [roles, setRoles] = useState<RoleMaster[]>([]);
+  const [registeredNote, setRegisteredNote] = useState<any>(null);
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
-  // ［役割情報を登録］
+  // ［読書ノートを登録］
   const handleRegist = async () => {
     try {
-      const data = await editRoleData();
+      const data = await editNoteData();
       if (data) {
-        setRegisteredRole(data); // 画面に表示
-        alert('書籍役割情報を登録しました');
+        setRegisteredNote(data); // 画面に表示
+        alert('読書ノートを登録しました');
       }
     } catch (error: any) {
       if (
@@ -55,7 +54,7 @@ export default function EditRole() {
   // ［画面初期化］
   const handleErase = () => {
     setFormData(initialFormState);
-    setRegisteredRole(null);
+    setRegisteredNote(null);
   };
   // ［閉じる］
   const handleClose = () => {
@@ -77,55 +76,38 @@ export default function EditRole() {
     }));
   };
 
-  // 画面内容をTable 'book_role' へ登録
-  const editRoleData = async () => {
-    if (!formData.role_cd || !formData.person_name.trim()) {
+  // 画面内容をTable 'book_note' へ登録
+  const editNoteData = async () => {
+    if (!formData.read_st_date.trim()) {
       alert('必須項目が未入力です');
       return null;
     }
+    if (formData.read_ed_date && formData.read_ed_date < formData.read_st_date) {
+      alert('読書終了を確認してください');
+      return null;
+    }
+
     const insertData = {
       book_id: bookId || null,
-      role_cd: formData.role_cd || null,
-      role_order: formData.role_order || null,
-      person_name: formData.person_name || null,
-      remarks: formData.remarks || null
+      read_st_date: formData.read_st_date || null,
+      read_ed_date: formData.read_ed_date || null,
+      note: formData.note || null
     };
-    const { data, error } = await supabaseClient.from('book_role').insert([insertData]).select();
+    const { data, error } = await supabaseClient.from('book_note').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
   };
 
-  // 役割マスターの展開・取得
-  useEffect(() => {
-    const fetchRoles = async () => {
-      const { data, error } = await supabaseClient
-        .from('role_master')
-        .select('*')
-        .lte('role_cd', 299)
-        .order('role_cd', { ascending: true });
-      if (error) {
-        console.error('Error fetching role_master:', error);
-      } else {
-        setRoles(data || []);
-      }
-    };
-    fetchRoles();
-  }, []);
-  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      role_cd: e.target.value // ここでrole_cdが取得される
-    });
-  };
-
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <h1 className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</h1>
-      <div className="border-solid border-2 rounded-lg flex m-4 p-1">
+      <h1 style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+        書籍管理
+      </h1>
+      <div style={{ width: `${screenMinW - 8}px` }} className="border-solid border-2 rounded-lg flex m-4 p-2">
         {/* 入力フォーム */}
         <div className="flex-1">
           <p>
-            <span className="text-xl font-bold text-blue-500 m-2">書籍役割情報</span>
+            <span className="text-xl font-bold text-blue-500 m-2">読書ノート</span>
             <span className="text-xl font-bold text-gray-500 ml-1">{title ? `『${title}』` : ''}</span>
             <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
           </p>
@@ -133,60 +115,42 @@ export default function EditRole() {
             （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
           </p>
           <p className="mt-1 ml-2">
-            <label htmlFor="role" className="font-bold text-orange-500">
-              役　割
-            </label>
-            <select id="role" className={styleItems} required value={formData.role_cd} onChange={handleSelect}>
-              <option value="">選択してください</option>
-              {roles.map((item) =>
-                item.selectable ? (
-                  <option key={item.role_cd} value={item.role_cd}>
-                    {item.role_name}
-                  </option>
-                ) : (
-                  <option key={item.role_cd} disabled>
-                    {item.role_name}
-                  </option>
-                )
-              )}
-            </select>
-          </p>
-          <p className="mt-1 ml-2">
-            <label htmlFor="role_order" className="inline-block ml-14">
-              役割内順序
+            <label htmlFor="read_st_date" className="inline-block w-16 font-bold text-orange-500">
+              読書開始
             </label>
             <input
-              id="role_order"
+              id="read_st_date"
               className={styleItems}
-              type="number"
-              min={1}
-              max={999}
-              value={formData.role_order}
-              onChange={handleChange}
-            />
-            <label htmlFor="person_name" className="inline-block  font-bold text-orange-500 ml-6">
-              人（団体）名
-            </label>
-            <input
-              id="person_name"
-              className={styleItems}
-              type="text"
-              size={38}
+              type="date"
               required
-              value={formData.person_name}
+              value={formData.read_st_date}
               onChange={handleChange}
             />
+            <span className="ml-1">※不明の場合 ･･･ 1/1/1</span>
           </p>
           <p className="mt-1 ml-2">
-            <label htmlFor="remarks" className="inline-block  align-top">
-              備　考
+            <label htmlFor="read_ed_date" className="inline-block w-16">
+              読書終了
+            </label>
+            <input
+              id="read_ed_date"
+              className={styleItems}
+              type="date"
+              value={formData.read_ed_date}
+              onChange={handleChange}
+            />
+            <span className="ml-1">※不明の場合 ･･･ 読書開始と同日</span>
+          </p>
+          <p className="mt-1 ml-2">
+            <label htmlFor="note" className="inline-block  w-16 align-top text-justify">
+              ノ ー ト
             </label>
             <textarea
-              id="remarks"
-              className={styleItems}
+              id="note"
+              className={`{${styleItems} ml-2`}
               cols={80}
               rows={4}
-              value={formData.remarks}
+              value={formData.note}
               onChange={handleChange}
             ></textarea>
           </p>
@@ -195,7 +159,7 @@ export default function EditRole() {
 
       {/* ボタンエリア */}
       <div className="flex m-2 justify-around">
-        <CommonButton label="役割情報を登録" variant="blue" onClick={handleRegist} />
+        <CommonButton label="読書ノートを登録" variant="blue" onClick={handleRegist} />
         <CommonButton label="画面初期化" variant="outline" onClick={handleErase} />
         <CommonButton
           label={

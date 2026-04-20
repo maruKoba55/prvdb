@@ -66,10 +66,6 @@ export default function RegistBook() {
       }
     }
   };
-  useHotkeys('alt+r', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleBaseRegist();
-  });
   // ［役割情報登録へ］
   const handleRole = () => {
     const { book_id, title } = registeredBook;
@@ -79,10 +75,6 @@ export default function RegistBook() {
     });
     window.open(`/book_role?${params.toString()}`, '_blank', 'width=760,height=420');
   };
-  useHotkeys('alt+p', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleRole();
-  });
   // ［保有情報登録へ］
   const handlePossess = () => {
     const { book_id, title, isbn13 } = registeredBook;
@@ -91,12 +83,8 @@ export default function RegistBook() {
       title: title || '',
       isbn13: isbn13 || ''
     });
-    window.open(`/book_possess?${params.toString()}`, '_blank', 'width=800,height=520');
+    window.open(`/book_possess?${params.toString()}`, '_blank', 'width=820,height=520');
   };
-  useHotkeys('alt+q', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handlePossess();
-  });
   // ［画面初期化］
   const handleErase = () => {
     if (confirm('入力内容をすべて消去しますか？')) {
@@ -104,10 +92,6 @@ export default function RegistBook() {
       setRegisteredBook(null);
     }
   };
-  useHotkeys('alt+e', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleErase();
-  });
   // ［閉じる］
   const handleClose = () => {
     window.close();
@@ -177,46 +161,22 @@ export default function RegistBook() {
       onClearField={handleEraseField}
       buttons={
         <>
+          <CommonButton label="基本情報を登録" variant="blue" onClick={handleBaseRegist} />
           <CommonButton
-            label={
-              <>
-                基本情報を登録 (<u>R</u>)
-              </>
-            }
-            variant="blue"
-            onClick={handleBaseRegist}
-          />
-          <CommonButton
-            label={
-              <>
-                役割情報登録へ (<u>P</u>)
-              </>
-            }
+            label="役割情報登録へ"
             variant="orange"
             onClick={handleRole}
             disabled={!registeredBook?.book_id}
             title="基本情報の登録後、検索用の著者名などを入力"
           />
           <CommonButton
-            label={
-              <>
-                保有情報登録へ (<u>Q</u>)
-              </>
-            }
+            label="保有情報登録へ"
             variant="red"
             onClick={handlePossess}
             disabled={!registeredBook?.book_id}
             title="基本情報の登録後、保有する書籍の情報を入力"
           />
-          <CommonButton
-            label={
-              <>
-                画面初期化 (<u>E</u>)
-              </>
-            }
-            variant="outline"
-            onClick={handleErase}
-          />
+          <CommonButton label="画面初期化" variant="outline" onClick={handleErase} />
           <CommonButton
             label={
               <>

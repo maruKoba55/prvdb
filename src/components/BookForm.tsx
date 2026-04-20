@@ -56,7 +56,7 @@ export const BookForm = ({
         <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
-            <p className="flex ml-2">
+            <p className="flex">
               <span className="text-xl font-bold text-blue-500">書籍基本情報</span>
               <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
             </p>
@@ -65,7 +65,7 @@ export const BookForm = ({
                 （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
               </p>
             )}
-            <p className="ml-2">
+            <p className="mt-1">
               <span>
                 <label htmlFor="isbn10" className="inline-block w-15">
                   ISBN-10
@@ -121,7 +121,7 @@ export const BookForm = ({
                 />
               </span>
             </p>
-            <p className="ml-2">
+            <p className="mt-1">
               <label htmlFor="title" className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}>
                 題　名
               </label>
@@ -136,7 +136,7 @@ export const BookForm = ({
                 onChange={onChange}
               />
             </p>
-            <p className="ml-2">
+            <p className="mt-1">
               <label htmlFor="original_title" className="inline-block w-15">
                 原題名
               </label>
@@ -150,7 +150,7 @@ export const BookForm = ({
                 onChange={onChange}
               />
             </p>
-            <p className="ml-2">
+            <p className="mt-1">
               <span>
                 <label htmlFor="colophon" className="inline-block w-15 align-top">
                   奥　付
@@ -165,7 +165,7 @@ export const BookForm = ({
                   onChange={onChange}
                 ></textarea>
               </span>
-              <span className="ml-2 align-top">
+              <span className="align-top">
                 {!isReadOnly ? (
                   <button
                     type="button"
@@ -177,7 +177,7 @@ export const BookForm = ({
                 ) : null}
               </span>
             </p>
-            <p className="ml-2">
+            <p>
               <label
                 htmlFor="publisher"
                 className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
@@ -194,9 +194,9 @@ export const BookForm = ({
                 value={formData.publisher}
                 onChange={onChange}
               />
-              &nbsp;※不詳の場合はカッコで括り、（不明）（自費出版）等
+              <span className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</span>
             </p>
-            <p className="ml-19">
+            <p className="mt-1 ml-17">
               <span>
                 <label htmlFor="publish_series">出版シリーズ</label>
                 <input
@@ -224,7 +224,7 @@ export const BookForm = ({
                 />
               </span>
             </p>
-            <p className="ml-2">
+            <p className="mt-1">
               <label
                 htmlFor="first_publish_year"
                 className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
@@ -248,9 +248,9 @@ export const BookForm = ({
                     <span>（{toWarekiYear(parseInt(String(formData.first_publish_year)) || 0)}）</span>
                   )
                 : null}
-              &nbsp;※不詳の場合は 0（zero）
+              <span className="ml-1">※不詳の場合は 0（zero）</span>
             </p>
-            <p className="ml-2">
+            <p className="mt-1">
               <label htmlFor="remarks" className="inline-block w-15 align-top">
                 備　考
               </label>
