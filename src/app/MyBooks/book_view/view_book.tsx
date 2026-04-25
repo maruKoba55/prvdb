@@ -7,7 +7,7 @@ import { supabaseClient } from '@/lib/Client';
 import { CommonButton } from '@/components/ui/button';
 import { BookForm } from '@/components/BookForm';
 
-export default function EditBooks() {
+export default function ViewBook() {
   const searchParams = useSearchParams();
   const initialIds = searchParams.get('ids')?.split(',') || []; // 初期値としてのみ使用
   const [bookIds, setBookIds] = useState<string[]>(initialIds);
@@ -52,9 +52,18 @@ export default function EditBooks() {
       book_id: book_id?.toString() || '',
       title: title || ''
     });
-    window.open(`/book_note?${params.toString()}`, '_blank', 'width=780,height=440');
+    window.open(`/MyBooks/note_regist?${params.toString()}`, '_blank', 'width=780,height=440');
   };
-  //［書籍削除］
+  //［このデータを編集］
+  const handleEdit = () => {
+    const { book_id } = book;
+    const params = new URLSearchParams({
+      book_id: book_id?.toString() || ''
+    });
+    //  console.log('Edit Params:', params.toString()); // パラメータの確認
+    window.open(`/MyBooks/book_edit?${params.toString()}`, '_blank');
+  };
+  //［このデータを削除］
   const handleDelete = async () => {
     const confirmed = confirm(`『${book.title}』（${book.publisher}）を削除しますか？`);
     if (!confirmed) return;
@@ -77,8 +86,8 @@ export default function EditBooks() {
       if (error.code === '23503') {
         alert(`読書ノートが存在します。先に読書ノートを削除してください。`);
       } else {
-        console.error('Delete error:', error.code);
-        alert(`削除失敗: ${error.message}`);
+        console.error(error);
+        alert(`削除失敗 code=${error.code} : ${error.message}`);
       }
     }
   };
@@ -146,51 +155,48 @@ export default function EditBooks() {
       currentCount={currentIndex + 1}
       extraFields={
         <div className="w-full">
-          <div className="border-solid border-2 rounded-lg p-2">
+          <div className="border-solid border-2 rounded-lg p-1">
             <h2 className="font-bold border-b mb-2">役割情報［検索用］</h2>
-            <div className="grid grid-cols-5 gap-x-4 gap-y-2">
+            <div className="grid grid-cols-5 gap-x-2 gap-y-1">
               {book.book_role?.map((r: any) => (
                 <div key={r.id} className="flex items-start text-sm border-b border-gray-50 flex-col">
-                  <span>
-                    <span className="mr-2">{r.role_master?.role_name}：</span>
-                    <span>{r.person_name}</span>
-                  </span>
-                  <span className="ml-4">{r.remarks}</span>
+                  <div className="mr-2">
+                    {r.role_master?.role_name}：{r.person_name}
+                  </div>
+                  <div className="ml-4">{r.remarks}</div>
                 </div>
               ))}
             </div>
           </div>
           <div className="border-solid border-2 rounded-lg mt-2 p-1">
             <h2 className="font-bold border-b mb-2">保有情報</h2>
-            <div className="grid grid-cols-3 gap-x-4 gap-y-2 divide-x">
+            <div className="grid grid-cols-3 gap-x-2 gap-y-1 divide-x">
               {book.book_possess?.map((p: any) => (
                 <div key={p.book_possess_id} className="flex items-start text-sm border-b border-gray-50">
-                  <span className="flex flex-col mr-2">
-                    <span>種　別：{p.booktype_master?.booktype}</span>
-                    <span>入手日：{p.get_date}</span>
-                    <span>処分日：{p.dispose_date}</span>
-                    <span>備　考：</span>
+                  <div className="flex flex-col mr-2">
+                    <div>種　別：{p.booktype_master?.booktype}</div>
+                    <div>入手日：{p.get_date}</div>
+                    <div>処分日：{p.dispose_date}</div>
+                    <div>備　考：</div>
                     <textarea className="ml-2" cols={20} rows={3} readOnly={readOnly_f}>
                       {p.remarks}
                     </textarea>
-                  </span>
-                  <span className="flex flex-col">
-                    <span>
-                      {p.image_url ? (
-                        <img
-                          src={p.image_url}
-                          alt="Book Cover"
-                          width={100}
-                          className="object-contain"
-                          onError={(e) => {
-                            e.currentTarget.src = '/images/book_unavailable.jpg';
-                          }}
-                        />
-                      ) : (
-                        <img src="/images/book_NoImage.jpg" alt="No Image" width={100} />
-                      )}
-                    </span>
-                  </span>
+                  </div>
+                  <div className="flex flex-col">
+                    {p.image_url ? (
+                      <img
+                        src={p.image_url}
+                        alt="Book Cover"
+                        width={100}
+                        className="object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = '/images/book_unavailable.jpg';
+                        }}
+                      />
+                    ) : (
+                      <img src="/images/book_NoImage.jpg" alt="No Image" width={100} />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -220,8 +226,9 @@ export default function EditBooks() {
             disabled={isNextDisabled}
           />
           <CommonButton label="読書ノートへ" variant="orange" onClick={handleNote} />
+          <CommonButton label="このデータを編集" variant="orange" onClick={handleEdit} />
           <CommonButton
-            label="書籍削除"
+            label="このデータを削除"
             variant="red"
             title="書籍情報を削除します。読書ノートが存在する場合は、先に削除してください。"
             onClick={handleDelete}

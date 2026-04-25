@@ -54,15 +54,12 @@ export default function RegistBook() {
         setRegisteredBook(data);
         alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
       }
-    } catch (error) {
-      if (
-        (error instanceof Error && (error as any).code === '23505') ||
-        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
-      ) {
+    } catch (error: any) {
+      if (error.code === '23505') {
         alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は登録済みです`);
       } else {
         console.error(error);
-        alert(`登録失敗（Insert to Table 'books' error.code=${(error as any).code || 'unknown'}）`);
+        alert(`登録失敗  code=${error.code} : ${error.message}`);
       }
     }
   };
@@ -73,7 +70,7 @@ export default function RegistBook() {
       book_id: book_id.toString(),
       title: title || ''
     });
-    window.open(`/book_role?${params.toString()}`, '_blank', 'width=760,height=420');
+    window.open(`/MyBooks/role_regist?${params.toString()}`, '_blank', 'width=760,height=420');
   };
   // ［保有情報登録へ］
   const handlePossess = () => {
@@ -83,7 +80,7 @@ export default function RegistBook() {
       title: title || '',
       isbn13: isbn13 || ''
     });
-    window.open(`/book_possess?${params.toString()}`, '_blank', 'width=820,height=520');
+    window.open(`/MyBooks/possess_regist?${params.toString()}`, '_blank', 'width=820,height=520');
   };
   // ［画面初期化］
   const handleErase = () => {

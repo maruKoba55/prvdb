@@ -56,17 +56,17 @@ export const BookForm = ({
         <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
-            <p className="flex">
-              <span className="text-xl font-bold text-blue-500">書籍基本情報</span>
-              <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
-            </p>
+            <div className="flex items-center">
+              <div className="text-xl font-bold text-blue-500">書籍基本情報</div>
+              <div className="text-gray-500 ml-1">{bookId ? `（書籍ID：${bookId}）` : ''}</div>
+            </div>
             {isReadOnly ? null : (
-              <p className="ml-6">
-                （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
-              </p>
+              <div className="ml-6">
+                （<span className="font-bold text-orange-500">オレンジ色</span>項目は空白不可）
+              </div>
             )}
-            <p className="mt-1">
-              <span>
+            <div className="flex mt-1">
+              <div>
                 <label htmlFor="isbn10" className="inline-block w-15">
                   ISBN-10
                 </label>
@@ -80,8 +80,8 @@ export const BookForm = ({
                   value={formData.isbn10}
                   onChange={onChange}
                 />
-              </span>
-              <span className="ml-4">
+              </div>
+              <div className="ml-4">
                 <label htmlFor="isbn13">ISBN-13</label>
                 <input
                   id="isbn13"
@@ -93,8 +93,8 @@ export const BookForm = ({
                   value={formData.isbn13}
                   onChange={onChange}
                 />
-              </span>
-              <span className="ml-4">
+              </div>
+              <div className="ml-4">
                 <label htmlFor="c_cd">Cコード</label>
                 <input
                   id="c_cd"
@@ -106,8 +106,8 @@ export const BookForm = ({
                   value={formData.c_cd}
                   onChange={onChange}
                 />
-              </span>
-              <span className="ml-4">
+              </div>
+              <div className="ml-4">
                 <label htmlFor="ndc">十進分類</label>
                 <input
                   id="ndc"
@@ -119,9 +119,9 @@ export const BookForm = ({
                   value={formData.ndc}
                   onChange={onChange}
                 />
-              </span>
-            </p>
-            <p className="mt-1">
+              </div>
+            </div>
+            <div className="mt-1">
               <label htmlFor="title" className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}>
                 題　名
               </label>
@@ -135,8 +135,8 @@ export const BookForm = ({
                 value={formData.title}
                 onChange={onChange}
               />
-            </p>
-            <p className="mt-1">
+            </div>
+            <div className="mt-1">
               <label htmlFor="original_title" className="inline-block w-15">
                 原題名
               </label>
@@ -149,9 +149,9 @@ export const BookForm = ({
                 value={formData.original_title}
                 onChange={onChange}
               />
-            </p>
-            <p className="mt-1">
-              <span>
+            </div>
+            <div className="flex mt-1">
+              <div>
                 <label htmlFor="colophon" className="inline-block w-15 align-top">
                   奥　付
                 </label>
@@ -164,8 +164,8 @@ export const BookForm = ({
                   value={formData.colophon}
                   onChange={onChange}
                 ></textarea>
-              </span>
-              <span className="align-top">
+              </div>
+              <div className="align-top ml-2">
                 {!isReadOnly ? (
                   <button
                     type="button"
@@ -175,9 +175,9 @@ export const BookForm = ({
                     奥付消去
                   </button>
                 ) : null}
-              </span>
-            </p>
-            <p>
+              </div>
+            </div>
+            <div className="flex items-center">
               <label
                 htmlFor="publisher"
                 className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
@@ -194,10 +194,10 @@ export const BookForm = ({
                 value={formData.publisher}
                 onChange={onChange}
               />
-              <span className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</span>
-            </p>
-            <p className="mt-1 ml-17">
-              <span>
+              <div className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>
+            </div>
+            <div className="flex mt-1 ml-17">
+              <div>
                 <label htmlFor="publish_series">出版シリーズ</label>
                 <input
                   id="publish_series"
@@ -208,8 +208,8 @@ export const BookForm = ({
                   value={formData.publish_series}
                   onChange={onChange}
                 />
-              </span>
-              <span>
+              </div>
+              <div>
                 <label htmlFor="publish_series_no" className="ml-4">
                   シリーズ番号
                 </label>
@@ -222,9 +222,9 @@ export const BookForm = ({
                   value={formData.publish_series_no}
                   onChange={onChange}
                 />
-              </span>
-            </p>
-            <p className="mt-1">
+              </div>
+            </div>
+            <div className="flex items-center mt-1">
               <label
                 htmlFor="first_publish_year"
                 className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
@@ -249,8 +249,8 @@ export const BookForm = ({
                   )
                 : null}
               <span className="ml-1">※不詳の場合は 0（zero）</span>
-            </p>
-            <p className="mt-1">
+            </div>
+            <div className="mt-1">
               <label htmlFor="remarks" className="inline-block w-15 align-top">
                 備　考
               </label>
@@ -263,13 +263,13 @@ export const BookForm = ({
                 value={formData.remarks}
                 onChange={onChange}
               ></textarea>
-            </p>
+            </div>
           </div>
 
           {/* 右側：画像表示エリア */}
           <div className="w-[200px] flex flex-col p-1">
-            <p className="ml-auto">{totalCount > 0 ? `( ${currentCount} / ${totalCount} )` : ''}</p>
-            <p className="w-[170px] h-full flex items-center justify-center mb-2">
+            <div className="ml-auto">{totalCount > 0 ? `( ${currentCount} / ${totalCount} )` : ''}</div>
+            <div className="w-[170px] h-full flex items-center justify-center mb-2">
               {formData.image_url ? (
                 <img
                   src={formData.image_url}
@@ -284,8 +284,8 @@ export const BookForm = ({
               ) : (
                 <img src="/images/book_NoImage.jpg" alt="No Image" width={170} height={200} />
               )}
-            </p>
-            <p className="w-full flex flex-col">
+            </div>
+            <div className="w-full flex flex-col">
               <textarea
                 id="image_url"
                 className={`${styleItems} w-full resize-none`}
@@ -298,8 +298,8 @@ export const BookForm = ({
               <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex justify-end mb-1">
                 （書影URL）
               </label>
-            </p>
-            <p className="flex mt-6 justify-end">
+            </div>
+            <div className="flex mt-6 justify-end">
               <label htmlFor="comic_f">コミック</label>
               <input
                 id="comic_f"
@@ -309,7 +309,7 @@ export const BookForm = ({
                 checked={formData.comic_f}
                 onChange={onChange}
               />
-            </p>
+            </div>
           </div>
         </div>
 

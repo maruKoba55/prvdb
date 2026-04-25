@@ -33,7 +33,7 @@ type BookTypeMaster = {
   selectable: boolean;
 };
 
-export default function EditPossess() {
+export default function RegistPossess() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const title = searchParams.get('title');
@@ -55,14 +55,11 @@ export default function EditPossess() {
         alert('書籍保有情報を登録しました');
       }
     } catch (error: any) {
-      if (
-        (error instanceof Error && (error as any).code === '23505') ||
-        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
-      ) {
+      if (error.code === '23505') {
         alert('このデータは登録済みです');
       } else {
         console.error(error);
-        alert(`登録失敗（Insert to Table 'book_possess' error.code=${(error as any).code || 'unknown'}）`);
+        alert(`登録失敗 code=${error.code} : ${error.message}`);
       }
     }
   };
@@ -164,12 +161,12 @@ export default function EditPossess() {
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <p>
-              <span className="text-xl font-bold text-blue-500 m-2">書籍保有情報</span>
-              <span className="text-xl font-bold text-gray-500 ml-1">{title ? `『${title}』` : ''}</span>
-              <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
+              <div className="text-xl font-bold text-blue-500 m-2">書籍保有情報</div>
+              <div className="text-xl font-bold text-gray-500 ml-1">{title ? `『${title}』` : ''}</div>
+              <div className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</div>
             </p>
             <p className="ml-6">
-              （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
+              （<span className="font-bold text-orange-500">オレンジ色</span>項目は空白不可）
             </p>
             <p className="mt-1 ml-2">
               <label htmlFor="booktype" className="font-bold text-orange-500">
@@ -275,7 +272,7 @@ export default function EditPossess() {
                 onChange={handleChange}
                 onBlur={handleBlur} // 確定時にプレビュー更新
               ></textarea>
-              <span className="flex justify-end">
+              <div className="flex justify-end">
                 <label htmlFor="urlUp_f">基本情報の書影とする</label>
                 <input
                   id="urlUp_f"
@@ -284,7 +281,7 @@ export default function EditPossess() {
                   checked={formData.urlUp_f}
                   onChange={handleChange}
                 />
-              </span>
+              </div>
             </p>
           </div>
         </div>

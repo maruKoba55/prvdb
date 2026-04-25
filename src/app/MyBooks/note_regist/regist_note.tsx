@@ -23,7 +23,7 @@ const initialFormState = {
   note: ''
 };
 
-export default function EditNote() {
+export default function RegistNote() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const title = searchParams.get('title');
@@ -40,14 +40,11 @@ export default function EditNote() {
         alert('読書ノートを登録しました');
       }
     } catch (error: any) {
-      if (
-        (error instanceof Error && (error as any).code === '23505') ||
-        (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505')
-      ) {
+      if (error.code === '23505') {
         alert('このデータは登録済みです');
       } else {
         console.error(error);
-        alert(`登録失敗（Insert to Table 'book_role' error.code=${(error as any).code || 'unknown'}）`);
+        alert(`登録失敗 code=${error.code} : ${error.message}`);
       }
     }
   };
@@ -112,7 +109,7 @@ export default function EditNote() {
             <span className="text-gray-500">{bookId ? `（書籍ID：${bookId}）` : ''}</span>
           </p>
           <p className="ml-6">
-            （<span className="font-bold text-orange-500">オレンジ色</span>項目は入力必須）
+            （<span className="font-bold text-orange-500">オレンジ色</span>項目は空白不可）
           </p>
           <p className="mt-1 ml-2">
             <label htmlFor="read_st_date" className="inline-block w-16 font-bold text-orange-500">
