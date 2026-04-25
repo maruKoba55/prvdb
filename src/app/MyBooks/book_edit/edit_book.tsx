@@ -21,7 +21,7 @@ export default function EditBook({ book }: { book: any }) {
 
   const readOnly_f = false;
   let partErr = false;
-  console.log('formData:', formData);
+  //console.log('formData:', formData);
 
   if (!formData) {
     return null;
