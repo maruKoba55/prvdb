@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { supabaseClient } from '@/lib/Client';
+import { Eraser, Plus, Search, Toolbox, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { styleItems } from '@/app/constants';
 
-const styleItems =
-  'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
 const screenMinW = 1100; //画面最小幅
 
 const initialFormState = {
@@ -196,14 +196,14 @@ export function SearchBooks() {
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <h1 style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+      <div style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
         書籍管理
-      </h1>
+      </div>
       <div style={{ width: `${screenMinW - 8}px` }} className="flex border-solid border-2 rounded-lg m-4 p-1">
         {/* 左側：書籍検索 */}
         <div className="flex-1 w-[600px] border-solid border-1 rounded-lg m-4 p-2">
-          <h2 className="text-center text-xl font-bold text-blue-500 m-2">検索条件</h2>
-          <p className="ml-2">
+          <div className="text-center text-xl font-bold text-blue-500 m-2">検索条件指定</div>
+          <div className="ml-2">
             <label htmlFor="isbn13" className="inline-block w-19">
               ISBN-13
             </label>
@@ -216,8 +216,8 @@ export function SearchBooks() {
               value={formData.isbn13}
               onChange={handleChange}
             />
-          </p>
-          <p className="mt-2 ml-2">
+          </div>
+          <div className="mt-2 ml-2">
             <label htmlFor="title" className="inline-block w-19">
               題　名
             </label>
@@ -229,9 +229,9 @@ export function SearchBooks() {
               value={formData.title}
               onChange={handleChange}
             />
-          </p>
-          <p className="flex mt-1 ml-22">
-            <span className="flex px-2">
+          </div>
+          <div className="flex mt-1 ml-22">
+            <div className="flex px-2">
               （
               <label className="block ml-1">
                 <input
@@ -256,9 +256,9 @@ export function SearchBooks() {
                 部分一致
               </label>
               ）
-            </span>
-          </p>
-          <p className="mt-2 ml-2">
+            </div>
+          </div>
+          <div className="flex items-center mt-2 ml-2">
             <label htmlFor="publisher" className="inline-block w-19 text-justify">
               出版社
             </label>
@@ -270,10 +270,10 @@ export function SearchBooks() {
               value={formData.publisher}
               onChange={handleChange}
             />
-            <span className="ml-2">※不詳の場合はカッコで括り、（不明）（自費出版）等</span>
-          </p>
-          <p className="mt-2 ml-22">
-            <span>
+            <div className="ml-2">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>
+          </div>
+          <div className="mt-2 ml-22">
+            <div>
               <label htmlFor="publish_series">出版シリーズ</label>
               <input
                 id="publish_series"
@@ -283,10 +283,10 @@ export function SearchBooks() {
                 value={formData.publish_series}
                 onChange={handleChange}
               />
-            </span>
-          </p>
-          <p className="mt-2 ml-2 flex">
-            <span>
+            </div>
+          </div>
+          <div className="mt-2 ml-2 flex">
+            <div>
               <label htmlFor="role" className="inline-block w-19">
                 役　割
               </label>
@@ -304,9 +304,9 @@ export function SearchBooks() {
                   )
                 )}
               </select>
-              <span className="flex ml-22">※役割のみの指定は不可</span>
-            </span>
-            <span>
+              <div className="flex ml-22">※役割のみの指定は不可</div>
+            </div>
+            <div>
               <label htmlFor="person_name" className="inline-block ml-6">
                 人（団体）名
               </label>
@@ -319,7 +319,7 @@ export function SearchBooks() {
                 value={formData.person_name}
                 onChange={handleChange}
               />
-              <span className="flex mt-1 ml-32 px-2">
+              <div className="flex mt-1 ml-32 px-2">
                 （
                 <label className="block ml-1">
                   <input
@@ -344,10 +344,10 @@ export function SearchBooks() {
                   部分一致
                 </label>
                 ）
-              </span>
-            </span>
-          </p>
-          <p className="mt-2 ml-2">
+              </div>
+            </div>
+          </div>
+          <div className="mt-2 ml-2">
             <label htmlFor="booktype" className="inline-block w-19">
               書籍種別
             </label>
@@ -371,12 +371,12 @@ export function SearchBooks() {
                 )
               )}
             </select>
-          </p>
-          <p className="flex mt-2 ml-2">
+          </div>
+          <div className="flex mt-2 ml-2">
             <label htmlFor="limitComic" className="inline-block w-19">
               コミック指定
             </label>
-            <span className={`${styleItems} flex px-2`}>
+            <div className={`${styleItems} flex px-2`}>
               <label className="block ml-1">
                 <input
                   type="radio"
@@ -410,11 +410,29 @@ export function SearchBooks() {
                 />
                 非コミックのみ
               </label>
-            </span>
-          </p>
+            </div>
+          </div>
           <div className="flex mt-2 ml-2 p-2 justify-around">
-            <CommonButton label="検索実行" variant="blue" onClick={handleSearch} />
-            <CommonButton label="条件消去" variant="outline" onClick={handleErase} />
+            <CommonButton
+              label={
+                <>
+                  <Search size={20} />
+                  検索
+                </>
+              }
+              variant="blue"
+              onClick={handleSearch}
+            />
+            <CommonButton
+              label={
+                <>
+                  <Eraser size={20} />
+                  条件消去
+                </>
+              }
+              variant="outline"
+              onClick={handleErase}
+            />
           </div>
         </div>
 
@@ -423,7 +441,8 @@ export function SearchBooks() {
           <CommonButton
             label={
               <>
-                書籍新規登録へ (<u>R</u>)
+                <Plus size={20} />
+                新規登録へ (<u>R</u>)
               </>
             }
             variant="blue"
@@ -432,7 +451,13 @@ export function SearchBooks() {
           <CommonButton
             label={
               <>
-                補助データメンテへ (<u>M</u>)
+                <Toolbox size={20} />
+                <div>
+                  補助データ
+                  <br />
+                  メンテへ
+                </div>{' '}
+                (<u>M</u>)
               </>
             }
             variant="orange"
@@ -442,6 +467,7 @@ export function SearchBooks() {
           <CommonButton
             label={
               <>
+                <X size={20} />
                 閉じる (<u>C</u>)
               </>
             }

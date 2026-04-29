@@ -10,7 +10,7 @@ type Props = {
 export const CommonButton = ({ label, variant = 'blue', onClick, title, disabled, type = 'button' }: Props) => {
   // 1. 共通の土台クラス
   const baseStyle =
-    'relative z-10 py-3 px-8 text-base rounded-md font-semibold transition-all duration-300 cursor-pointer disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:transform-none';
+    'flex items-center gap-2 relative z-10 py-2 px-2 text-base rounded-md font-semibold transition-all duration-300 cursor-pointer disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:transform-none';
 
   // 2. variantごとのクラス
   const variantStyles = {

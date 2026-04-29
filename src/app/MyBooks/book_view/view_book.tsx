@@ -4,38 +4,51 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
+import { ArrowLeft, ArrowRight, Notebook, Pencil, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { BookForm } from '@/components/BookForm';
 
 export default function ViewBook() {
   const searchParams = useSearchParams();
   const initialIds = searchParams.get('ids')?.split(',') || []; // 初期値としてのみ使用
+  const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
   const [bookIds, setBookIds] = useState<string[]>(initialIds);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true); // 読み込み状態を管理
 
   const readOnly_f = true;
   const isPrevDisabled = currentIndex <= 0;
   const isNextDisabled = currentIndex >= bookIds.length - 1;
-  //  console.log('Before Delete:', bookIds);
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
-  //［前のデータ］
+  //［前］
   const handlePrev = () => {
-    if (!isPrevDisabled) setCurrentIndex((i) => i - 1);
+    if (!isPrevDisabled) {
+      setCurrentIndex((prev) => {
+        const nextIdx = prev - 1;
+        updateUrl(nextIdx); // 更新後の値でURLを書き換え
+        return nextIdx;
+      });
+    }
   };
   useHotkeys(
     'alt+p',
     (event) => {
       event.preventDefault(); // ブラウザのデフォルト挙動を防止
-      handlePrev(); // handlePrev内の「!isNextDisabled」判定が通る時だけ実行される
+      handlePrev(); // handlePrev内の「!isPrevDisabled」判定が通る時だけ実行される
     },
-    [isPrevDisabled]
+    [isPrevDisabled, handlePrev]
   );
-  // ［次のデータ］
+  // ［次］
   const handleNext = () => {
-    if (!isNextDisabled) setCurrentIndex((i) => i + 1);
+    if (!isNextDisabled) {
+      setCurrentIndex((prev) => {
+        const nextIdx = prev + 1;
+        updateUrl(nextIdx);
+        return nextIdx;
+      });
+    }
   };
   useHotkeys(
     'alt+n',
@@ -43,7 +56,7 @@ export default function ViewBook() {
       event.preventDefault(); // ブラウザのデフォルト挙動を防止
       handleNext(); // handleNext内の「!isNextDisabled」判定が通る時だけ実行される
     },
-    [isNextDisabled]
+    [isNextDisabled, handleNext]
   );
   //［読書ノートへ］
   const handleNote = () => {
@@ -52,18 +65,17 @@ export default function ViewBook() {
       book_id: book_id?.toString() || '',
       title: title || ''
     });
-    window.open(`/MyBooks/note_regist?${params.toString()}`, '_blank', 'width=780,height=440');
+    window.open(`/MyBooks/note_list?${params.toString()}`, '_blank', 'width=820,height=600');
   };
-  //［このデータを編集］
+  //［編集］
   const handleEdit = () => {
     const { book_id } = book;
     const params = new URLSearchParams({
       book_id: book_id?.toString() || ''
     });
-    //  console.log('Edit Params:', params.toString()); // パラメータの確認
     window.open(`/MyBooks/book_edit?${params.toString()}`, '_blank');
   };
-  //［このデータを削除］
+  //［削除］
   const handleDelete = async () => {
     const confirmed = confirm(`『${book.title}』（${book.publisher}）を削除しますか？`);
     if (!confirmed) return;
@@ -91,14 +103,30 @@ export default function ViewBook() {
       }
     }
   };
+  //［画面最新化］
+  const handleRefresh = () => {
+    fetchBookData(bookIds, currentIndex);
+  };
+  useHotkeys('alt+r', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleRefresh();
+  });
   //［閉じる］
   const handleClose = () => {
     window.close();
   };
   useHotkeys('alt+c', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleClose(); // handlePrev内の「!isNextDisabled」判定が通る時だけ実行される
+    handleClose(); //
   });
+
+  // indexが変わったらURLを同期させる関数
+  const updateUrl = (newIndex: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('index', newIndex.toString());
+    // historyを書き換え（画面はリロードされない）
+    window.history.replaceState(null, '', `?${params.toString()}`);
+  };
 
   // bookIdsかcurrentIndexが変わったらデータ取得
   useEffect(() => {
@@ -147,7 +175,7 @@ export default function ViewBook() {
 
   return (
     <BookForm
-      screenTitle="書籍管理"
+      screenTitle="書籍管理（閲覧）"
       bookId={book.book_id}
       formData={book}
       isReadOnly={readOnly_f}
@@ -156,7 +184,7 @@ export default function ViewBook() {
       extraFields={
         <div className="w-full">
           <div className="border-solid border-2 rounded-lg p-1">
-            <h2 className="font-bold border-b mb-2">役割情報［検索用］</h2>
+            <div className="font-bold border-b mb-2">役割情報［検索用］</div>
             <div className="grid grid-cols-5 gap-x-2 gap-y-1">
               {book.book_role?.map((r: any) => (
                 <div key={r.id} className="flex items-start text-sm border-b border-gray-50 flex-col">
@@ -169,7 +197,7 @@ export default function ViewBook() {
             </div>
           </div>
           <div className="border-solid border-2 rounded-lg mt-2 p-1">
-            <h2 className="font-bold border-b mb-2">保有情報</h2>
+            <div className="font-bold border-b mb-2">保有情報</div>
             <div className="grid grid-cols-3 gap-x-2 gap-y-1 divide-x">
               {book.book_possess?.map((p: any) => (
                 <div key={p.book_possess_id} className="flex items-start text-sm border-b border-gray-50">
@@ -208,7 +236,7 @@ export default function ViewBook() {
           <CommonButton
             label={
               <>
-                前のデータ (<u>P</u>)
+                <ArrowLeft size={20} />前 (<u>P</u>)
               </>
             }
             variant="blue"
@@ -218,24 +246,59 @@ export default function ViewBook() {
           <CommonButton
             label={
               <>
-                次のデータ (<u>N</u>)
+                <Notebook size={20} />
+                読書ノートへ
+              </>
+            }
+            variant="orange"
+            onClick={handleNote}
+          />
+          <CommonButton
+            label={
+              <>
+                <Pencil size={20} />
+                編集
+              </>
+            }
+            variant="orange"
+            onClick={handleEdit}
+          />
+          <CommonButton
+            label={
+              <>
+                <Trash2 size={20} />
+                削除
+              </>
+            }
+            variant="red"
+            title="書籍情報を削除します。読書ノートが存在する場合は、先に削除してください。"
+            onClick={handleDelete}
+          />
+          <CommonButton
+            type="button"
+            label={
+              <>
+                <RefreshCw size={20} />
+                画面最新化 (<u>R</u>)
+              </>
+            }
+            variant="blue"
+            onClick={handleRefresh}
+          />
+          <CommonButton
+            label={
+              <>
+                次 <ArrowRight size={20} /> (<u>N</u>)
               </>
             }
             variant="blue"
             onClick={handleNext}
             disabled={isNextDisabled}
           />
-          <CommonButton label="読書ノートへ" variant="orange" onClick={handleNote} />
-          <CommonButton label="このデータを編集" variant="orange" onClick={handleEdit} />
-          <CommonButton
-            label="このデータを削除"
-            variant="red"
-            title="書籍情報を削除します。読書ノートが存在する場合は、先に削除してください。"
-            onClick={handleDelete}
-          />
           <CommonButton
             label={
               <>
+                <X size={20} />
                 閉じる (<u>C</u>)
               </>
             }

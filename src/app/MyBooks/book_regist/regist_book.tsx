@@ -2,8 +2,13 @@
 
 import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
+import { BookCopy, Eraser, Save, UserRoundPen, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { AddRoleModal } from '@/components/AddRoleModal';
+import { AddPossessModal } from '@/components/AddPossessModal';
+import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { BookForm } from '@/components/BookForm';
 
 const initialFormState = {
@@ -42,8 +47,11 @@ interface BookFormData {
 }
 
 export default function RegistBook() {
+  const router = useRouter();
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
+  const [isAddRoleModal, setIsAddRoleModal] = useState(false);
+  const [isAddPossessModal, setIsAddPossessModal] = useState(false);
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
   // ［基本情報を登録］
@@ -52,11 +60,11 @@ export default function RegistBook() {
       const data = await editBookData();
       if (data) {
         setRegisteredBook(data);
-        alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました`);
+        alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました。`);
       }
     } catch (error: any) {
       if (error.code === '23505') {
-        alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は登録済みです`);
+        alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は既に登録されています。`);
       } else {
         console.error(error);
         alert(`登録失敗  code=${error.code} : ${error.message}`);
@@ -98,27 +106,42 @@ export default function RegistBook() {
     handleClose();
   });
 
-  // 汎用的な入力変更ハンドラ
-  // チェックボックスの場合はchecked、それ以外はvalueを格納
+  // 入力変更ハンドラ
+  // 汎用；チェックボックスの場合はchecked、それ以外はvalueを格納
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
+      ...prev, // 元のデータをすべてコピー
+      [id]: type === 'checkbox' ? checked : value // 新しい値で上書き
+    }));
+  };
+  // 関数を介する項目用（ISBN等）
+  const handleChangeF = (id: any, value: any) => {
+    setFormData((prev: any) => ({
       ...prev,
-      [id]: type === 'checkbox' ? checked : value
+      [id]: value
     }));
   };
 
   // 画面内容をTable 'books' へ登録
   const editBookData = async () => {
     if (!formData.title.trim() || !formData.publisher.trim() || String(formData.first_publish_year).trim() === '') {
-      alert('必須項目が未入力です');
+      alert('必須項目が未入力です。');
       return null;
     }
     if (formData.first_publish_year > new Date().getFullYear() + 1) {
-      alert('初版年を確認してください');
+      alert('初版年を確認してください。');
       return null;
     }
+
+    if (formData.isbn10 && !formData.isbn13.trim()) {
+      if (confirm('ISBN-10を変換してISBN-13としますか？')) {
+        formData.isbn13 = isbnHyphenate(formData.isbn10) ?? '';
+        router.refresh();
+      }
+    }
+
     const insertData = {
       ...formData,
       isbn10: formData.isbn10.replaceAll('-', '') || null,
@@ -150,41 +173,102 @@ export default function RegistBook() {
   };
 
   return (
-    <BookForm
-      screenTitle="書籍管理"
-      bookId={registeredBook ? registeredBook.book_id : ''}
-      formData={formData}
-      onChange={handleChange}
-      onClearField={handleEraseField}
-      buttons={
-        <>
-          <CommonButton label="基本情報を登録" variant="blue" onClick={handleBaseRegist} />
-          <CommonButton
-            label="役割情報登録へ"
-            variant="orange"
-            onClick={handleRole}
-            disabled={!registeredBook?.book_id}
-            title="基本情報の登録後、検索用の著者名などを入力"
-          />
-          <CommonButton
-            label="保有情報登録へ"
-            variant="red"
-            onClick={handlePossess}
-            disabled={!registeredBook?.book_id}
-            title="基本情報の登録後、保有する書籍の情報を入力"
-          />
-          <CommonButton label="画面初期化" variant="outline" onClick={handleErase} />
-          <CommonButton
-            label={
-              <>
-                閉じる (<u>C</u>)
-              </>
-            }
-            variant="outline"
-            onClick={handleClose}
-          />
-        </>
-      }
-    />
+    <div>
+      <BookForm
+        screenTitle="書籍管理（登録）"
+        bookId={registeredBook ? registeredBook.book_id : ''}
+        formData={formData}
+        onChange={handleChange}
+        onChangeF={handleChangeF}
+        onClearField={handleEraseField}
+        buttons={
+          <>
+            <CommonButton
+              label={
+                <>
+                  <Save size={20} />
+                  基本情報を保存
+                </>
+              }
+              variant="blue"
+              onClick={handleBaseRegist}
+            />
+            <CommonButton
+              label={
+                <>
+                  <UserRoundPen size={20} />
+                  役割情報登録
+                </>
+              }
+              variant="orange"
+              onClick={() => setIsAddRoleModal(true)}
+              disabled={!registeredBook?.book_id}
+              title="基本情報の保存後、検索用の著者名などを入力"
+            />
+            <CommonButton
+              label={
+                <>
+                  <BookCopy size={20} />
+                  保有情報登録
+                </>
+              }
+              variant="red"
+              onClick={() => setIsAddPossessModal(true)}
+              disabled={!registeredBook?.book_id}
+              title="基本情報の保存後、保有する書籍の情報を入力"
+            />
+            <CommonButton
+              label={
+                <>
+                  <Eraser size={20} />
+                  画面初期化
+                </>
+              }
+              variant="outline"
+              onClick={handleErase}
+            />
+            <CommonButton
+              label={
+                <>
+                  <X size={20} />
+                  閉じる (<u>C</u>)
+                </>
+              }
+              variant="outline"
+              onClick={handleClose}
+            />
+          </>
+        }
+      />
+      {isAddRoleModal && (
+        <AddRoleModal
+          bookId={Number(registeredBook.book_id) || 0}
+          bookTitle={formData.title || ''}
+          onClose={() => setIsAddRoleModal(false)}
+          onSuccess={() => {
+            setIsAddRoleModal(false);
+            router.refresh();
+            //  window.location.reload();
+            // ↑これで画面更新すると、追加したbook_roleが表示される一方、
+            //  他の変更内容が元に戻ってしまう。
+          }}
+        />
+      )}
+
+      {isAddPossessModal && (
+        <AddPossessModal
+          bookId={Number(registeredBook.book_id) || 0}
+          bookTitle={formData.title || ''}
+          onClose={() => setIsAddPossessModal(false)}
+          onSuccess={() => {
+            setIsAddPossessModal(false);
+            router.refresh();
+            //  window.location.reload();
+            // ↑これで画面更新すると、追加したbook_roleが表示される一方、
+            //  他の変更内容が元に戻ってしまう。
+          }}
+        />
+      )}
+    </div>
   );
 }

@@ -1,5 +1,9 @@
 import React from 'react';
+import { Eraser } from 'lucide-react';
+import { isbnHyphen10 } from '@/utils/isbnHyphen10';
+import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { toWarekiYear } from '@/utils/toWarekiYear';
+import { styleItems } from '@/app/constants';
 
 export type BookFormData = {
   isbn10: string;
@@ -26,13 +30,12 @@ type Props = {
   totalCount?: number; // 総件数
   currentCount?: number; // 現在件数
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChangeF?: (id: any, value: any) => void; // 関数を介する項目用（ISBN等）
   onClearField?: (field: keyof BookFormData) => void; //入力内容消去ボタン用
   extraFields?: React.ReactNode; // 追加表示項目
   buttons?: React.ReactNode; // ボタンエリア
 };
 
-const styleItems =
-  'ml-2 border border-[#ccc] p-1 rounded outline-none hover:border-[#999] focus:border-[#007bff] focus:ring-4 focus:ring-[#007bff]/25';
 const screenMinW = 1100; //画面最小幅
 
 export const BookForm = ({
@@ -43,21 +46,22 @@ export const BookForm = ({
   totalCount = 0,
   currentCount = 0,
   onChange,
+  onChangeF,
   onClearField,
   extraFields,
   buttons
 }: Props) => {
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <h1 style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+      <div style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
         {screenTitle}
-      </h1>
+      </div>
       <div style={{ width: `${screenMinW - 8}px` }}>
         <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
             <div className="flex items-center">
-              <div className="text-xl font-bold text-blue-500">書籍基本情報</div>
+              <div className="text-xl font-bold text-blue-500 m-1">基本情報</div>
               <div className="text-gray-500 ml-1">{bookId ? `（書籍ID：${bookId}）` : ''}</div>
             </div>
             {isReadOnly ? null : (
@@ -66,7 +70,7 @@ export const BookForm = ({
               </div>
             )}
             <div className="flex mt-1">
-              <div>
+              <div className="flex items-center">
                 <label htmlFor="isbn10" className="inline-block w-15">
                   ISBN-10
                 </label>
@@ -74,25 +78,39 @@ export const BookForm = ({
                   id="isbn10"
                   className={styleItems}
                   type="text"
-                  size={13}
+                  size={12}
                   maxLength={13}
                   readOnly={isReadOnly}
-                  value={formData.isbn10}
+                  value={isbnHyphen10(formData.isbn10) ?? formData.isbn10 ?? ''}
                   onChange={onChange}
+                  onBlur={(e) => {
+                    const formatted = isbnHyphen10(formData.isbn10);
+                    if (formatted && onChangeF) {
+                      onChangeF('isbn10', formatted);
+                    }
+                  }}
                 />
+                {formData.isbn10 && !isbnHyphen10(formData.isbn10) ? <div className="text-red-500 ml-1">?</div> : null}
               </div>
-              <div className="ml-4">
+              <div className="flex items-center ml-4">
                 <label htmlFor="isbn13">ISBN-13</label>
                 <input
                   id="isbn13"
                   className={styleItems}
                   type="text"
-                  size={17}
+                  size={16}
                   maxLength={17}
                   readOnly={isReadOnly}
-                  value={formData.isbn13}
+                  value={isbnHyphenate(formData.isbn13) ?? formData.isbn13 ?? ''}
                   onChange={onChange}
+                  onBlur={(e) => {
+                    const formatted = isbnHyphenate(formData.isbn13);
+                    if (formatted && onChangeF) {
+                      onChangeF('isbn13', formatted);
+                    }
+                  }}
                 />
+                {formData.isbn13 && !isbnHyphenate(formData.isbn13) ? <div className="text-red-500 ml-1">?</div> : null}
               </div>
               <div className="ml-4">
                 <label htmlFor="c_cd">Cコード</label>
@@ -100,7 +118,7 @@ export const BookForm = ({
                   id="c_cd"
                   className={styleItems}
                   type="text"
-                  size={5}
+                  size={4}
                   maxLength={5}
                   readOnly={isReadOnly}
                   value={formData.c_cd}
@@ -113,7 +131,7 @@ export const BookForm = ({
                   id="ndc"
                   className={styleItems}
                   type="text"
-                  size={10}
+                  size={9}
                   maxLength={10}
                   readOnly={isReadOnly}
                   value={formData.ndc}
@@ -172,6 +190,7 @@ export const BookForm = ({
                     className="py-2 px-3 text-base rounded-md font-semibold bg-blue-300"
                     onClick={() => onClearField?.('colophon')}
                   >
+                    <Eraser size={14} />
                     奥付消去
                   </button>
                 ) : null}
@@ -248,7 +267,7 @@ export const BookForm = ({
                     <span>（{toWarekiYear(parseInt(String(formData.first_publish_year)) || 0)}）</span>
                   )
                 : null}
-              <span className="ml-1">※不詳の場合は 0（zero）</span>
+              <div className="ml-1">※不詳の場合は 0（zero）</div>
             </div>
             <div className="mt-1">
               <label htmlFor="remarks" className="inline-block w-15 align-top">
