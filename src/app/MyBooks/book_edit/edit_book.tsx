@@ -460,7 +460,7 @@ export default function EditBook({ book }: { book: any }) {
                     画面最新化 (<u>R</u>)
                   </>
                 }
-                variant="blue"
+                variant="outline"
                 onClick={handleRefresh}
               />
               <CommonButton

@@ -282,7 +282,7 @@ export default function ViewBook() {
                 画面最新化 (<u>R</u>)
               </>
             }
-            variant="blue"
+            variant="outline"
             onClick={handleRefresh}
           />
           <CommonButton
