@@ -23,7 +23,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const isPrevDisabled = currentIndex <= 0;
   const isNextDisabled = currentIndex >= bookIds.length - 1;
 
-  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
+  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
   //［前］
   const handlePrev = () => {
     if (!isPrevDisabled) {
@@ -95,7 +95,6 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
         setCurrentIndex(nextIds.length - 1); // 末尾を削除した場合のインデックス調整
       }
       setBookIds(nextIds); // IDリストを更新 ⇒ useEffectがトリガーされてデータfetch
-      //      console.log('After Delete:', bookIds);
     } catch (error: any) {
       if (error.code === '23503') {
         alert(`読書ノートが存在します。先に読書ノートを削除してください。`);
@@ -138,6 +137,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   }, [currentIndex, bookIds]);
 
   //初期表示件数確認
+  //  console.log('bookIdList:', bookIdList);
   useEffect(() => {
     if (bookIdList.length === 0) {
       alert('該当データがありません');
@@ -155,7 +155,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     }
   }, []); // 第2引数を空配列にすることで「初回のみ」実行
 
-  const fetchBookData = async (targetIds: string[], index: number) => {
+  const fetchBookData = async (targetIds: number[], index: number) => {
     setBook(null);
     setLoading(true);
     const { data, error } = await supabase
@@ -225,9 +225,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
                     <div>入手日：{p.get_date}</div>
                     <div>処分日：{p.dispose_date}</div>
                     <div>備　考：</div>
-                    <textarea className="ml-2" cols={20} rows={3} readOnly={readOnly_f}>
-                      {p.remarks}
-                    </textarea>
+                    <textarea className="ml-2" cols={20} rows={3} readOnly={readOnly_f} value={p.remarks}></textarea>
                   </div>
                   <div className="flex flex-col">
                     {p.image_url ? (

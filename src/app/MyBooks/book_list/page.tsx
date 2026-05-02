@@ -23,7 +23,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
     p_limit_comic: (params.limit_comic as string) || 'noLimit',
     p_limit_possess: (params.limit_possess as string) || 'noLimit',
     p_display_order: (params.display_order as string) || 'publish',
-    p_select_limit: bookSearchMax || 9999
+    p_select_limit: (bookSearchMax as number) || 9999
   });
   if (error) {
     console.error(error);

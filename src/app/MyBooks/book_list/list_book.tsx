@@ -29,6 +29,7 @@ export default function ListBook({ bookIdList }: { bookIdList: number[] }) {
   });
 
   //初期表示件数確認
+  //  console.log('bookIdList:', bookIdList);
   useEffect(() => {
     if (bookIdList.length === 0) {
       alert('該当データがありません');
