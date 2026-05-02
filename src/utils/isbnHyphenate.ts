@@ -11,6 +11,7 @@ export function isbnHyphenate(str: string) {
   a = a.replace(/[０-９]/g, (s) => {
     return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
   });
+  const originalCd = a.slice(-1);
   a = a.replace(/\D/g, '');
   if (a.startsWith('4') && (a.length === 9 || a.length === 10)) {
     a = prefixJapan + a;
@@ -25,6 +26,7 @@ export function isbnHyphenate(str: string) {
   const step2 =
     (parseInt(a[1]) + parseInt(a[3]) + parseInt(a[5]) + parseInt(a[7]) + parseInt(a[9]) + parseInt(a[11])) * 3;
   const cd = (10 - Number(String(step1 + step2).slice(-1))) % 10;
+  if (String(cd) !== originalCd) return null;
 
   // 13桁ISBNのハイフン挿入
   const pubCode2 = parseInt(a.substring(4, 6)); // 出版社記号判別用

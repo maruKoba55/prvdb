@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { ArrowLeft, ArrowRight, Notebook, Pencil, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { BookForm } from '@/components/BookForm';
+import { bookSearchMax } from '@/app/constants';
 
-export default function ViewBook() {
-  const searchParams = useSearchParams();
-  const initialIds = searchParams.get('ids')?.split(',') || []; // 初期値としてのみ使用
-  const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
-  const [bookIds, setBookIds] = useState<string[]>(initialIds);
-  const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
+export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
+  const supabase = supabaseClient();
+  const router = useRouter();
+  const [bookIds, setBookIds] = useState<number[]>(bookIdList);
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true); // 読み込み状態を管理
+  const searchParams = useSearchParams();
+  const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
+  const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
 
   const readOnly_f = true;
   const isPrevDisabled = currentIndex <= 0;
@@ -80,7 +82,7 @@ export default function ViewBook() {
     const confirmed = confirm(`『${book.title}』（${book.publisher}）を削除しますか？`);
     if (!confirmed) return;
     try {
-      const { error } = await supabaseClient.from('books').delete().eq('book_id', book.book_id);
+      const { error } = await supabase.from('books').delete().eq('book_id', book.book_id);
       if (error) throw error;
       alert(`『${book.title}』（${book.publisher}）を削除しました`);
       //削除したIDを除去した新しいリストを作成
@@ -111,13 +113,13 @@ export default function ViewBook() {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
     handleRefresh();
   });
-  //［閉じる］
-  const handleClose = () => {
-    window.close();
+  //［戻る］（検索条件指定画面へ）
+  const handleBack = () => {
+    router.back();
   };
-  useHotkeys('alt+c', (event) => {
+  useHotkeys('alt+b', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleClose(); //
+    handleBack(); //
   });
 
   // indexが変わったらURLを同期させる関数
@@ -135,10 +137,28 @@ export default function ViewBook() {
     }
   }, [currentIndex, bookIds]);
 
+  //初期表示件数確認
+  useEffect(() => {
+    if (bookIdList.length === 0) {
+      alert('該当データがありません');
+      router.replace('/'); //検索条件指定（/app/page.tsx）へ
+      return; //router.back()では検索条件指定まで閉じてしまう
+    }
+    if (bookIdList.length > 10) {
+      const confirmed = window.confirm(
+        `該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？（${bookSearchMax}件まで表示可能）`
+      );
+      if (!confirmed) {
+        router.replace('/');
+        return;
+      }
+    }
+  }, []); // 第2引数を空配列にすることで「初回のみ」実行
+
   const fetchBookData = async (targetIds: string[], index: number) => {
     setBook(null);
     setLoading(true);
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
       .from('books')
       .select(
         `
@@ -160,7 +180,6 @@ export default function ViewBook() {
       .eq('book_id', targetIds[index])
       .order('role_cd', { referencedTable: 'book_role', ascending: true })
       .order('role_order', { referencedTable: 'book_role', ascending: true })
-      .order('booktype_cd', { referencedTable: 'book_possess', ascending: true })
       .order('get_date', { referencedTable: 'book_possess', ascending: true })
       .single();
 
@@ -247,7 +266,7 @@ export default function ViewBook() {
             label={
               <>
                 <Notebook size={20} />
-                読書ノートへ
+                読書ノート
               </>
             }
             variant="orange"
@@ -299,11 +318,11 @@ export default function ViewBook() {
             label={
               <>
                 <X size={20} />
-                閉じる (<u>C</u>)
+                戻る (<u>B</u>)
               </>
             }
             variant="outline"
-            onClick={handleClose}
+            onClick={handleBack}
           />
         </>
       }

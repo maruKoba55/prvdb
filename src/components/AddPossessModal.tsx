@@ -31,6 +31,7 @@ export function AddPossessModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     booktype_cd: '',
@@ -77,7 +78,7 @@ export function AddPossessModal({
       return;
     }
 
-    const { error } = await supabaseClient.from('book_possess').insert([insertData]);
+    const { error } = await supabase.from('book_possess').insert([insertData]);
     setLoading(false);
     if (!error) {
       if (formData.urlUp_f) {
@@ -114,10 +115,7 @@ export function AddPossessModal({
 
   // 書影URLを Table 'books' に反映
   const updateBookImageUrl = async () => {
-    const { error } = await supabaseClient
-      .from('books')
-      .update({ image_url: formData.image_url })
-      .eq('book_id', bookId);
+    const { error } = await supabase.from('books').update({ image_url: formData.image_url }).eq('book_id', bookId);
     if (error) throw error;
   };
 
@@ -125,7 +123,7 @@ export function AddPossessModal({
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
   useEffect(() => {
     const fetchBookTypes = async () => {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('booktype_master')
         .select('*')
         .order('booktype_cd', { ascending: true });

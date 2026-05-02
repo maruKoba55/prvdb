@@ -12,7 +12,7 @@ export function isbnHyphen10(str: string) {
     return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
   });
   if (!a.startsWith('4')) return null; // 日本のISBNではない
-  const originalCd = a[a.length - 1];
+  const originalCd = a.slice(-1);
   a = a.replace(/\D/g, '');
   if (a.length === 10) {
     //チェックデジット算出へ
@@ -43,6 +43,7 @@ export function isbnHyphen10(str: string) {
   } else {
     cd = String(step2).slice(-1);
   }
+  if (cd !== originalCd) return null;
 
   // ハイフン挿入
   const pubCode2 = parseInt(a.substring(1, 3)); // 出版社記号判別用

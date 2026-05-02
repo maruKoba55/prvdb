@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { BookCopy, BookSearch, CalendarSearch, Eraser, Plus, TextSearch, Toolbox, X } from 'lucide-react';
+import { BookCopy, BookSearch, CalendarSearch, Eraser, Plus, Search, TextSearch, Toolbox, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 
 const screenMinW = 1100; //画面最小幅
@@ -22,10 +24,11 @@ const initialFormState = {
   limitComic: 'noLimit',
   limitNote: 'noLimit',
   limitPossess: 'noLimit',
-  displayOrder: 'publish',
+  bookOrder: 'publish',
   read_st_from: '',
   read_st_to: '',
-  limitComicNote: 'nonComic'
+  noteLimitComic: 'nonComic',
+  noteOrder: 'get'
 };
 
 type BookTypeMaster = {
@@ -40,7 +43,22 @@ type RoleMaster = {
   selectable: boolean;
 };
 
+// 書籍検索条件の組合せチェック
+const SearchChk = (formData: any) => {
+  if (formData.role_cd && !formData.person_name) {
+    alert('役割を指定した場合、人（団体）名も入力してください。');
+    return null;
+  }
+  if (formData.booktype_cd && formData.limitPossess !== 'noLimit') {
+    alert('書籍種別と書籍保有の限定条件は同時に指定できません。');
+    return null;
+  }
+  return true;
+};
+
 export function SearchBooks() {
+  const supabase = supabaseClient();
+  const router = useRouter();
   const [formData, setFormData] = useState(initialFormState);
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
   const [roles, setRoles] = useState<RoleMaster[]>([]);
@@ -48,55 +66,50 @@ export function SearchBooks() {
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
   // ［書籍検索（個別）］
   const handleBookSearch = async () => {
-    if (formData.role_cd && !formData.person_name) {
-      alert('役割を指定した場合、人（団体）名も入力してください。');
-      return null;
-    }
-    if (formData.booktype_cd && formData.limitPossess !== 'noLimit') {
-      alert('書籍種別と書籍保有の限定条件は同時に指定できません。');
-      return null;
-    }
-
-    const { data, error } = await supabaseClient.rpc('search_books_complex', {
-      p_isbn13: formData.isbn13?.replaceAll('-', '') || null,
-      p_title: formData.title || null,
-      p_title_search_type: formData.titleSearch,
-      p_publisher: formData.publisher || null,
-      p_publish_series: formData.publish_series || null,
-      p_role_cd: formData.role_cd || null,
-      p_person_name: formData.person_name || null,
-      p_person_search_type: formData.personSearch,
-      p_booktype_cd: formData.booktype_cd || null,
-      p_limit_comic: formData.limitComic,
-      p_limit_possess: formData.limitPossess,
-      p_display_order: formData.displayOrder
+    if (!SearchChk(formData)) return null;
+    const params = new URLSearchParams({
+      isbn: formData.isbn13?.replaceAll('-', '') || '',
+      title: formData.title || '',
+      title_search_type: formData.titleSearch || '',
+      publisher: formData.publisher || '',
+      publish_series: formData.publish_series || '',
+      role_cd: formData.role_cd || '',
+      person_name: formData.person_name || '',
+      person_search_type: formData.personSearch,
+      booktype_cd: formData.booktype_cd || '',
+      limit_comic: formData.limitComic || '',
+      limit_possess: formData.limitPossess || '',
+      display_order: formData.bookOrder || ''
     });
-    if (error) {
-      console.error(error);
-      alert(`データ取得失敗 error.code=${(error as any).code || 'unknown'}`);
-      return;
-    }
-    if (!data || data.length === 0) {
-      alert('該当データがありません');
-      return;
-    }
-    if (data.length > 50) {
-      const confirmed = confirm(
-        `該当データが${data.length}件あります。1000件まで表示可能ですが、時間がかかる場合があります。`
-      );
-      if (!confirmed) return;
-    }
-    // book_id をカンマ区切りで渡し、結果表示画面を開く
-    const ids = data.map((item: any) => item.book_id).join(',');
-    window.open(`/MyBooks/book_view?ids=${ids}`, '_blank');
+    router.push(`/MyBooks/book_view?${params.toString()}`);
   };
   // ［書籍検索（一覧）］
   const handleBookList = async () => {
-    null;
+    if (!SearchChk(formData)) return null;
+    const params = new URLSearchParams({
+      isbn: formData.isbn13?.replaceAll('-', '') || '',
+      title: formData.title || '',
+      title_search_type: formData.titleSearch || '',
+      publisher: formData.publisher || '',
+      publish_series: formData.publish_series || '',
+      role_cd: formData.role_cd || '',
+      person_name: formData.person_name || '',
+      person_search_type: formData.personSearch,
+      booktype_cd: formData.booktype_cd || '',
+      limit_comic: formData.limitComic || '',
+      limit_possess: formData.limitPossess || '',
+      display_order: formData.bookOrder || ''
+    });
+    router.push(`/MyBooks/book_list?${params.toString()}`);
   };
   // ［条件消去］
   const handleErase = () => {
-    setFormData(initialFormState);
+    setFormData({
+      ...initialFormState, // 全項目を初期化
+      read_st_from: formData.read_st_from, // 現在の値を上書き（保持）
+      read_st_to: formData.read_st_to,
+      noteLimitComic: formData.noteLimitComic
+    });
   };
   // ［ノート検索］
   const handleNoteSearch = () => {
@@ -148,11 +161,18 @@ export function SearchBooks() {
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
   };
+  // 関数を介する項目用（ISBN等）
+  const handleChangeF = (id: any, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [id]: value
+    }));
+  };
 
   // 役割マスターの展開・取得
   useEffect(() => {
     const fetchRoles = async () => {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('role_master')
         .select('*')
         .lte('role_cd', 299) // 分野を「共通」「著作・出版」に限定
@@ -175,7 +195,7 @@ export function SearchBooks() {
   // 書籍種別マスターの展開・取得
   useEffect(() => {
     const fetchBookTypes = async () => {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('booktype_master')
         .select('*')
         .order('booktype_cd', { ascending: true });
@@ -203,7 +223,7 @@ export function SearchBooks() {
           {/* 左側上段：書籍検索 */}
           <div className="border-solid border-1 rounded-lg m-3 p-2">
             <div className="text-xl font-bold text-blue-500 m-1">書籍検索</div>
-            <div className="mt-2 ml-2">
+            <div className="flex items-center mt-2 ml-2">
               <label htmlFor="isbn13" className="inline-block w-16">
                 ISBN-13
               </label>
@@ -211,11 +231,20 @@ export function SearchBooks() {
                 id="isbn13"
                 className={styleItems}
                 type="text"
-                size={17}
+                size={16}
                 maxLength={17}
-                value={formData.isbn13}
+                value={isbnHyphenate(formData.isbn13) ?? formData.isbn13 ?? ''}
                 onChange={handleChange}
+                onBlur={(e) => {
+                  const formatted = isbnHyphenate(formData.isbn13);
+                  if (formatted) {
+                    handleChangeF('isbn13', formatted);
+                  }
+                }}
               />
+              {formData.isbn13 && !isbnHyphenate(formData.isbn13) ? (
+                <div className="text-red-500 ml-1">?</div>
+              ) : null}{' '}
             </div>
             <div className="mt-2 ml-2">
               <label htmlFor="title" className="inline-block w-16">
@@ -232,7 +261,6 @@ export function SearchBooks() {
             </div>
             <div className="flex mt-1 ml-22">
               <div className="flex px-2">
-                （
                 <label className="block ml-1">
                   <input
                     type="radio"
@@ -242,7 +270,7 @@ export function SearchBooks() {
                     onChange={handleChangeR}
                     className="mr-1"
                   />
-                  先頭一致
+                  から始まる（先頭一致）
                 </label>
                 <label className="block ml-4">
                   <input
@@ -253,9 +281,8 @@ export function SearchBooks() {
                     onChange={handleChangeR}
                     className="mr-1"
                   />
-                  部分一致
+                  を含む（部分一致）
                 </label>
-                ）
               </div>
             </div>
             <div className="flex items-center mt-2 ml-2">
@@ -320,7 +347,6 @@ export function SearchBooks() {
                   onChange={handleChange}
                 />
                 <div className="flex mt-1 ml-32 px-2">
-                  （
                   <label className="block ml-1">
                     <input
                       type="radio"
@@ -330,7 +356,7 @@ export function SearchBooks() {
                       onChange={handleChangeR}
                       className="mr-1"
                     />
-                    先頭一致
+                    から始まる（先頭一致）
                   </label>
                   <label className="block ml-4">
                     <input
@@ -341,9 +367,8 @@ export function SearchBooks() {
                       onChange={handleChangeR}
                       className="mr-1"
                     />
-                    部分一致
+                    を含む（部分一致）
                   </label>
-                  ）
                 </div>
               </div>
             </div>
@@ -465,9 +490,9 @@ export function SearchBooks() {
                   <label className="block w-20">
                     <input
                       type="radio"
-                      name="displayOrder"
+                      name="bookOrder"
                       value="publish"
-                      checked={formData.displayOrder === 'publish'}
+                      checked={formData.bookOrder === 'publish'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -476,9 +501,9 @@ export function SearchBooks() {
                   <label className="block w-20">
                     <input
                       type="radio"
-                      name="displayOrder"
+                      name="bookOrder"
                       value="get"
-                      checked={formData.displayOrder === 'get'}
+                      checked={formData.bookOrder === 'get'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -551,9 +576,9 @@ export function SearchBooks() {
                   <label className="block w-20 ml-1">
                     <input
                       type="radio"
-                      name="limitComicNote"
+                      name="noteLimitComic"
                       value="comic"
-                      checked={formData.limitComicNote === 'comic'}
+                      checked={formData.noteLimitComic === 'comic'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -562,9 +587,9 @@ export function SearchBooks() {
                   <label className="block w-23">
                     <input
                       type="radio"
-                      name="limitComicNote"
+                      name="noteLimitComic"
                       value="nonComic"
-                      checked={formData.limitComicNote === 'nonComic'}
+                      checked={formData.noteLimitComic === 'nonComic'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -573,9 +598,9 @@ export function SearchBooks() {
                   <label className="block w-20">
                     <input
                       type="radio"
-                      name="limitComicNote"
+                      name="noteLimitComic"
                       value="noLimit"
-                      checked={formData.limitComicNote === 'noLimit'}
+                      checked={formData.noteLimitComic === 'noLimit'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -586,11 +611,40 @@ export function SearchBooks() {
             </div>
             <div className="mt-2 ml-4">
               <span className="text-lg text-white bg-blue-500">［ノート検索］</span>
-              ：上記条件でノートを一覧表示（個別のノートは該当書籍の閲覧画面から表示、登録）
+              ：上記条件でノートを一覧表示（個別のノートは当該書籍の閲覧画面から表示、編集）
             </div>
-            <div className="mt-2 ml-4">
-              <span className="text-lg text-white bg-blue-500">［未読一覧］</span>
-              ：読書ノートの存在しない（＝未読）書籍を一覧表示
+            <div className="flex items-center mt-2 ml-4">
+              <div className="flex">
+                <span className="text-lg text-white bg-blue-500">［未読一覧］</span>
+                ：読書ノートの存在しない書籍を一覧表示
+              </div>
+              <div className="flex ml-2">
+                <div className={`${styleItems} flex ml-1`}>
+                  <label className="block w-20">
+                    <input
+                      type="radio"
+                      name="noteOrder"
+                      value="publish"
+                      checked={formData.noteOrder === 'publish'}
+                      onChange={handleChangeR}
+                      className="mr-1"
+                    />
+                    刊行順
+                  </label>
+                  <label className="block w-20">
+                    <input
+                      type="radio"
+                      name="noteOrder"
+                      value="get"
+                      checked={formData.noteOrder === 'get'}
+                      onChange={handleChangeR}
+                      className="mr-1"
+                    />
+                    入手順
+                  </label>
+                </div>
+              </div>
+              （限定条件は上で指定）
             </div>
             <div className="flex mt-2 ml-2 p-2 justify-around">
               <CommonButton
@@ -623,7 +677,7 @@ export function SearchBooks() {
             label={
               <>
                 <Plus size={20} />
-                新規登録へ (<u>R</u>)
+                書籍新規登録(<u>R</u>)
               </>
             }
             variant="orange"
@@ -633,12 +687,7 @@ export function SearchBooks() {
             label={
               <>
                 <Toolbox size={20} />
-                <div>
-                  補助データ
-                  <br />
-                  メンテへ
-                </div>
-                (<u>M</u>)
+                データメンテ (<u>M</u>)
               </>
             }
             variant="orange"

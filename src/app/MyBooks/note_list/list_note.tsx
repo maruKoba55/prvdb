@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
@@ -19,6 +19,7 @@ type BookNote = {
 };
 
 export default function ListNote() {
+  const supabase = supabaseClient();
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const bookTitle = searchParams.get('title');
@@ -30,7 +31,7 @@ export default function ListNote() {
 
   // データ取得
   const fetchNotes = async () => {
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
       .from('book_note')
       .select('*')
       .eq('book_id', bookId)
@@ -62,7 +63,7 @@ export default function ListNote() {
         return;
       }
     }
-    const { error } = await supabaseClient
+    const { error } = await supabase
       .from('book_note')
       .update({
         read_st_date: editForm.read_st_date,
@@ -80,7 +81,7 @@ export default function ListNote() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('このノートを削除しますか？')) return;
-    const { error } = await supabaseClient.from('book_note').delete().eq('id', id);
+    const { error } = await supabase.from('book_note').delete().eq('id', id);
     if (!error) {
       fetchNotes(); // 削除成功後、一覧を再取得
     } else {

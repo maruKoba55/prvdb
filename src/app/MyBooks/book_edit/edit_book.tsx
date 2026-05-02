@@ -31,6 +31,7 @@ interface BookFormData {
 }
 
 export default function EditBook({ book }: { book: any }) {
+  const supabase = supabaseClient();
   const router = useRouter();
   const [formData, setFormData] = useState(book);
   const [deleteRoles, setDeleteRoles] = useState<number[]>([]);
@@ -67,7 +68,7 @@ export default function EditBook({ book }: { book: any }) {
     }
 
     // 書籍基本情報（Books）の更新
-    const { error: bookErr } = await supabaseClient
+    const { error: bookErr } = await supabase
       .from('books')
       .update({
         isbn10: formData.isbn10.replaceAll('-', ''),
@@ -98,7 +99,7 @@ export default function EditBook({ book }: { book: any }) {
 
     // 選択された役割情報（book_role）、保有情報（book_possess）の削除
     if (deleteRoles.length > 0) {
-      const { error: deleteRoleErr } = await supabaseClient.from('book_role').delete().in('id', deleteRoles);
+      const { error: deleteRoleErr } = await supabase.from('book_role').delete().in('id', deleteRoles);
       if (deleteRoleErr) {
         console.error(deleteRoleErr);
         alert(`削除失敗（役割情報） code=${deleteRoleErr.code} : ${deleteRoleErr.message}`);
@@ -106,7 +107,7 @@ export default function EditBook({ book }: { book: any }) {
       }
     }
     if (deletePossessions.length > 0) {
-      const { error: deletePossessErr } = await supabaseClient
+      const { error: deletePossessErr } = await supabase
         .from('book_possess')
         .delete()
         .in('book_possess_id', deletePossessions);
@@ -121,7 +122,7 @@ export default function EditBook({ book }: { book: any }) {
     for (const role of formData.book_role) {
       if (!deleteRoles.includes(role.id)) {
         if (role.person_name.trim()) {
-          const { error: updateRoleErr } = await supabaseClient
+          const { error: updateRoleErr } = await supabase
             .from('book_role')
             .update({
               role_order: role.role_order,
@@ -143,7 +144,7 @@ export default function EditBook({ book }: { book: any }) {
     for (const possess of formData.book_possess) {
       if (!deletePossessions.includes(possess.book_possess_id)) {
         if (possess.get_date) {
-          const { error: updatePossessErr } = await supabaseClient
+          const { error: updatePossessErr } = await supabase
             .from('book_possess')
             .update({
               get_date: possess.get_date || null,

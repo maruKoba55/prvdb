@@ -24,6 +24,7 @@ export function AddRoleModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     role_cd: '',
@@ -62,7 +63,7 @@ export function AddRoleModal({
       return;
     }
 
-    const { error } = await supabaseClient.from('book_role').insert([insertData]);
+    const { error } = await supabase.from('book_role').insert([insertData]);
     setLoading(false);
     if (!error) {
       onSuccess();
@@ -80,7 +81,7 @@ export function AddRoleModal({
   const [roles, setRoles] = useState<RoleMaster[]>([]);
   useEffect(() => {
     const fetchRoles = async () => {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('role_master')
         .select('*')
         .lte('role_cd', 299) // 分野を「共通」「著作・出版」に限定

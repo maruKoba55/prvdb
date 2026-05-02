@@ -1,16 +1,17 @@
-import { supabaseClient } from '@/lib/Client';
+import { supabaseServer } from '@/lib/Server';
 import EditBook from '@/app/MyBooks/book_edit/edit_book';
 
 // 呼出し元からのbook_id受け取りが2回走行し、1回目の値が2回目でundefinedとなる事象が発生。
 // 1回目の成功したデータのみ保持し、2回目以降のundefinedは無視する。
 export default async function EditBookPage(props: any) {
+  const supabase = await supabaseServer();
   const searchParams = await props?.searchParams;
   const bookId = searchParams?.book_id;
   if (!bookId) {
     return null;
   }
 
-  const { data: book, error } = await supabaseClient
+  const { data: book, error } = await supabase
     .from('books')
     .select(
       `

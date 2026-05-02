@@ -47,6 +47,7 @@ interface BookFormData {
 }
 
 export default function RegistBook() {
+  const supabase = supabaseClient();
   const router = useRouter();
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
@@ -159,7 +160,7 @@ export default function RegistBook() {
     };
 
     // Table 'books'にinsertし、その内容を取得
-    const { data, error } = await supabaseClient.from('books').insert([insertData]).select();
+    const { data, error } = await supabase.from('books').insert([insertData]).select();
     if (error) throw error;
     return data ? data[0] : null;
   };

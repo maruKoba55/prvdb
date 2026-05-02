@@ -24,6 +24,7 @@ export function AddNoteModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     read_st_date: todayLocal,
@@ -65,7 +66,7 @@ export function AddNoteModal({
       return;
     }
 
-    const { error } = await supabaseClient.from('book_note').insert([insertData]);
+    const { error } = await supabase.from('book_note').insert([insertData]);
     setLoading(false);
     if (!error) {
       onSuccess();
