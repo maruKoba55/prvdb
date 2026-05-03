@@ -6,6 +6,7 @@ const prefixJapan = '978';
 export function isbnHyphenate(str: string) {
   let a = str;
   if (!a) return null;
+  let isbn13_f = true; //引数のISBN10/13識別
 
   // 全角数字を半角に変換、数値のみを抽出
   a = a.replace(/[０-９]/g, (s) => {
@@ -15,18 +16,18 @@ export function isbnHyphenate(str: string) {
   a = a.replace(/\D/g, '');
   if (a.startsWith('4') && (a.length === 9 || a.length === 10)) {
     a = prefixJapan + a;
+    isbn13_f = false;
   } else if (a.startsWith(`${prefixJapan}4`) && a.length === 13) {
-    // チェックデジット算出へ
   } else {
     return null; // 日本のISBNではない
   }
 
-  // チェックデジット算出
+  // ISBN13のチェックデジット算出
   const step1 = parseInt(a[0]) + parseInt(a[2]) + parseInt(a[4]) + parseInt(a[6]) + parseInt(a[8]) + parseInt(a[10]);
   const step2 =
     (parseInt(a[1]) + parseInt(a[3]) + parseInt(a[5]) + parseInt(a[7]) + parseInt(a[9]) + parseInt(a[11])) * 3;
   const cd = (10 - Number(String(step1 + step2).slice(-1))) % 10;
-  if (String(cd) !== originalCd) return null;
+  if (isbn13_f && String(cd) !== originalCd) return null;
 
   // 13桁ISBNのハイフン挿入
   const pubCode2 = parseInt(a.substring(4, 6)); // 出版社記号判別用

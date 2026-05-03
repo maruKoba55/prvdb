@@ -8,24 +8,23 @@ import { X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { isbnHyphen10 } from '@/utils/isbnHyphen10';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
-import { bookSearchMax } from '@/app/constants';
 
 const screenMinW = 1060; //画面最小幅
 
-export default function ListBook({ bookIdList }: { bookIdList: number[] }) {
+export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; bookIdList: number[] }) {
   const supabase = supabaseClient();
   const router = useRouter();
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // 読み込み状態を管理
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
-  //［戻る］（検索条件指定画面へ）
-  const handleBack = () => {
-    router.back();
+  //［閉じる］
+  const handleClose = () => {
+    window.close();
   };
-  useHotkeys('alt+b', (event) => {
+  useHotkeys('alt+c', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleBack(); //
+    handleClose();
   });
 
   //初期表示件数確認
@@ -36,10 +35,8 @@ export default function ListBook({ bookIdList }: { bookIdList: number[] }) {
       router.replace('/'); //検索条件指定（/app/page.tsx）へ
       return; //router.back()では検索条件指定まで閉じてしまう
     }
-    if (bookIdList.length > 10) {
-      const confirmed = window.confirm(
-        `該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？（${bookSearchMax}件まで表示可能）`
-      );
+    if (bookIdList.length > 100) {
+      const confirmed = window.confirm(`該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？`);
       if (!confirmed) {
         router.replace('/');
         return;
@@ -94,21 +91,43 @@ export default function ListBook({ bookIdList }: { bookIdList: number[] }) {
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="space-y-4">
-      <div className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理（一覧）</div>
+      <div className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理（{titleAdd}一覧）</div>
       {books.map((book, i) => (
         <div key={book.book_id} className="flex border rounded shadow-sm ml-2 p-1 ">
-          <div className="flex text-white bg-gray-400 w-9 align-top justify-end p-1"> {i + 1}</div>
+          <div className="flex text-white bg-gray-400 min-w-9 align-top justify-end p-1"> {i + 1}</div>
           <div className="ml-2">
             <div>
               <span className="font-bold text-lg">『{book.title}』</span>
-              <span>（{isbnHyphenate(book.isbn13) ?? isbnHyphen10(book.isbn10) ?? 'ISBN未登録'}）</span>
+              {book.isbn13 || book.isbn10 ? (
+                <span className="ml-2">
+                  ISBN
+                  {book.isbn13 ? (
+                    <span className="ml-1">
+                      (13)
+                      {isbnHyphenate(book.isbn13) ?? book.isbn13}
+                    </span>
+                  ) : (
+                    ''
+                  )}
+                  {book.isbn10 ? (
+                    <span className="ml-2">
+                      (10)
+                      {isbnHyphen10(book.isbn10) ?? book.isbn10}
+                    </span>
+                  ) : (
+                    ''
+                  )}
+                </span>
+              ) : (
+                ''
+              )}
             </div>
             <div className="text-sm ml-2">
               {book.first_publish_year}年／{book.publisher}
               {book.publish_series ? `（${book.publish_series}）` : ''}
               {book.comic_f ? <span className=" text-green-500 ml-2">［コミック］</span> : ''}
             </div>
-            <div className="mt-2">
+            <div className="border-t mt-2">
               <ul className="grid grid-cols-5 gap-2 text-sm ml-2">
                 {book.book_role?.map((r: any) => (
                   <li key={r.id}>
@@ -117,7 +136,7 @@ export default function ListBook({ bookIdList }: { bookIdList: number[] }) {
                 ))}
               </ul>
             </div>
-            <div className="mt-2">
+            <div className="border-t mt-2">
               <ul className="grid grid-cols-3 gap-2 text-sm ml-2">
                 {book.book_possess?.map((p: any) => (
                   <li key={p.book_possess_id}>
@@ -136,11 +155,11 @@ export default function ListBook({ bookIdList }: { bookIdList: number[] }) {
             label={
               <>
                 <X size={20} />
-                戻る (<u>B</u>)
+                閉じる (<u>C</u>)
               </>
             }
             variant="outline"
-            onClick={handleBack}
+            onClick={handleClose}
           />
         </>
       </div>

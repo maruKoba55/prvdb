@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookCopy, BookSearch, CalendarSearch, Eraser, Plus, Search, TextSearch, Toolbox, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
+import { bookSearchMax } from '@/app/constants';
 
 const screenMinW = 1100; //画面最小幅
 
@@ -28,7 +28,7 @@ const initialFormState = {
   read_st_from: '',
   read_st_to: '',
   noteLimitComic: 'nonComic',
-  noteOrder: 'get'
+  unreadOrder: 'get'
 };
 
 type BookTypeMaster = {
@@ -43,25 +43,24 @@ type RoleMaster = {
   selectable: boolean;
 };
 
-// 書籍検索条件の組合せチェック
-const SearchChk = (formData: any) => {
-  if (formData.role_cd && !formData.person_name) {
-    alert('役割を指定した場合、人（団体）名も入力してください。');
-    return null;
-  }
-  if (formData.booktype_cd && formData.limitPossess !== 'noLimit') {
-    alert('書籍種別と書籍保有の限定条件は同時に指定できません。');
-    return null;
-  }
-  return true;
-};
-
 export function SearchBooks() {
   const supabase = supabaseClient();
-  const router = useRouter();
   const [formData, setFormData] = useState(initialFormState);
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
   const [roles, setRoles] = useState<RoleMaster[]>([]);
+
+  // 書籍検索条件の組合せチェック
+  const SearchChk = (formData: any) => {
+    if (formData.role_cd && !formData.person_name) {
+      alert('役割を指定した場合、人（団体）名も入力してください。');
+      return null;
+    }
+    if (formData.booktype_cd && formData.limitPossess !== 'noLimit') {
+      alert('書籍種別と書籍保有の限定条件は同時に指定できません。');
+      return null;
+    }
+    return true;
+  };
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
   // ［書籍検索（個別）］
@@ -81,7 +80,7 @@ export function SearchBooks() {
       limit_possess: formData.limitPossess || '',
       display_order: formData.bookOrder || ''
     });
-    router.push(`/MyBooks/book_view?${params.toString()}`);
+    window.open(`/MyBooks/view_book?${params.toString()}`, '_blank', 'width=1110,height=880');
   };
   // ［書籍検索（一覧）］
   const handleBookList = async () => {
@@ -100,7 +99,7 @@ export function SearchBooks() {
       limit_possess: formData.limitPossess || '',
       display_order: formData.bookOrder || ''
     });
-    router.push(`/MyBooks/book_list?${params.toString()}`);
+    window.open(`/MyBooks/list_book?${params.toString()}`, '_blank', 'width=1080,height=600');
   };
   // ［条件消去］
   const handleErase = () => {
@@ -108,20 +107,30 @@ export function SearchBooks() {
       ...initialFormState, // 全項目を初期化
       read_st_from: formData.read_st_from, // 現在の値を上書き（保持）
       read_st_to: formData.read_st_to,
-      noteLimitComic: formData.noteLimitComic
+      noteLimitComic: formData.noteLimitComic,
+      unreadOrder: formData.unreadOrder
     });
   };
   // ［ノート検索］
   const handleNoteSearch = () => {
-    null;
+    const params = new URLSearchParams({
+      read_st_from: formData.read_st_from || '0001-01-01',
+      read_st_to: formData.read_st_to || '9999-12-31',
+      noteLimitComic: formData.noteLimitComic || ''
+    });
+    window.open(`/MyBooks/list_note_range?${params.toString()}`, '_blank', 'width=840,height=600');
   };
   // ［未読一覧］
-  const handleNonNote = () => {
-    null;
+  const handleUnRead = () => {
+    const params = new URLSearchParams({
+      noteLimit_comic: formData.noteLimitComic || '',
+      unread_order: formData.unreadOrder || ''
+    });
+    window.open(`/MyBooks/list_book_unread?${params.toString()}`, '_blank', 'width=1080,height=600');
   };
   // ［書籍新規登録へ］
   const handleRegist = () => {
-    window.open(`/MyBooks/book_regist?`, '_blank');
+    window.open(`/MyBooks/regist_book?`, '_blank', 'width=1120,height=620');
   };
   useHotkeys('alt+r', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
@@ -441,9 +450,8 @@ export function SearchBooks() {
                       </label>
                     </div>
                   </div>
-                  <hr />
                   <div>
-                    <div className="flex mt-1 ml-1">
+                    <div className="flex border-t mt-1 ml-1">
                       <label htmlFor="limitPossess" className="inline-block w-18 mr-3">
                         書籍保有
                       </label>
@@ -609,23 +617,23 @@ export function SearchBooks() {
                 </div>
               </div>
             </div>
-            <div className="mt-2 ml-4">
+            <div className="mt-2 ml-3">
               <span className="text-lg text-white bg-blue-500">［ノート検索］</span>
               ：上記条件でノートを一覧表示（個別のノートは当該書籍の閲覧画面から表示、編集）
             </div>
-            <div className="flex items-center mt-2 ml-4">
-              <div className="flex">
+            <div className="flex items-center mt-1 ml-3">
+              <div className="flex items-center">
                 <span className="text-lg text-white bg-blue-500">［未読一覧］</span>
-                ：読書ノートの存在しない書籍を一覧表示
+                ：ノート未存在の（保有）書籍を一覧表示
               </div>
               <div className="flex ml-2">
                 <div className={`${styleItems} flex ml-1`}>
                   <label className="block w-20">
                     <input
                       type="radio"
-                      name="noteOrder"
+                      name="unreadOrder"
                       value="publish"
-                      checked={formData.noteOrder === 'publish'}
+                      checked={formData.unreadOrder === 'publish'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -634,9 +642,9 @@ export function SearchBooks() {
                   <label className="block w-20">
                     <input
                       type="radio"
-                      name="noteOrder"
+                      name="unreadOrder"
                       value="get"
-                      checked={formData.noteOrder === 'get'}
+                      checked={formData.unreadOrder === 'get'}
                       onChange={handleChangeR}
                       className="mr-1"
                     />
@@ -644,7 +652,7 @@ export function SearchBooks() {
                   </label>
                 </div>
               </div>
-              （限定条件は上で指定）
+              （コミックの限定は上で指定）
             </div>
             <div className="flex mt-2 ml-2 p-2 justify-around">
               <CommonButton
@@ -665,35 +673,51 @@ export function SearchBooks() {
                   </>
                 }
                 variant="blue"
-                onClick={handleNonNote}
+                onClick={handleUnRead}
               />
             </div>
           </div>
         </div>
 
         {/* 右側エリア */}
-        <div className="flex flex-col w-1/5 border-solid border-2 rounded-lg justify-around my-3 ml-1 p-2">
-          <CommonButton
-            label={
-              <>
-                <Plus size={20} />
-                書籍新規登録(<u>R</u>)
-              </>
-            }
-            variant="orange"
-            onClick={handleRegist}
-          />
-          <CommonButton
-            label={
-              <>
-                <Toolbox size={20} />
-                データメンテ (<u>M</u>)
-              </>
-            }
-            variant="orange"
-            onClick={handleAssistMaint}
-            disabled={true}
-          />
+        <div className="flex flex-col w-1/5 flex-1">
+          {/* 右側上段：検索件数制限 */}
+          <div className="border-solid border-2 rounded-lg mt-3 mr-1 p-2">
+            <div>
+              {bookSearchMax ? (
+                <div>
+                  <div className="font-bold text-center text-red-500">データ検索件数制限中！</div>
+                  <div className="text-center">最大{bookSearchMax}件</div>
+                </div>
+              ) : (
+                <div className="font-bold text-center">データ検索件数 制限なし</div>
+              )}
+            </div>
+          </div>
+          {/* 右側下段：ボタンエリア */}
+          <div className="flex flex-col flex-1 border-solid border-2 rounded-lg justify-around my-3 mr-1 p-1">
+            <CommonButton
+              label={
+                <>
+                  <Plus size={20} />
+                  書籍新規登録(<u>R</u>)
+                </>
+              }
+              variant="orange"
+              onClick={handleRegist}
+            />
+            <CommonButton
+              label={
+                <>
+                  <Toolbox size={20} />
+                  データメンテ (<u>M</u>)
+                </>
+              }
+              variant="orange"
+              onClick={handleAssistMaint}
+              disabled={true}
+            />
+            {/* window.close()は window.openで開いたウィンドウにしか効かないため、ボタンを見せない
           <CommonButton
             label={
               <>
@@ -703,7 +727,8 @@ export function SearchBooks() {
             }
             variant="outline"
             onClick={handleClose}
-          />
+          />  */}
+          </div>
         </div>
       </div>
     </div>

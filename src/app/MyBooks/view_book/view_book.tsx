@@ -4,10 +4,9 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { ArrowLeft, ArrowRight, Notebook, Pencil, RefreshCw, Trash2, X } from 'lucide-react';
+import { Notebook, Pencil, RefreshCw, StepBack, StepForward, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { BookForm } from '@/components/BookForm';
-import { bookSearchMax } from '@/app/constants';
 
 export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const supabase = supabaseClient();
@@ -67,7 +66,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       book_id: book_id?.toString() || '',
       title: title || ''
     });
-    window.open(`/MyBooks/note_list?${params.toString()}`, '_blank', 'width=820,height=600');
+    window.open(`/MyBooks/list_note_book?${params.toString()}`, '_blank', 'width=840,height=600');
   };
   //［編集］
   const handleEdit = () => {
@@ -75,7 +74,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     const params = new URLSearchParams({
       book_id: book_id?.toString() || ''
     });
-    window.open(`/MyBooks/book_edit?${params.toString()}`, '_blank');
+    window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
   };
   //［削除］
   const handleDelete = async () => {
@@ -112,13 +111,13 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
     handleRefresh();
   });
-  //［戻る］（検索条件指定画面へ）
-  const handleBack = () => {
-    router.back();
+  // ［閉じる］
+  const handleClose = () => {
+    window.close();
   };
-  useHotkeys('alt+b', (event) => {
+  useHotkeys('alt+c', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
-    handleBack(); //
+    handleClose();
   });
 
   // indexが変わったらURLを同期させる関数
@@ -144,10 +143,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       router.replace('/'); //検索条件指定（/app/page.tsx）へ
       return; //router.back()では検索条件指定まで閉じてしまう
     }
-    if (bookIdList.length > 10) {
-      const confirmed = window.confirm(
-        `該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？（${bookSearchMax}件まで表示可能）`
-      );
+    if (bookIdList.length > 50) {
+      const confirmed = window.confirm(`該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？`);
       if (!confirmed) {
         router.replace('/');
         return;
@@ -253,7 +250,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
           <CommonButton
             label={
               <>
-                <ArrowLeft size={20} />前 (<u>P</u>)
+                <StepBack size={20} />前 (<u>P</u>)
               </>
             }
             variant="blue"
@@ -305,7 +302,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
           <CommonButton
             label={
               <>
-                次 <ArrowRight size={20} /> (<u>N</u>)
+                次 <StepForward size={20} /> (<u>N</u>)
               </>
             }
             variant="blue"
@@ -316,11 +313,11 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
             label={
               <>
                 <X size={20} />
-                戻る (<u>B</u>)
+                閉じる (<u>C</u>)
               </>
             }
             variant="outline"
-            onClick={handleBack}
+            onClick={handleClose}
           />
         </>
       }

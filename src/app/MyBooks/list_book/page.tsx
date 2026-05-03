@@ -1,12 +1,12 @@
 import { supabaseServer } from '@/lib/Server';
-import ViewBook from '@/app/MyBooks/book_view/view_book';
+import ListBook from '@/components/list_book';
 import { bookSearchMax } from '@/app/constants';
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function ViewBookPage({ searchParams }: PageProps) {
+export default async function ListBookPage({ searchParams }: PageProps) {
   const supabase = await supabaseServer();
   const params = await searchParams;
 
@@ -23,7 +23,7 @@ export default async function ViewBookPage({ searchParams }: PageProps) {
     p_limit_comic: (params.limit_comic as string) || 'noLimit',
     p_limit_possess: (params.limit_possess as string) || 'noLimit',
     p_display_order: (params.display_order as string) || 'publish',
-    p_select_limit: bookSearchMax || 9999
+    p_select_limit: (bookSearchMax as number) || 9999
   });
   if (error) {
     console.error(error);
@@ -38,7 +38,7 @@ export default async function ViewBookPage({ searchParams }: PageProps) {
 
   return (
     <div>
-      <ViewBook bookIdList={bookIdList} />
+      <ListBook titleAdd="" bookIdList={bookIdList} />
     </div>
   );
 }

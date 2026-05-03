@@ -59,8 +59,7 @@ export default function EditBook({ book }: { book: any }) {
       alert('初版年を確認してください。');
       return null;
     }
-    console.log(formData.isbn10, formData.isbn13);
-    if (formData.isbn10 && !formData.isbn13) {
+    if (formData.isbn10 && !formData.isbn13 && isbnHyphenate(formData.isbn10)) {
       if (confirm('ISBN-10を変換してISBN-13としますか？')) {
         formData.isbn13 = isbnHyphenate(formData.isbn10);
         router.refresh();
@@ -71,8 +70,8 @@ export default function EditBook({ book }: { book: any }) {
     const { error: bookErr } = await supabase
       .from('books')
       .update({
-        isbn10: formData.isbn10.replaceAll('-', ''),
-        isbn13: formData.isbn13.replaceAll('-', ''),
+        isbn10: formData.isbn10 ? formData.isbn10.replaceAll('-', '') : '',
+        isbn13: formData.isbn13 ? formData.isbn13.replaceAll('-', '') : '',
         c_cd: formData.c_cd,
         ndc: formData.ndc,
         title: formData.title,

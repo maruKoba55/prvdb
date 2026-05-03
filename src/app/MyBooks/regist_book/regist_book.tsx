@@ -136,7 +136,7 @@ export default function RegistBook() {
       return null;
     }
 
-    if (formData.isbn10 && !formData.isbn13.trim()) {
+    if (formData.isbn10 && !formData.isbn13 && isbnHyphenate(formData.isbn10)) {
       if (confirm('ISBN-10を変換してISBN-13としますか？')) {
         formData.isbn13 = isbnHyphenate(formData.isbn10) ?? '';
         router.refresh();

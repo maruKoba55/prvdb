@@ -1,12 +1,12 @@
 import { supabaseServer } from '@/lib/Server';
-import ListBook from '@/app/MyBooks/book_list/list_book';
+import ViewBook from '@/app/MyBooks/view_book/view_book';
 import { bookSearchMax } from '@/app/constants';
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function ListBookPage({ searchParams }: PageProps) {
+export default async function ViewBookPage({ searchParams }: PageProps) {
   const supabase = await supabaseServer();
   const params = await searchParams;
 
@@ -38,7 +38,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
 
   return (
     <div>
-      <ListBook bookIdList={bookIdList} />
+      <ViewBook bookIdList={bookIdList} />
     </div>
   );
 }
