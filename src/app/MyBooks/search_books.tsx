@@ -63,7 +63,7 @@ export function SearchBooks() {
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
   // ［書籍検索（個別）］
   const handleBookSearch = async () => {
-    if (!SearchChk(formData)) return null;
+    if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title || '',
@@ -82,7 +82,7 @@ export function SearchBooks() {
   };
   // ［書籍検索（一覧）］
   const handleBookList = async () => {
-    if (!SearchChk(formData)) return null;
+    if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title || '',
@@ -110,7 +110,7 @@ export function SearchBooks() {
   // ［ノート検索］
   const handleNoteSearch = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
-    if (!SearchChk(formData)) return null;
+    if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       read_st_from: formData.read_st_from || '0001-01-01',
       read_st_to: formData.read_st_to || '9999-12-31',
@@ -130,7 +130,7 @@ export function SearchBooks() {
   // ［未読一覧］
   const handleUnRead = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
-    if (!SearchChk(formData)) return null;
+    if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title || '',
