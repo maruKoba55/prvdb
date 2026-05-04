@@ -11,7 +11,17 @@ import { isbnHyphenate } from '@/utils/isbnHyphenate';
 
 const screenMinW = 1060; //画面最小幅
 
-export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; bookIdList: number[] }) {
+export default function ListBook({
+  titleAdd,
+  booktype_cd,
+  limit_comic,
+  bookIdList
+}: {
+  titleAdd: string;
+  booktype_cd: string;
+  limit_comic: string;
+  bookIdList: number[];
+}) {
   const supabase = supabaseClient();
   const router = useRouter();
   const [books, setBooks] = useState<any[]>([]);
@@ -32,17 +42,58 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
   useEffect(() => {
     if (bookIdList.length === 0) {
       alert('該当データがありません');
-      router.replace('/'); //検索条件指定（/app/page.tsx）へ
-      return; //router.back()では検索条件指定まで閉じてしまう
+      window.close();
+      return;
     }
     if (bookIdList.length > 100) {
       const confirmed = window.confirm(`該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？`);
       if (!confirmed) {
-        router.replace('/');
+        window.close();
         return;
       }
     }
   }, []); // 第2引数を空配列にすることで「初回のみ」実行
+
+  // 書籍種別が指定された時、種別名を取得
+  const [getBookType, setGetBookType] = useState(null);
+  useEffect(() => {
+    const fetchBookType = async () => {
+      if (booktype_cd) {
+        const { data, error } = await supabase
+          .from('booktype_master')
+          .select('booktype')
+          .eq('booktype_cd', booktype_cd)
+          .single();
+        if (!error && data) {
+          setGetBookType(data.booktype);
+        } else {
+          console.error(error);
+        }
+      }
+    };
+    fetchBookType();
+  }, []);
+
+  //一覧タイトル追加文字
+  let titleAdd2 = null;
+  if (booktype_cd) {
+    titleAdd2 = getBookType;
+  }
+  if (limit_comic !== 'noLimit') {
+    if (limit_comic === 'comic') {
+      if (titleAdd2) {
+        titleAdd2 = titleAdd2 + '／コミック';
+      } else {
+        titleAdd2 = 'コミック';
+      }
+    } else if (limit_comic === 'nonComic') {
+      if (titleAdd2) {
+        titleAdd2 = titleAdd2 + '／非コミック';
+      } else {
+        titleAdd2 = '非コミック';
+      }
+    }
+  }
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -91,7 +142,10 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="space-y-4">
-      <div className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理（{titleAdd}一覧）</div>
+      <div className="text-center bg-cyan-500">
+        <span className="text-3xl font-bold underline">書籍管理（{titleAdd}一覧）</span>
+        {titleAdd2 ? <span className="text-lg font-bold ml-2">（{titleAdd2}）</span> : ''}
+      </div>
       {books.map((book, i) => (
         <div key={book.book_id} className="flex border rounded shadow-sm ml-2 p-1 ">
           <div className="flex text-white bg-gray-400 min-w-9 align-top justify-end p-1"> {i + 1}</div>

@@ -26,9 +26,7 @@ const initialFormState = {
   limitPossess: 'noLimit',
   bookOrder: 'publish',
   read_st_from: '',
-  read_st_to: '',
-  noteLimitComic: 'nonComic',
-  unreadOrder: 'get'
+  read_st_to: ''
 };
 
 type BookTypeMaster = {
@@ -67,7 +65,7 @@ export function SearchBooks() {
   const handleBookSearch = async () => {
     if (!SearchChk(formData)) return null;
     const params = new URLSearchParams({
-      isbn: formData.isbn13?.replaceAll('-', '') || '',
+      isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title || '',
       title_search_type: formData.titleSearch || '',
       publisher: formData.publisher || '',
@@ -86,7 +84,7 @@ export function SearchBooks() {
   const handleBookList = async () => {
     if (!SearchChk(formData)) return null;
     const params = new URLSearchParams({
-      isbn: formData.isbn13?.replaceAll('-', '') || '',
+      isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title || '',
       title_search_type: formData.titleSearch || '',
       publisher: formData.publisher || '',
@@ -106,25 +104,45 @@ export function SearchBooks() {
     setFormData({
       ...initialFormState, // 全項目を初期化
       read_st_from: formData.read_st_from, // 現在の値を上書き（保持）
-      read_st_to: formData.read_st_to,
-      noteLimitComic: formData.noteLimitComic,
-      unreadOrder: formData.unreadOrder
+      read_st_to: formData.read_st_to
     });
   };
   // ［ノート検索］
   const handleNoteSearch = () => {
+    formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
+    if (!SearchChk(formData)) return null;
     const params = new URLSearchParams({
       read_st_from: formData.read_st_from || '0001-01-01',
       read_st_to: formData.read_st_to || '9999-12-31',
-      noteLimitComic: formData.noteLimitComic || ''
+      isbn13: formData.isbn13?.replaceAll('-', '') || '',
+      title: formData.title || '',
+      title_search_type: formData.titleSearch || '',
+      publisher: formData.publisher || '',
+      publish_series: formData.publish_series || '',
+      role_cd: formData.role_cd || '',
+      person_name: formData.person_name || '',
+      person_search_type: formData.personSearch,
+      booktype_cd: formData.booktype_cd || '',
+      limit_comic: formData.limitComic || ''
     });
     window.open(`/MyBooks/list_note_range?${params.toString()}`, '_blank', 'width=840,height=600');
   };
   // ［未読一覧］
   const handleUnRead = () => {
+    formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
+    if (!SearchChk(formData)) return null;
     const params = new URLSearchParams({
-      noteLimit_comic: formData.noteLimitComic || '',
-      unread_order: formData.unreadOrder || ''
+      isbn13: formData.isbn13?.replaceAll('-', '') || '',
+      title: formData.title || '',
+      title_search_type: formData.titleSearch || '',
+      publisher: formData.publisher || '',
+      publish_series: formData.publish_series || '',
+      role_cd: formData.role_cd || '',
+      person_name: formData.person_name || '',
+      person_search_type: formData.personSearch,
+      booktype_cd: formData.booktype_cd || '',
+      limit_comic: formData.limitComic || '',
+      display_order: formData.bookOrder || ''
     });
     window.open(`/MyBooks/list_book_unread?${params.toString()}`, '_blank', 'width=1080,height=600');
   };
@@ -306,7 +324,7 @@ export function SearchBooks() {
                 value={formData.publisher}
                 onChange={handleChange}
               />
-              <div className="ml-2">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>
+              <span className="ml-2">※不詳の場合はカッコで括り、（不明）（自費出版）等</span>
             </div>
             <div className="mt-2 ml-22">
               <div>
@@ -319,6 +337,7 @@ export function SearchBooks() {
                   value={formData.publish_series}
                   onChange={handleChange}
                 />
+                <span className="ml-2">から始まる（先頭一致）</span>
               </div>
             </div>
             <div className="flex mt-2 ml-2">
@@ -556,110 +575,47 @@ export function SearchBooks() {
 
           {/* 左側下段：読書ノート検索 */}
           <div className="border-solid border-1 rounded-lg m-3 p-2">
-            <div className="text-xl font-bold text-blue-500 m-1">読書ノート検索</div>
-            <div className="flex mt-2 ml-2">
-              <div className="flex items-center">
-                <label htmlFor="read_st_date" className="inline-block w-16">
-                  読書開始
-                </label>
-                <input
-                  id="read_st_from"
-                  className={styleItems}
-                  type="date"
-                  value={formData.read_st_from}
-                  onChange={handleChange}
-                />
-                <div className="flex ml-1 mr-1">～</div>
-                <input
-                  id="read_st_to"
-                  className={styleItems}
-                  type="date"
-                  min={formData.read_st_from || ''}
-                  value={formData.read_st_to}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className={`${styleItems} flex items-center ml-6`}>
-                <div className="flex">
-                  <label className="block w-20 ml-1">
-                    <input
-                      type="radio"
-                      name="noteLimitComic"
-                      value="comic"
-                      checked={formData.noteLimitComic === 'comic'}
-                      onChange={handleChangeR}
-                      className="mr-1"
-                    />
-                    コミック
-                  </label>
-                  <label className="block w-23">
-                    <input
-                      type="radio"
-                      name="noteLimitComic"
-                      value="nonComic"
-                      checked={formData.noteLimitComic === 'nonComic'}
-                      onChange={handleChangeR}
-                      className="mr-1"
-                    />
-                    非コミック
-                  </label>
-                  <label className="block w-20">
-                    <input
-                      type="radio"
-                      name="noteLimitComic"
-                      value="noLimit"
-                      checked={formData.noteLimitComic === 'noLimit'}
-                      onChange={handleChangeR}
-                      className="mr-1"
-                    />
-                    無限定
-                  </label>
-                </div>
-              </div>
+            <div className="m-1">
+              <span className="text-xl font-bold text-blue-500">読書ノート検索</span>
+              <span className="ml-2">※ノートの登録・編集は当該書籍の閲覧画面から</span>
             </div>
             <div className="mt-2 ml-3">
-              <span className="text-lg text-white bg-blue-500">［ノート検索］</span>
-              ：上記条件でノートを一覧表示（個別のノートは当該書籍の閲覧画面から表示、編集）
+              <span className="text-lg text-white bg-blue-500">［ノート一覧］</span>
+              ：書籍検索条件（書籍保有の限定と表示順を除く）＋読書開始日でノートを一覧表示
+            </div>
+            <div className="flex items-center mt-2 ml-36">
+              <label htmlFor="read_st_date" className="inline-block w-16">
+                読書開始
+              </label>
+              <input
+                id="read_st_from"
+                className={styleItems}
+                type="date"
+                value={formData.read_st_from}
+                onChange={handleChange}
+              />
+              <div className="flex ml-1 mr-1">～</div>
+              <input
+                id="read_st_to"
+                className={styleItems}
+                type="date"
+                min={formData.read_st_from || ''}
+                value={formData.read_st_to}
+                onChange={handleChange}
+              />
             </div>
             <div className="flex items-center mt-1 ml-3">
               <div className="flex items-center">
                 <span className="text-lg text-white bg-blue-500">［未読一覧］</span>
-                ：ノート未存在の（保有）書籍を一覧表示
+                ：書籍検索条件（書籍保有の限定を除く）でノート未存在の書籍を一覧表示
               </div>
-              <div className="flex ml-2">
-                <div className={`${styleItems} flex ml-1`}>
-                  <label className="block w-20">
-                    <input
-                      type="radio"
-                      name="unreadOrder"
-                      value="publish"
-                      checked={formData.unreadOrder === 'publish'}
-                      onChange={handleChangeR}
-                      className="mr-1"
-                    />
-                    刊行順
-                  </label>
-                  <label className="block w-20">
-                    <input
-                      type="radio"
-                      name="unreadOrder"
-                      value="get"
-                      checked={formData.unreadOrder === 'get'}
-                      onChange={handleChangeR}
-                      className="mr-1"
-                    />
-                    入手順
-                  </label>
-                </div>
-              </div>
-              （コミックの限定は上で指定）
             </div>
             <div className="flex mt-2 ml-2 p-2 justify-around">
               <CommonButton
                 label={
                   <>
                     <CalendarSearch size={20} />
-                    ノート検索
+                    ノート一覧
                   </>
                 }
                 variant="blue"
@@ -717,7 +673,7 @@ export function SearchBooks() {
               onClick={handleAssistMaint}
               disabled={true}
             />
-            {/* window.close()は window.openで開いたウィンドウにしか効かないため、ボタンを見せない
+            {/* window.close()は window.openで開いたウィンドウ以外に無効のため、ボタンを見せない
           <CommonButton
             label={
               <>

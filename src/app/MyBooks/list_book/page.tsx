@@ -11,7 +11,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const { data: idListData, error } = await supabase.rpc('search_books_complex', {
-    p_isbn13: (params.isbn as string) || null,
+    p_isbn13: (params.isbn13 as string) || null,
     p_title: (params.title as string) || null,
     p_title_search_type: (params.title_search_type as string) || 'top',
     p_publisher: (params.publisher as string) || null,
@@ -36,9 +36,15 @@ export default async function ListBookPage({ searchParams }: PageProps) {
   // book_id 配列 (例: [10001, 10005, ...])
   const bookIdList = idListData?.map((item: any) => item.book_id) || [];
 
+  // build時のエラー避けのため、booktype_cd、limit_comicが undefined、string[]となる可能性を排除
   return (
     <div>
-      <ListBook titleAdd="" bookIdList={bookIdList} />
+      <ListBook
+        titleAdd=""
+        booktype_cd={Array.isArray(params.booktype_cd) ? params.booktype_cd[0] : (params.booktype_cd ?? '')}
+        limit_comic={Array.isArray(params.limit_comic) ? params.limit_comic[0] : (params.limit_comic ?? '')}
+        bookIdList={bookIdList}
+      />
     </div>
   );
 }

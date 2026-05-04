@@ -1,0 +1,216 @@
+DROP FUNCTION IF EXISTS search_books_complex;
+※引数を変更したために同名FUNCTIONが複数存在する場合は、引数のリストを付けてそれぞれDROPする。
+  （例）DROP FUNCTION IF EXISTS search_books_complex(text, text, text, text, text, text, text, text, text, text, text, text);
+
+
+■書籍閲覧、一覧用
+DROP FUNCTION IF EXISTS search_books_complex;
+CREATE OR REPLACE FUNCTION search_books_complex(
+  p_isbn13 TEXT DEFAULT NULL,
+  p_title TEXT DEFAULT NULL,
+  p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_publisher TEXT DEFAULT NULL,
+  p_publish_series TEXT DEFAULT NULL,
+  p_role_cd TEXT DEFAULT NULL,
+  p_person_name TEXT DEFAULT NULL,
+  p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_booktype_cd TEXT DEFAULT NULL,
+  p_limit_comic TEXT DEFAULT 'noLimit',    -- 'comic', 'nonComic', 'noLimit'
+  p_limit_possess TEXT DEFAULT 'noLimit',   -- 'possess', 'nonPossess', 'noLimit'
+  p_display_order TEXT DEFAULT 'publish',   -- 'publish', 'get'
+  p_select_limit INT DEFAULT 9999  -- 0:no limit, 1~:LIMIT
+)
+RETURNS TABLE (
+  book_id INTEGER,
+  isbn13 VARCHAR(13),
+  title TEXT,
+  publisher TEXT,
+  publish_series TEXT,
+  first_publish_year INTEGER,
+  comic_f BOOLEAN,
+  roles JSONB,
+  possessions JSONB
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    b.book_id, b.isbn13, b.title, b.publisher, b.publish_series, b.first_publish_year, b.comic_f,
+    COALESCE(jsonb_agg(DISTINCT jsonb_build_object('role_cd', br.role_cd, 'person_name', br.person_name)) FILTER (WHERE br.id IS NOT NULL), '[]') as roles,
+    COALESCE(jsonb_agg(DISTINCT jsonb_build_object('booktype_cd', bp.booktype_cd, 'get_date', bp.get_date, 'dispose_date', bp.dispose_date)) FILTER (WHERE bp.book_possess_id IS NOT NULL), '[]') as possessions
+  FROM books b
+  LEFT JOIN book_role br ON b.book_id = br.book_id
+  LEFT JOIN book_possess bp ON b.book_id = bp.book_id
+  WHERE 
+    -- 基本フィルタ
+    (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_publisher IS NULL OR b.publisher = p_publisher)
+    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
+    -- タイトル検索 (前方一致 or 部分一致)
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
+    -- コミックによる限定
+    AND (CASE 
+          WHEN p_limit_comic = 'comic' THEN b.comic_f = true 
+          WHEN p_limit_comic = 'nonComic' THEN b.comic_f = false 
+          ELSE true END)
+    -- 役割 (存在する場合のみ絞り込む = !inner相当)
+    AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+    -- 保有状況
+    AND (p_booktype_cd IS NULL OR bp.booktype_cd = p_booktype_cd)
+    AND (CASE 
+          WHEN p_limit_possess = 'possess' THEN 
+            -- 「未処分」が1つ以上存在する
+            EXISTS (SELECT 1 FROM book_possess bp2 WHERE bp2.book_id = b.book_id AND bp2.dispose_date IS NULL)
+          WHEN p_limit_possess = 'nonPossess' THEN 
+            -- 「未処分」が1つも存在しない (未所持 or 全処分)
+            NOT EXISTS (SELECT 1 FROM book_possess bp2 WHERE bp2.book_id = b.book_id AND bp2.dispose_date IS NULL)
+          ELSE true END)
+  GROUP BY b.book_id
+  ORDER BY 
+    CASE WHEN p_display_order = 'publish' THEN b.first_publish_year ELSE NULL END ASC,
+    CASE WHEN p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC,
+    b.publisher ASC, 
+    b.isbn13 ASC
+LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
+END;
+$$;
+
+
+■未読一覧用
+DROP FUNCTION IF EXISTS search_books_unread;
+CREATE OR REPLACE FUNCTION search_books_unread(
+  p_isbn13 TEXT DEFAULT NULL,
+  p_title TEXT DEFAULT NULL,
+  p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_publisher TEXT DEFAULT NULL,
+  p_publish_series TEXT DEFAULT NULL,
+  p_role_cd TEXT DEFAULT NULL,
+  p_person_name TEXT DEFAULT NULL,
+  p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_booktype_cd TEXT DEFAULT NULL,
+  p_limit_comic TEXT DEFAULT 'noLimit',    -- 'comic', 'nonComic', 'noLimit'
+  p_display_order TEXT DEFAULT 'publish',   -- 'publish', 'get'
+  p_select_limit INT DEFAULT 9999  -- 0:no limit, 1~:LIMIT
+)
+RETURNS TABLE (
+  book_id INTEGER
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    b.book_id
+  FROM books b
+  LEFT JOIN book_note bn ON b.book_id = bn.book_id
+  LEFT JOIN book_role br ON b.book_id = br.book_id
+  -- 保有履歴あり
+  JOIN book_possess bp ON b.book_id = bp.book_id
+  -- ノート未存在
+  WHERE bn.id IS NULL
+    -- 単純フィルタ
+    AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_publisher IS NULL OR b.publisher = p_publisher)
+    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
+    -- タイトル検索 (前方一致 or 部分一致)
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
+    -- コミックによる限定
+    AND (CASE 
+          WHEN p_limit_comic = 'comic' THEN b.comic_f = true 
+          WHEN p_limit_comic = 'nonComic' THEN b.comic_f = false 
+          ELSE true END)
+    -- 役割 (存在する場合のみ絞り込む = !inner相当)
+    AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+    -- 保有状況
+    AND (p_booktype_cd IS NULL OR bp.booktype_cd = p_booktype_cd)
+  GROUP BY b.book_id
+  ORDER BY 
+    CASE WHEN p_display_order = 'publish' THEN b.first_publish_year ELSE NULL END ASC,
+    CASE WHEN p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC,
+    b.publisher ASC, 
+    b.isbn13 ASC
+LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
+END;
+$$;
+
+
+■ノート一覧（範囲指定）用
+DROP FUNCTION IF EXISTS search_note_range;
+CREATE OR REPLACE FUNCTION search_note_range(
+  p_read_st_from DATE DEFAULT '0001-01-01',
+  p_read_st_to DATE DEFAULT '9999-12-31',
+  p_isbn13 TEXT DEFAULT NULL,
+  p_title TEXT DEFAULT NULL,
+  p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_publisher TEXT DEFAULT NULL,
+  p_publish_series TEXT DEFAULT NULL,
+  p_role_cd TEXT DEFAULT NULL,
+  p_person_name TEXT DEFAULT NULL,
+  p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_booktype_cd TEXT DEFAULT NULL,
+  p_limit_comic TEXT DEFAULT 'noLimit',    -- 'comic', 'nonComic', 'noLimit'
+  p_select_limit INT DEFAULT 9999  -- 0:no limit, 1~:LIMIT
+)
+RETURNS TABLE (
+  note_id INTEGER,
+  book_id INTEGER,
+  read_st_date DATE,
+  read_ed_date DATE,
+  note TEXT,
+  isbn13 VARCHAR(13),
+  title TEXT,
+  publisher TEXT,
+  publish_series TEXT,
+  first_publish_year INTEGER,
+  comic_f BOOLEAN
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT
+    bn.id AS note_id,
+    bn.book_id,
+    bn.read_st_date,
+    bn.read_ed_date,
+    bn.note,
+    b.isbn13,
+    b.title,
+    b.publisher,
+    b.publish_series,
+    b.first_publish_year,
+    b.comic_f
+  FROM book_note bn
+  JOIN books b ON bn.book_id = b.book_id
+  -- 関連テーブルは条件がある場合のみ絞り込めるようLEFT JOIN
+  LEFT JOIN book_role br ON b.book_id = br.book_id
+  LEFT JOIN book_possess bp ON b.book_id = bp.book_id
+  WHERE
+    -- 読書開始日の範囲指定（必須想定）
+    bn.read_st_date >= p_read_st_from AND bn.read_st_date < p_read_st_to
+    -- 書籍（単純条件）
+    AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_publisher IS NULL OR b.publisher = p_publisher)
+    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
+    -- タイトル検索 (前方一致 or 部分一致)
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
+    -- コミックによる限定
+    AND (CASE 
+          WHEN p_limit_comic = 'comic' THEN b.comic_f = true 
+          WHEN p_limit_comic = 'nonComic' THEN b.comic_f = false 
+          ELSE true END)
+    -- 役割
+    AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+    -- 保有状況
+    AND (p_booktype_cd IS NULL OR bp.booktype_cd = p_booktype_cd)
+  ORDER BY bn.read_st_date ASC,
+    b.title ASC
+LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
+END;
+$$;
+
+

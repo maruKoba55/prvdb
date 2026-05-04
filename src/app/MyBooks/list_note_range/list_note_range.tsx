@@ -11,62 +11,110 @@ import { bookSearchMax } from '@/app/constants';
 const screenMinW = 800;
 
 type BookNote = {
-  id: number;
+  note_id: number;
   book_id: number;
   read_st_date: string | null;
   read_ed_date: string | null;
   note: string | null;
-  books: {
-    title: string;
-    publisher: string;
-    first_publish_year: number;
-    comic_f: boolean;
-  } | null;
+  isbn13: string | null;
+  title: string | null;
+  publisher: string | null;
+  publish_series: string | null;
+  first_publish_year: number;
+  comic_f: boolean;
 };
 
 export default function ListNoteRange() {
   const supabase = supabaseClient();
   const searchParams = useSearchParams();
-  const read_st_from = searchParams.get('read_st_from');
-  const read_st_to = searchParams.get('read_st_to');
-  const noteLimitComic = searchParams.get('noteLimitComic');
+  const s_read_st_from = searchParams.get('read_st_from');
+  const s_read_st_to = searchParams.get('read_st_to');
+  const s_isbn13 = searchParams.get('isbn13');
+  const s_title = searchParams.get('title');
+  const s_title_search_type = searchParams.get('title_search_type');
+  const s_publisher = searchParams.get('publisher');
+  const s_publish_series = searchParams.get('publish_series');
+  const s_role_cd = searchParams.get('role_cd');
+  const s_person_name = searchParams.get('person_name');
+  const s_person_search_type = searchParams.get('person_search_type');
+  const s_booktype_cd = searchParams.get('booktype_cd');
+  const s_limit_comic = searchParams.get('limit_comic');
   const [notes, setNotes] = useState<BookNote[]>([]);
+
+  // 書籍種別が指定された時、種別名を取得
+  const [getBookType, setGetBookType] = useState(null);
+  useEffect(() => {
+    const fetchBookType = async () => {
+      if (s_booktype_cd) {
+        const { data, error } = await supabase
+          .from('booktype_master')
+          .select('booktype')
+          .eq('booktype_cd', s_booktype_cd)
+          .single();
+        if (!error && data) {
+          setGetBookType(data.booktype);
+        } else {
+          console.error(error);
+        }
+      }
+    };
+    fetchBookType();
+  }, []);
 
   //一覧タイトル追加文字
   let titleAdd = null;
-  if (noteLimitComic === 'comic') {
-    titleAdd = 'コミック';
-  } else {
-    if (noteLimitComic === 'nonComic') {
-      titleAdd = '非コミック';
+  if (s_booktype_cd) {
+    titleAdd = getBookType;
+  }
+  if (s_limit_comic !== 'noLimit') {
+    if (s_limit_comic === 'comic') {
+      if (titleAdd) {
+        titleAdd = titleAdd + '／コミック';
+      } else {
+        titleAdd = 'コミック';
+      }
+    } else if (s_limit_comic === 'nonComic') {
+      if (titleAdd) {
+        titleAdd = titleAdd + '／非コミック';
+      } else {
+        titleAdd = '非コミック';
+      }
     }
   }
 
   // データ取得
   let dateFrom = '0001-01-01'; // 日付最小値
   let dateTo = '9999-12-31'; // 日付最大値
-  if (read_st_from) dateFrom = read_st_from;
-  if (read_st_to) dateTo = read_st_to;
+  if (s_read_st_from) dateFrom = s_read_st_from;
+  if (s_read_st_to) dateTo = s_read_st_to;
   let dateTmp = new Date(dateTo); //to日付を画面指定の1日後として、lt（より前）で検索する
   dateTmp.setDate(dateTmp.getDate() + 1);
   dateTo = `${dateTmp.getFullYear()}-${dateTmp.getMonth() + 1}-${dateTmp.getDate()}`;
-  let query = supabase.from('book_note').select(`
-    *, books!inner(title, publisher, first_publish_year,comic_f)`);
-  query = query.gte('read_st_date', dateFrom);
-  query = query.lt('read_st_date', dateTo);
-  if (noteLimitComic === 'comic') {
-    query = query.eq('books.comic_f', true);
-  } else {
-    if (noteLimitComic === 'nonComic') {
-      query = query.eq('books.comic_f', false);
-    }
-  }
-  query = query.order('read_st_date', { ascending: true });
-  if (bookSearchMax) query = query.limit(bookSearchMax);
   const fetchNotes = async () => {
-    const { data, error } = await query;
+    const { data, error } = await supabase.rpc('search_note_range', {
+      p_read_st_from: dateFrom as string,
+      p_read_st_to: dateTo as string,
+      p_isbn13: (s_isbn13 as string) || null,
+      p_title: (s_title as string) || null,
+      p_title_search_type: (s_title_search_type as string) || 'top',
+      p_publisher: (s_publisher as string) || null,
+      p_publish_series: (s_publish_series as string) || null,
+      p_role_cd: (s_role_cd as string) || null,
+      p_person_name: (s_person_name as string) || null,
+      p_person_search_type: (s_person_search_type as string) || 'top',
+      p_booktype_cd: (s_booktype_cd as string) || null,
+      p_limit_comic: (s_limit_comic as string) || 'noLimit',
+      p_select_limit: (bookSearchMax as number) || 9999
+    });
     if (error) console.error(error);
-    else setNotes(data || []);
+    else {
+      setNotes(data || []);
+      if (!data[0]) {
+        alert('該当データがありません');
+        window.close();
+        return;
+      }
+    }
   };
   useEffect(() => {
     fetchNotes();
@@ -91,7 +139,7 @@ export default function ListNoteRange() {
         <div className="mb-4">
           <span className="text-xl font-bold text-blue-500 m-1">読書ノート</span>
           <span>
-            （{read_st_from} ～ {read_st_to}
+            （{s_read_st_from} ～ {s_read_st_to}
             {titleAdd ? `／${titleAdd}` : ''}）
           </span>
 
@@ -106,7 +154,7 @@ export default function ListNoteRange() {
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th colSpan={3} className="p-1">
-                    タイトル（出版社、初版年）
+                    タイトル（出版社／出版シリーズ、初版年）
                   </th>
                 </tr>
                 <tr>
@@ -117,10 +165,12 @@ export default function ListNoteRange() {
               </thead>
               <tbody>
                 {notes.map((note) => (
-                  <Fragment key={note.id}>
+                  <Fragment key={note.note_id}>
                     <tr className="border-t hover:bg-gray-50">
                       <td colSpan={3} className="p-1 font-bold text-blue-600">
-                        『{note.books?.title}』（{note.books?.publisher}、{note.books?.first_publish_year}）
+                        『{note.title}』（{note.publisher} {note.publish_series ? `／${note.publish_series}` : ''}、
+                        {note.first_publish_year}）
+                        {note.comic_f ? <span className=" text-green-500 ml-2">［コミック］</span> : ''}
                       </td>
                     </tr>
                     <tr>

@@ -140,13 +140,13 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   useEffect(() => {
     if (bookIdList.length === 0) {
       alert('該当データがありません');
-      router.replace('/'); //検索条件指定（/app/page.tsx）へ
-      return; //router.back()では検索条件指定まで閉じてしまう
+      window.close();
+      return;
     }
     if (bookIdList.length > 50) {
       const confirmed = window.confirm(`該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？`);
       if (!confirmed) {
-        router.replace('/');
+        window.close();
         return;
       }
     }

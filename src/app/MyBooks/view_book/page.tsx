@@ -11,7 +11,7 @@ export default async function ViewBookPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const { data: idListData, error } = await supabase.rpc('search_books_complex', {
-    p_isbn13: (params.isbn as string) || null,
+    p_isbn13: (params.isbn13 as string) || null,
     p_title: (params.title as string) || null,
     p_title_search_type: (params.title_search_type as string) || 'top',
     p_publisher: (params.publisher as string) || null,

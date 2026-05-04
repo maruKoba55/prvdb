@@ -1,0 +1,80 @@
+■RLS policy "Develop";開発用、なんでも許可
+create policy "Develop"
+on "public"."books"
+to public
+using (
+  true
+) with check (
+  true
+);
+create policy "Develop"
+on "public"."book_role"
+to public
+using (
+  true
+) with check (
+  true
+);
+create policy "Develop"
+on "public"."book_possess"
+to public
+using (
+  true
+) with check (
+  true
+);
+create policy "Develop"
+on "public"."book_note"
+to public
+using (
+  true
+) with check (
+  true
+);
+create policy "Develop"
+on "public"."booktype_master"
+to public
+using (
+  true
+) with check (
+  true
+);
+create policy "Develop"
+on "public"."role_master"
+to public
+using (
+  true
+) with check (
+  true
+);
+
+
+
+■ログインユーザーのみに操作を許可する例
+alter policy "Individuals can create titles."
+on "public"."manga_title"
+to public
+with check (
+  (auth.uid() = user_id)
+);
+
+alter policy "Individuals can delete their own titles."
+on "public"."manga_title"
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+alter policy "Individuals can update their own titles."
+on "public"."manga_title"
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+alter policy "Individuals can view their own titles."
+on "public"."manga_title"
+to public
+using (
+  (auth.uid() = user_id)
+);
