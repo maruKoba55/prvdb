@@ -12,7 +12,7 @@ if (!supabaseKey) {
 }
 
 export async function supabaseServer() {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies(); // ここでawaitしているので関数自体もasync
 
   return createServerClient(supabaseUrl!, supabaseKey!, {
     cookies: {
@@ -24,7 +24,7 @@ export async function supabaseServer() {
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
           // Server Componentから呼び出された場合、
-          // クッキーの設定（set）は無視しても問題ありません（読み取りが主目的のため）
+          // クッキーの設定（set）は無視してOK（読み取りが主目的のため）
         }
       }
     }

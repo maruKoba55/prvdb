@@ -146,7 +146,7 @@ export function SearchBooks() {
     });
     window.open(`/MyBooks/list_book_unread?${params.toString()}`, '_blank', 'width=1080,height=600');
   };
-  // ［書籍新規登録へ］
+  // ［書籍新規登録］
   const handleRegist = () => {
     window.open(`/MyBooks/regist_book?`, '_blank', 'width=1120,height=620');
   };
@@ -154,7 +154,7 @@ export function SearchBooks() {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
     handleRegist();
   });
-  // ［補助データメンテへ］
+  // ［データメンテ］
   const handleAssistMaint = () => {
     null;
   };
@@ -169,6 +169,15 @@ export function SearchBooks() {
   useHotkeys('alt+c', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
     handleClose();
+  });
+  // ［ログアウト］
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/'; // トップに戻して再認証を促す
+  };
+  useHotkeys('alt+o', (event) => {
+    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    handleLogout();
   });
 
   // 入力変更ハンドラ；一般用
@@ -684,6 +693,16 @@ export function SearchBooks() {
             variant="outline"
             onClick={handleClose}
           />  */}
+            <CommonButton
+              label={
+                <>
+                  <X size={20} />
+                  ログアウト (<u>O</u>)
+                </>
+              }
+              variant="outline"
+              onClick={handleLogout}
+            />
           </div>
         </div>
       </div>
