@@ -2,11 +2,25 @@
 
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 
 export default function AuthForm() {
   const supabase = supabaseClient();
-  console.log(location.origin);
+  console.log(window.location.origin);
+
+  const router = useRouter();
+  useEffect(() => {
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((event: any) => {
+      if (event === 'SIGNED_IN') {
+        router.refresh(); // サーバーコンポーネント(page.tsx)を再実行させる
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [supabase, router]);
 
   return (
     <div style={{ maxWidth: '400px', margin: '0 auto', padding: '2rem' }}>
@@ -21,8 +35,8 @@ export default function AuthForm() {
           }
         }}
         providers={['google']}
-        // ログイン後のリダイレクト先（Google認証などで重要）
-        //    redirectTo={`${typeof window !== 'undefined' ? location.origin : ''}/auth/callback`}
+        // ログイン後のリダイレクト先（location.origin～指定すると、Google認証で404）
+        //redirectTo={`${typeof window !== 'undefined' ? location.origin : ''}/auth/callback`}
         localization={{
           variables: {
             sign_in: {
