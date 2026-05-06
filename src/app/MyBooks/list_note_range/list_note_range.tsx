@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { bookSearchMax } from '@/app/constants';
+import { dbSearchMax } from '@/app/constants';
 
 const screenMinW = 800;
 
@@ -104,7 +104,7 @@ export default function ListNoteRange() {
       p_person_search_type: (s_person_search_type as string) || 'top',
       p_booktype_cd: (s_booktype_cd as string) || null,
       p_limit_comic: (s_limit_comic as string) || 'noLimit',
-      p_select_limit: (bookSearchMax as number) || 9999
+      p_select_limit: (dbSearchMax as number) || 9999
     });
     if (error) console.error(error);
     else {

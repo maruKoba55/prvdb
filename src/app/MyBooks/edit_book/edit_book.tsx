@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { BookForm } from '@/components/BookForm';
-import { AddRoleModal } from '@/components/AddRoleModal';
-import { AddPossessModal } from '@/components/AddPossessModal';
+import { BookForm } from '@/app/MyBooks/BookForm';
+import { AddRoleModal } from '@/app/MyBooks/AddRoleModal';
+import { AddPossessModal } from '@/app/MyBooks/AddPossessModal';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 

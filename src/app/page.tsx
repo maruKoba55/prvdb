@@ -1,6 +1,6 @@
 import { supabaseServer } from '@/lib/Server';
 import { SearchBooks } from '@/app/MyBooks/search_books';
-import AuthForm from '@/components/authForm';
+import AuthForm from '@/app/auth/authForm';
 
 export default async function Home() {
   const supabase = await supabaseServer();

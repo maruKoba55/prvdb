@@ -6,8 +6,8 @@ import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Pencil, Save, X, Plus, Trash2 } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { AddNoteModal } from '@/components/AddNoteModal';
-import { bookSearchMax } from '@/app/constants';
+import { AddNoteModal } from '@/app/MyBooks/AddNoteModal';
+import { dbSearchMax } from '@/app/constants';
 
 const screenMinW = 800;
 
@@ -32,7 +32,7 @@ export default function ListNoteBook() {
 
   // データ取得
   let query = supabase.from('book_note').select('*').eq('book_id', bookId).order('read_st_date', { ascending: true });
-  if (bookSearchMax) query = query.limit(bookSearchMax);
+  if (dbSearchMax) query = query.limit(dbSearchMax);
   const fetchNotes = async () => {
     const { data, error } = await query;
     if (error) console.error(error);

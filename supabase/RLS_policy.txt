@@ -50,30 +50,38 @@ using (
 
 
 
-■ログインユーザーのみに操作を許可する例
-alter policy "Individuals can create titles."
-on "public"."manga_title"
+■ログインユーザーのみに操作を許可
+create policy "Individuals can create profile."
+on "public"."profile"
+as PERMISSIVE
+for INSERT
 to public
 with check (
   (auth.uid() = user_id)
 );
 
-alter policy "Individuals can delete their own titles."
-on "public"."manga_title"
+create policy "Individuals can delete their own profile."
+on "public"."profile"
+as PERMISSIVE
+for DELETE
 to public
 using (
   (auth.uid() = user_id)
 );
 
-alter policy "Individuals can update their own titles."
-on "public"."manga_title"
+create policy "Individuals can update their own profile."
+on "public"."profile"
+as PERMISSIVE
+for UPDATE
 to public
 using (
   (auth.uid() = user_id)
 );
 
-alter policy "Individuals can view their own titles."
-on "public"."manga_title"
+create policy "Individuals can view their own profile."
+on "public"."profile"
+as PERMISSIVE
+for SELECT
 to public
 using (
   (auth.uid() = user_id)

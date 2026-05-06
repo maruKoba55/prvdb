@@ -8,7 +8,6 @@ import { supabaseClient } from '@/lib/Client';
 
 export default function AuthForm() {
   const supabase = supabaseClient();
-  console.log(window.location.origin);
 
   const router = useRouter();
   useEffect(() => {
@@ -21,6 +20,20 @@ export default function AuthForm() {
     });
     return () => subscription.unsubscribe();
   }, [supabase, router]);
+
+  {
+    /*
+  const getRidirectURL = () => {
+    let ridirectUrl =
+      process?.env?.NEXT_PUBLIC_SITE_URL ?? // Vercel等で設定する環境変数
+      process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Vercelが自動付与する変数
+      'http://localhost:3000/';
+    ridirectUrl = ridirectUrl.includes('http') ? ridirectUrl : `https://${ridirectUrl}`;
+    console.log('ridirectUrl:', ridirectUrl);
+    return ridirectUrl;
+  };
+*/
+  }
 
   return (
     <div style={{ maxWidth: '400px', margin: '0 auto', padding: '2rem' }}>
@@ -35,8 +48,9 @@ export default function AuthForm() {
           }
         }}
         providers={['google']}
-        // ログイン後のリダイレクト先（location.origin～指定すると、Google認証で404）
-        //redirectTo={`${typeof window !== 'undefined' ? location.origin : ''}/auth/callback`}
+        // ログイン後のリダイレクト先
+        //  redirectTo={`${getRidirectURL()}/auth/callback`}
+        redirectTo={`${typeof window !== 'undefined' ? location.origin : ''}/auth/callback`}
         localization={{
           variables: {
             sign_in: {

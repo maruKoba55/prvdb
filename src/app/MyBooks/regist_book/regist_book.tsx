@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookCopy, Eraser, Save, UserRoundPen, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { AddRoleModal } from '@/components/AddRoleModal';
-import { AddPossessModal } from '@/components/AddPossessModal';
+import { AddRoleModal } from '@/app/MyBooks/AddRoleModal';
+import { AddPossessModal } from '@/app/MyBooks/AddPossessModal';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
-import { BookForm } from '@/components/BookForm';
+import { BookForm } from '@/app/MyBooks/BookForm';
 
 const initialFormState = {
   isbn10: '',

@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { supabaseClient } from '@/lib/Client';
 import { BookCopy, BookSearch, CalendarSearch, Eraser, Plus, Search, TextSearch, Toolbox, X } from 'lucide-react';
+import { EditProfile } from '@/components/editProfile';
 import { CommonButton } from '@/components/ui/button';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
-import { bookSearchMax } from '@/app/constants';
+import { dbSearchMax } from '@/app/constants';
 
 const screenMinW = 1100; //画面最小幅
 
@@ -46,6 +47,16 @@ export function SearchBooks() {
   const [formData, setFormData] = useState(initialFormState);
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
   const [roles, setRoles] = useState<RoleMaster[]>([]);
+
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
+  //  console.log('user:', user);
 
   // 書籍検索条件の組合せチェック
   const SearchChk = (formData: any) => {
@@ -647,20 +658,20 @@ export function SearchBooks() {
         {/* 右側エリア */}
         <div className="flex flex-col w-1/5 flex-1">
           {/* 右側上段：検索件数制限 */}
-          <div className="border-solid border-2 rounded-lg mt-3 mr-1 p-2">
+          <div className="border-solid border-2 rounded-lg h-1/8 mt-3 mr-1 p-2">
             <div>
-              {bookSearchMax ? (
+              {dbSearchMax ? (
                 <div>
-                  <div className="font-bold text-center text-red-500">データ検索件数制限中！</div>
-                  <div className="text-center">最大{bookSearchMax}件</div>
+                  <div className="flex items-center justify-center font-bold text-red-500">データ検索件数制限中！</div>
+                  <div className="text-center">最大{dbSearchMax}件</div>
                 </div>
               ) : (
                 <div className="font-bold text-center">データ検索件数 制限なし</div>
               )}
             </div>
           </div>
-          {/* 右側下段：ボタンエリア */}
-          <div className="flex flex-col flex-1 border-solid border-2 rounded-lg justify-around my-3 mr-1 p-1">
+          {/* 右側中段：ボタンエリア */}
+          <div className="flex flex-col border-solid border-2 rounded-lg h-4/8 justify-around mt-3 mr-1 p-1">
             <CommonButton
               label={
                 <>
@@ -693,6 +704,19 @@ export function SearchBooks() {
             variant="outline"
             onClick={handleClose}
           />  */}
+          </div>
+          {/* 右側下段：ユーザー ＆ ログアウト */}
+          <div className="flex flex-col flex-1 border-solid border-2 rounded-lg justify-around my-3 mr-1 p-1">
+            <div className="flex flex-col">
+              <div className="flex justify-center text-lg my-2">ログイン中</div>
+              {user ? (
+                <div className="flex justify-center">
+                  <EditProfile user={user} />
+                </div>
+              ) : (
+                ''
+              )}
+            </div>
             <CommonButton
               label={
                 <>
