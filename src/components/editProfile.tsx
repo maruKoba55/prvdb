@@ -116,9 +116,9 @@ export const EditProfile = (props: Props) => {
 
   return (
     <>
-      <div className="border-2 rounded-full border-gray-300 px-4 py-1 cursor-pointer flex gap-2" onClick={openModal}>
+      <div className="border-2 rounded-full border-gray-300 px-2 py-1 cursor-pointer flex gap-2" onClick={openModal}>
         <Avatar size="36" name={name} color="#bbbbbb" alt="Icon" round src={icon ? icon : ''} />
-        <a className="text-xl pt-1">{name}</a>
+        <a className="text-lg pt-1">{name}</a>
       </div>
 
       <Transition appear show={isOpen} as={Fragment}>
@@ -138,7 +138,7 @@ export const EditProfile = (props: Props) => {
             >
               <DialogPanel className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform border border-gray-300 shadow-xl bg-gray-50 rounded-xl">
                 <DialogTitle as="h3" className="text-2xl font-medium leading-6 text-center text-gray-900">
-                  Edit Profile
+                  プロフィール編集
                 </DialogTitle>
 
                 <div className="my-4">
@@ -162,8 +162,8 @@ export const EditProfile = (props: Props) => {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-2 mt-4">
-                  <div className="col-span-1 text-xl text-center">Name</div>
+                <div className="grid grid-cols-4 gap-2 mt-4 flex items-center">
+                  <div className="col-span-1 text-xl text-end">氏 名 </div>
                   <input
                     className="w-full h-10 col-span-3 p-2 bg-white border border-gray-300 rounded shadow appearance-none hover:border-gray-700"
                     value={editName}
@@ -172,7 +172,16 @@ export const EditProfile = (props: Props) => {
                     }}
                   />
                 </div>
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center mt-4 ml-10">
+                  <div className="w-32 p-2">
+                    <button
+                      type="button"
+                      className="flex items-center bg-blue-600 rounded-md text-sm text-white p-1 ml-2 hover:bg-blue-700"
+                      onClick={handleSave}
+                    >
+                      <Save /> 保存
+                    </button>
+                  </div>
                   <div className="w-32 p-2">
                     <button
                       type="button"
@@ -182,16 +191,7 @@ export const EditProfile = (props: Props) => {
                         closeModal();
                       }}
                     >
-                      <X /> Cancel
-                    </button>
-                  </div>
-                  <div className="w-32 p-2">
-                    <button
-                      type="button"
-                      className="flex items-center bg-blue-600 rounded-md text-sm text-white p-1 ml-2 hover:bg-blue-700"
-                      onClick={handleSave}
-                    >
-                      <Save /> Save
+                      <X /> キャンセル
                     </button>
                   </div>
                 </div>

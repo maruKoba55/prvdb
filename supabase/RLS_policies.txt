@@ -1,0 +1,267 @@
+■ログインユーザーのみに操作を許可
+
+drop policy if exists "booktype_master insert : only own user_id" on booktype_master;
+drop policy if exists "booktype_master delete : only own user_id" on booktype_master;
+drop policy if exists "booktype_master update : only own user_id" on booktype_master;
+drop policy if exists "booktype_master select : only own user_id" on booktype_master;
+
+create policy "booktype_master insert : only own user_id"
+on "public"."booktype_master"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "booktype_master delete : only own user_id"
+on "public"."booktype_master"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "booktype_master update : only own user_id"
+on "public"."booktype_master"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "booktype_master select : only own user_id"
+on "public"."booktype_master"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "book_role_master insert : only own user_id" on book_role_master;
+drop policy if exists "book_role_master delete : only own user_id" on book_role_master;
+drop policy if exists "book_role_master update : only own user_id" on book_role_master;
+drop policy if exists "book_role_master select : only own user_id" on book_role_master;
+
+create policy "book_role_master insert : only own user_id"
+on "public"."book_role_master"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "book_role_master delete : only own user_id"
+on "public"."book_role_master"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_role_master update : only own user_id"
+on "public"."book_role_master"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_role_master select : only own user_id"
+on "public"."book_role_master"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "books insert : only own user_id" on books;
+drop policy if exists "books delete : only own user_id" on books;
+drop policy if exists "books update : only own user_id" on books;
+drop policy if exists "books select : only own user_id" on books;
+
+create policy "books insert : only own user_id"
+on "public"."books"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "books delete : only own user_id"
+on "public"."books"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "books update : only own user_id"
+on "public"."books"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "books select : only own user_id"
+on "public"."books"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "book_possess insert : only own user_id" on book_possess;
+drop policy if exists "book_possess delete : only own user_id" on book_possess;
+drop policy if exists "book_possess update : only own user_id" on book_possess;
+drop policy if exists "book_possess select : only own user_id" on book_possess;
+
+create policy "book_possess insert : only own user_id"
+on "public"."book_possess"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "book_possess delete : only own user_id"
+on "public"."book_possess"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_possess update : only own user_id"
+on "public"."book_possess"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_possess select : only own user_id"
+on "public"."book_possess"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "book_role insert : only own user_id" on book_role;
+drop policy if exists "book_role delete : only own user_id" on book_role;
+drop policy if exists "book_role update : only own user_id" on book_role;
+drop policy if exists "book_role select : only own user_id" on book_role;
+
+create policy "book_role insert : only own user_id"
+on "public"."book_role"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "book_role delete : only own user_id"
+on "public"."book_role"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_role update : only own user_id"
+on "public"."book_role"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_role select : only own user_id"
+on "public"."book_role"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "book_note insert : only own user_id" on book_note;
+drop policy if exists "book_note delete : only own user_id" on book_note;
+drop policy if exists "book_note update : only own user_id" on book_note;
+drop policy if exists "book_note select : only own user_id" on book_note;
+
+create policy "book_note insert : only own user_id"
+on "public"."book_note"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "book_note delete : only own user_id"
+on "public"."book_note"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_note update : only own user_id"
+on "public"."book_note"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "book_note select : only own user_id"
+on "public"."book_note"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "profile insert : only own user_id" on profile;
+drop policy if exists "profile delete : only own user_id" on profile;
+drop policy if exists "profile update : only own user_id" on profile;
+drop policy if exists "profile select : only own user_id" on profile;
+
+create policy "profile insert : only own user_id"
+on "public"."profile"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "profile delete : only own user_id"
+on "public"."profile"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "profile update : only own user_id"
+on "public"."profile"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "profile select : only own user_id"
+on "public"."profile"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);

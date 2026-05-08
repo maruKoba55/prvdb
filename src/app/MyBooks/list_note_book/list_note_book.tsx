@@ -17,6 +17,7 @@ type BookNote = {
   read_st_date: string | null;
   read_ed_date: string | null;
   note: string | null;
+  user_id: string | null;
 };
 
 export default function ListNoteBook() {
@@ -24,6 +25,7 @@ export default function ListNoteBook() {
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
   const bookTitle = searchParams.get('title');
+  const user = searchParams.get('user');
 
   const [notes, setNotes] = useState<BookNote[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -98,10 +100,13 @@ export default function ListNoteBook() {
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <div style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+      <div
+        style={{ width: `${screenMinW + 8}px` }}
+        className="text-center text-3xl font-bold underline bg-cyan-500 mx-2"
+      >
         書籍管理
       </div>
-      <div style={{ width: `${screenMinW - 8}px` }} className="border-solid border-2 rounded-lg flex m-4 p-2">
+      <div style={{ width: `${screenMinW}px` }} className="border-solid border-2 rounded-lg flex m-2 p-2">
         <div>
           <div className="text-xl font-bold text-blue-500 m-1">読書ノート</div>
           <div className="text-xl font-bold text-gray-500 ml-3 mb-4">『{bookTitle}』</div>
@@ -188,7 +193,6 @@ export default function ListNoteBook() {
           </div>
         </div>
       </div>
-
       {/* ボタンエリア */}
       <div className="flex m-2 justify-around">
         <CommonButton
@@ -211,11 +215,12 @@ export default function ListNoteBook() {
           onClick={handleClose}
         />
       </div>
-
+      {/* 読書ノート追加 */}
       {isAddModalOpen && (
         <AddNoteModal
           bookId={Number(bookId) || 0}
           bookTitle={bookTitle || ''}
+          user={user || ''}
           onClose={() => setIsAddModalOpen(false)}
           onSuccess={() => {
             setIsAddModalOpen(false);

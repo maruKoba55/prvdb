@@ -11,16 +11,17 @@ import { BookForm } from '@/app/MyBooks/BookForm';
 export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const supabase = supabaseClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const user = searchParams.get('user');
+  const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
+  const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
   const [bookIds, setBookIds] = useState<number[]>(bookIdList);
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true); // 読み込み状態を管理
-  const searchParams = useSearchParams();
-  const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
-  const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
 
-  const readOnly_f = true;
   const isPrevDisabled = currentIndex <= 0;
   const isNextDisabled = currentIndex >= bookIds.length - 1;
+  const readOnly_f = true;
 
   // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
   //［前］
@@ -59,12 +60,13 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     },
     [isNextDisabled, handleNext]
   );
-  //［読書ノートへ］
+  //［読書ノート］
   const handleNote = () => {
     const { book_id, title } = book;
     const params = new URLSearchParams({
       book_id: book_id?.toString() || '',
-      title: title || ''
+      title: title || '',
+      user: user || ''
     });
     window.open(`/MyBooks/list_note_book?${params.toString()}`, '_blank', 'width=840,height=600');
   };
@@ -72,7 +74,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const handleEdit = () => {
     const { book_id } = book;
     const params = new URLSearchParams({
-      book_id: book_id?.toString() || ''
+      book_id: book_id?.toString() || '',
+      user: user || ''
     });
     window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
   };
@@ -136,7 +139,6 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   }, [currentIndex, bookIds]);
 
   //初期表示件数確認
-  //  console.log('bookIdList:', bookIdList);
   useEffect(() => {
     if (bookIdList.length === 0) {
       alert('該当データがありません');
@@ -162,7 +164,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
         *,
         book_role (
           *,
-          role_master (
+          book_role_master (
             role_name
           )
         ),
@@ -205,7 +207,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
               {book.book_role?.map((r: any) => (
                 <div key={r.id} className="flex items-start text-sm border-b border-gray-50 flex-col">
                   <div className="mr-2">
-                    {r.role_master?.role_name}：{r.person_name}
+                    {r.book_role_master?.role_name}：{r.person_name}
                   </div>
                   <div className="ml-4">{r.remarks}</div>
                 </div>

@@ -7,50 +7,8 @@ using (
 ) with check (
   true
 );
-create policy "Develop"
-on "public"."book_role"
-to public
-using (
-  true
-) with check (
-  true
-);
-create policy "Develop"
-on "public"."book_possess"
-to public
-using (
-  true
-) with check (
-  true
-);
-create policy "Develop"
-on "public"."book_note"
-to public
-using (
-  true
-) with check (
-  true
-);
-create policy "Develop"
-on "public"."booktype_master"
-to public
-using (
-  true
-) with check (
-  true
-);
-create policy "Develop"
-on "public"."role_master"
-to public
-using (
-  true
-) with check (
-  true
-);
 
-
-
-■ログインユーザーのみに操作を許可
+■ログインユーザーのみに各操作を許可
 create policy "Individuals can create profile."
 on "public"."profile"
 as PERMISSIVE

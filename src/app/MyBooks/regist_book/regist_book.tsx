@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookCopy, Eraser, Save, UserRoundPen, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
@@ -49,12 +49,14 @@ interface BookFormData {
 export default function RegistBook() {
   const supabase = supabaseClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const user = searchParams.get('user');
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
   const [isAddRoleModal, setIsAddRoleModal] = useState(false);
   const [isAddPossessModal, setIsAddPossessModal] = useState(false);
 
-  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラーになる）
+  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
   // ［基本情報を登録］
   const handleBaseRegist = async () => {
     try {
@@ -71,25 +73,6 @@ export default function RegistBook() {
         alert(`登録失敗  code=${error.code} : ${error.message}`);
       }
     }
-  };
-  // ［役割情報登録へ］
-  const handleRole = () => {
-    const { book_id, title } = registeredBook;
-    const params = new URLSearchParams({
-      book_id: book_id.toString(),
-      title: title || ''
-    });
-    window.open(`/MyBooks/role_regist?${params.toString()}`, '_blank', 'width=760,height=420');
-  };
-  // ［保有情報登録へ］
-  const handlePossess = () => {
-    const { book_id, title, isbn13 } = registeredBook;
-    const params = new URLSearchParams({
-      book_id: book_id.toString(),
-      title: title || '',
-      isbn13: isbn13 || ''
-    });
-    window.open(`/MyBooks/possess_regist?${params.toString()}`, '_blank', 'width=820,height=520');
   };
   // ［画面初期化］
   const handleErase = () => {
@@ -156,7 +139,8 @@ export default function RegistBook() {
       publish_series: formData.publish_series || null,
       publish_series_no: formData.publish_series_no || null,
       remarks: formData.remarks || null,
-      image_url: formData.image_url || null
+      image_url: formData.image_url || null,
+      user_id: user || null
     };
 
     // Table 'books'にinsertし、その内容を取得
@@ -241,10 +225,12 @@ export default function RegistBook() {
           </>
         }
       />
+      {/* 役割情報登録 */}
       {isAddRoleModal && (
         <AddRoleModal
           bookId={Number(registeredBook.book_id) || 0}
           bookTitle={formData.title || ''}
+          user={user || ''}
           onClose={() => setIsAddRoleModal(false)}
           onSuccess={() => {
             setIsAddRoleModal(false);
@@ -255,11 +241,12 @@ export default function RegistBook() {
           }}
         />
       )}
-
+      {/* 保有情報登録 */}
       {isAddPossessModal && (
         <AddPossessModal
           bookId={Number(registeredBook.book_id) || 0}
           bookTitle={formData.title || ''}
+          user={user || ''}
           onClose={() => setIsAddPossessModal(false)}
           onSuccess={() => {
             setIsAddPossessModal(false);

@@ -38,7 +38,6 @@ export default function ListBook({
   });
 
   //初期表示件数確認
-  //  console.log('bookIdList:', bookIdList);
   useEffect(() => {
     if (bookIdList.length === 0) {
       alert('該当データがありません');
@@ -111,7 +110,7 @@ export default function ListBook({
           *,
           book_role (
             *,
-            role_master (role_name)
+            book_role_master (role_name)
           ),
           book_possess (
             *,
@@ -142,12 +141,12 @@ export default function ListBook({
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="space-y-4">
-      <div className="text-center bg-cyan-500">
+      <div className="text-center bg-cyan-500 mx-2">
         <span className="text-3xl font-bold underline">書籍管理（{titleAdd}一覧）</span>
         {titleAdd2 ? <span className="text-lg font-bold ml-2">（{titleAdd2}）</span> : ''}
       </div>
       {books.map((book, i) => (
-        <div key={book.book_id} className="flex border rounded shadow-sm ml-2 p-1 ">
+        <div key={book.book_id} className="flex border rounded shadow-sm mx-2 p-1 ">
           <div className="flex text-white bg-gray-400 min-w-9 align-top justify-end p-1"> {i + 1}</div>
           <div className="ml-2">
             <div>
@@ -185,7 +184,7 @@ export default function ListBook({
               <ul className="grid grid-cols-5 gap-2 text-sm ml-2">
                 {book.book_role?.map((r: any) => (
                   <li key={r.id}>
-                    <span className="font-semibold">{r.role_master?.role_name}</span>：{r.person_name}
+                    <span className="font-semibold">{r.book_role_master?.role_name}</span>：{r.person_name}
                   </li>
                 ))}
               </ul>

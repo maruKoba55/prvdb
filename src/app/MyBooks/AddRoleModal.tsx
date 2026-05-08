@@ -6,21 +6,24 @@ import { Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { styleItems } from '@/app/constants';
 
-type RoleMaster = {
+type BookRoleMaster = {
   role_cd: string;
   role_order: number;
   role_name: string;
   selectable: boolean;
+  user_id: string;
 };
 
 export function AddRoleModal({
   bookId,
   bookTitle,
+  user,
   onClose,
   onSuccess
 }: {
   bookId: number;
   bookTitle: string;
+  user: string;
   onClose: () => void;
   onSuccess: () => void;
 }) {
@@ -37,7 +40,8 @@ export function AddRoleModal({
     role_cd: formData.role_cd,
     role_order: formData.role_order || 0,
     person_name: formData.person_name,
-    remarks: formData.remarks
+    remarks: formData.remarks,
+    user_id: user
   };
 
   // 画面マウント時のフォーカス用(役割セレクトに当てるため、HTMLSelectElement)
@@ -78,16 +82,12 @@ export function AddRoleModal({
   };
 
   // 役割マスターの展開・取得
-  const [roles, setRoles] = useState<RoleMaster[]>([]);
+  const [roles, setRoles] = useState<BookRoleMaster[]>([]);
   useEffect(() => {
     const fetchRoles = async () => {
-      const { data, error } = await supabase
-        .from('role_master')
-        .select('*')
-        .lte('role_cd', 299) // 分野を「共通」「著作・出版」に限定
-        .order('role_cd', { ascending: true });
+      const { data, error } = await supabase.from('book_role_master').select('*').order('role_cd', { ascending: true });
       if (error) {
-        console.error('Error fetching role_master:', error);
+        console.error('Error fetching book_role_master:', error);
       } else {
         setRoles(data || []);
       }

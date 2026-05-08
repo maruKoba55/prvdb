@@ -36,8 +36,6 @@ type Props = {
   buttons?: React.ReactNode; // ボタンエリア
 };
 
-const screenMinW = 1100; //画面最小幅
-
 export const BookForm = ({
   screenTitle,
   bookId,
@@ -51,6 +49,7 @@ export const BookForm = ({
   extraFields,
   buttons
 }: Props) => {
+  const screenMinW = 1100; //画面最小幅
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
       <div style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">

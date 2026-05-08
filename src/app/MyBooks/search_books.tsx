@@ -3,14 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { supabaseClient } from '@/lib/Client';
-import { BookCopy, BookSearch, CalendarSearch, Eraser, Plus, Search, TextSearch, Toolbox, X } from 'lucide-react';
+import { BookCopy, BookSearch, CalendarSearch, Eraser, LogIn, LogOut, Plus, TextSearch, Toolbox } from 'lucide-react';
 import { EditProfile } from '@/components/editProfile';
 import { CommonButton } from '@/components/ui/button';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 import { dbSearchMax } from '@/app/constants';
-
-const screenMinW = 1100; //画面最小幅
 
 const initialFormState = {
   isbn13: '',
@@ -34,19 +32,21 @@ type BookTypeMaster = {
   booktype_cd: string;
   booktype: string;
   selectable: boolean;
+  user_id: string;
 };
 
-type RoleMaster = {
+type BookRoleMaster = {
   role_cd: string;
   role_name: string;
   selectable: boolean;
+  user_id: string;
 };
 
 export function SearchBooks() {
   const supabase = supabaseClient();
   const [formData, setFormData] = useState(initialFormState);
   const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
-  const [roles, setRoles] = useState<RoleMaster[]>([]);
+  const [roles, setRoles] = useState<BookRoleMaster[]>([]);
 
   const [user, setUser] = useState<string | null>(null);
   useEffect(() => {
@@ -56,7 +56,6 @@ export function SearchBooks() {
     };
     fetchUser();
   }, []);
-  //  console.log('user:', user);
 
   // 書籍検索条件の組合せチェック
   const SearchChk = (formData: any) => {
@@ -87,7 +86,8 @@ export function SearchBooks() {
       booktype_cd: formData.booktype_cd || '',
       limit_comic: formData.limitComic || '',
       limit_possess: formData.limitPossess || '',
-      display_order: formData.bookOrder || ''
+      display_order: formData.bookOrder || '',
+      user: user || ''
     });
     window.open(`/MyBooks/view_book?${params.toString()}`, '_blank', 'width=1110,height=880');
   };
@@ -159,7 +159,10 @@ export function SearchBooks() {
   };
   // ［書籍新規登録］
   const handleRegist = () => {
-    window.open(`/MyBooks/regist_book?`, '_blank', 'width=1120,height=620');
+    const params = new URLSearchParams({
+      user: user || ''
+    });
+    window.open(`/MyBooks/regist_book?${params.toString()}`, '_blank', 'width=1120,height=640');
   };
   useHotkeys('alt+r', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
@@ -219,13 +222,9 @@ export function SearchBooks() {
   // 役割マスターの展開・取得
   useEffect(() => {
     const fetchRoles = async () => {
-      const { data, error } = await supabase
-        .from('role_master')
-        .select('*')
-        .lte('role_cd', 299) // 分野を「共通」「著作・出版」に限定
-        .order('role_cd', { ascending: true });
+      const { data, error } = await supabase.from('book_role_master').select('*').order('role_cd', { ascending: true });
       if (error) {
-        console.error('Error fetching role_master:', error);
+        console.error('Error fetching book_role_master:', error);
       } else {
         setRoles(data || []);
       }
@@ -260,6 +259,8 @@ export function SearchBooks() {
       booktype_cd: e.target.value // ここでbooktype_cdが取得される
     });
   };
+
+  const screenMinW = 1100; //画面最小幅
 
   return (
     <div style={{ width: `${screenMinW}px` }}>
@@ -658,15 +659,15 @@ export function SearchBooks() {
         {/* 右側エリア */}
         <div className="flex flex-col w-1/5 flex-1">
           {/* 右側上段：検索件数制限 */}
-          <div className="border-solid border-2 rounded-lg h-1/8 mt-3 mr-1 p-2">
+          <div className="border-solid border-2 rounded-lg h-1/8 mt-3 mr-1 p-2 flex items-center justify-center">
             <div>
               {dbSearchMax ? (
                 <div>
-                  <div className="flex items-center justify-center font-bold text-red-500">データ検索件数制限中！</div>
+                  <div className="font-bold text-red-500">データ検索件数制限中！</div>
                   <div className="text-center">最大{dbSearchMax}件</div>
                 </div>
               ) : (
-                <div className="font-bold text-center">データ検索件数 制限なし</div>
+                <div className="font-bold">データ検索件数 制限なし</div>
               )}
             </div>
           </div>
@@ -707,26 +708,44 @@ export function SearchBooks() {
           </div>
           {/* 右側下段：ユーザー ＆ ログアウト */}
           <div className="flex flex-col flex-1 border-solid border-2 rounded-lg justify-around my-3 mr-1 p-1">
-            <div className="flex flex-col">
-              <div className="flex justify-center text-lg my-2">ログイン中</div>
-              {user ? (
+            {user ? (
+              <div className="flex flex-col">
+                <div className="flex justify-center text-lg my-2">ログイン中</div>
                 <div className="flex justify-center">
                   <EditProfile user={user} />
                 </div>
-              ) : (
-                ''
-              )}
-            </div>
-            <CommonButton
-              label={
-                <>
-                  <X size={20} />
-                  ログアウト (<u>O</u>)
-                </>
-              }
-              variant="outline"
-              onClick={handleLogout}
-            />
+                <div className="flex justify-center mt-6">
+                  <CommonButton
+                    label={
+                      <>
+                        <LogOut size={20} />
+                        ログアウト (<u>O</u>)
+                      </>
+                    }
+                    variant="outline"
+                    onClick={handleLogout}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <div className="flex justify-center text-lg my-2">ログインしていません</div>
+                <div className="flex justify-center mt-6">
+                  <CommonButton
+                    label={
+                      <>
+                        <LogIn size={20} />
+                        ログイン
+                      </>
+                    }
+                    variant="outline"
+                    // もしログイン中にも関わらずuserを認識できていないならば
+                    // いったんログアウトしてトップ画面に戻す
+                    onClick={handleLogout}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

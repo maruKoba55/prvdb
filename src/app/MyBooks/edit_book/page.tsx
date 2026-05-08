@@ -18,7 +18,7 @@ export default async function EditBookPage(props: any) {
       *,
         book_role (
           *,
-          role_master (
+          book_role_master (
             role_name
           )
         ),

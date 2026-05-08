@@ -104,13 +104,24 @@ BEGIN
   SELECT 
     b.book_id
   FROM books b
-  LEFT JOIN book_note bn ON b.book_id = bn.book_id
-  LEFT JOIN book_role br ON b.book_id = br.book_id
-  -- 保有履歴あり
+  -- 1. 保有していることを確認 (RLSにより自分の所有分のみ対象)
   JOIN book_possess bp ON b.book_id = bp.book_id
-  -- ノート未存在
-  WHERE bn.id IS NULL
-    -- 単純フィルタ
+  WHERE 
+    -- 2. ノートが「存在しない」ことを確認 (NOT EXISTSを使用)
+    NOT EXISTS (
+      SELECT 1 FROM book_note bn WHERE bn.book_id = b.book_id
+    )
+    -- 3. 役割/著者検索が必要な場合のみ結合
+    AND (
+      (p_role_cd IS NULL AND p_person_name IS NULL) OR
+      EXISTS (
+        SELECT 1 FROM book_role br 
+        WHERE br.book_id = b.book_id
+          AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+      )
+    )
+    -- 4. その他のフィルタ
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_publisher IS NULL OR b.publisher = p_publisher)
     AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
@@ -121,9 +132,6 @@ BEGIN
           WHEN p_limit_comic = 'comic' THEN b.comic_f = true 
           WHEN p_limit_comic = 'nonComic' THEN b.comic_f = false 
           ELSE true END)
-    -- 役割 (存在する場合のみ絞り込む = !inner相当)
-    AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
     -- 保有状況
     AND (p_booktype_cd IS NULL OR bp.booktype_cd = p_booktype_cd)
   GROUP BY b.book_id

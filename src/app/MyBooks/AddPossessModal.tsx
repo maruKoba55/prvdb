@@ -11,6 +11,7 @@ type BookTypeMaster = {
   booktype_cd: string;
   booktype: string;
   selectable: boolean;
+  user_id: string;
 };
 
 // 本日日付（ローカル）
@@ -23,11 +24,13 @@ const todayLocal = [
 export function AddPossessModal({
   bookId,
   bookTitle,
+  user,
   onClose,
   onSuccess
 }: {
   bookId: number;
   bookTitle: string;
+  user: string;
   onClose: () => void;
   onSuccess: () => void;
 }) {
@@ -47,7 +50,8 @@ export function AddPossessModal({
     get_date: formData.get_date || null,
     dispose_date: formData.dispose_date || null,
     remarks: formData.remarks,
-    image_url: formData.image_url
+    image_url: formData.image_url,
+    user_id: user
   };
 
   // 画面マウント時のフォーカス用(書籍種別セレクトに当てるため、HTMLSelectElement)

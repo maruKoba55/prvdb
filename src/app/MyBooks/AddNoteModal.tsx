@@ -16,11 +16,13 @@ const todayLocal = [
 export function AddNoteModal({
   bookId,
   bookTitle,
+  user,
   onClose,
   onSuccess
 }: {
   bookId: number;
   bookTitle: string;
+  user: string;
   onClose: () => void;
   onSuccess: () => void;
 }) {
@@ -35,8 +37,10 @@ export function AddNoteModal({
     book_id: bookId,
     read_st_date: formData.read_st_date,
     read_ed_date: formData.read_ed_date || null,
-    note: formData.note
+    note: formData.note,
+    user_id: user
   };
+  console.log('addNote user:', user);
 
   // 画面マウント時のフォーカス用
   const firstInputRef = useRef<HTMLInputElement>(null);

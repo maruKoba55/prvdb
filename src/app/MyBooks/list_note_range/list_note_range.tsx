@@ -10,7 +10,7 @@ import { dbSearchMax } from '@/app/constants';
 
 const screenMinW = 800;
 
-type BookNote = {
+type RangeNote = {
   note_id: number;
   book_id: number;
   read_st_date: string | null;
@@ -39,7 +39,7 @@ export default function ListNoteRange() {
   const s_person_search_type = searchParams.get('person_search_type');
   const s_booktype_cd = searchParams.get('booktype_cd');
   const s_limit_comic = searchParams.get('limit_comic');
-  const [notes, setNotes] = useState<BookNote[]>([]);
+  const [notes, setNotes] = useState<RangeNote[]>([]);
 
   // 書籍種別が指定された時、種別名を取得
   const [getBookType, setGetBookType] = useState(null);
@@ -132,10 +132,13 @@ export default function ListNoteRange() {
 
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <div style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
+      <div
+        style={{ width: `${screenMinW + 8}px` }}
+        className="text-center text-3xl font-bold underline bg-cyan-500 mx-2"
+      >
         書籍管理
       </div>
-      <div style={{ width: `${screenMinW - 8}px` }} className="border-solid border-2 rounded-lg flex m-4 p-2">
+      <div style={{ width: `${screenMinW}px` }} className="border-solid border-2 rounded-lg flex m-2 p-2">
         <div className="mb-4">
           <span className="text-xl font-bold text-blue-500 m-1">読書ノート</span>
           <span>

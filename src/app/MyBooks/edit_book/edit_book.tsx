@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
@@ -33,6 +33,9 @@ interface BookFormData {
 export default function EditBook({ book }: { book: any }) {
   const supabase = supabaseClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const bookId = searchParams.get('book_id');
+  const user = searchParams.get('user');
   const [formData, setFormData] = useState(book);
   const [deleteRoles, setDeleteRoles] = useState<number[]>([]);
   const [deletePossessions, setDeletePossessions] = useState<number[]>([]);
@@ -43,7 +46,6 @@ export default function EditBook({ book }: { book: any }) {
 
   const readOnly_f = false;
   let partErr = false;
-
   if (!formData) {
     return null;
   }
@@ -85,7 +87,7 @@ export default function EditBook({ book }: { book: any }) {
         comic_f: formData.comic_f,
         image_url: formData.image_url
       })
-      .eq('book_id', book.book_id);
+      .eq('book_id', bookId);
     if (bookErr) {
       if (bookErr.code === '23505') {
         alert(`『${formData.title}』（${formData.publisher}、${formData.first_publish_year}）は別に登録されています。`);
@@ -274,7 +276,7 @@ export default function EditBook({ book }: { book: any }) {
                       className={`flex items-center text-sm gap-2 mb-1 ${deleteRoles.includes(r.id) ? 'opacity-30' : ''}`}
                     >
                       <div>
-                        <div className="flex flex-col text-sm inline-block w-17"> {r.role_master?.role_name}</div>
+                        <div className="flex flex-col text-sm inline-block w-17"> {r.book_role_master?.role_name}</div>
                         <div className="flex items-center">
                           (
                           <input
@@ -477,10 +479,12 @@ export default function EditBook({ book }: { book: any }) {
           }
         />
       </form>
+      {/* 役割情報追加 */}
       {isAddRoleModal && (
         <AddRoleModal
           bookId={Number(formData.book_id) || 0}
           bookTitle={formData.title || ''}
+          user={user || ''}
           onClose={() => setIsAddRoleModal(false)}
           onSuccess={() => {
             setIsAddRoleModal(false);
@@ -491,10 +495,12 @@ export default function EditBook({ book }: { book: any }) {
           }}
         />
       )}
+      {/* 保有情報追加 */}
       {isAddPossessModal && (
         <AddPossessModal
           bookId={Number(formData.book_id) || 0}
           bookTitle={formData.title || ''}
+          user={user || ''}
           onClose={() => setIsAddPossessModal(false)}
           onSuccess={() => {
             setIsAddPossessModal(false);
