@@ -146,7 +146,7 @@ export const BookForm = ({
                 />
               </div>
             </div>
-            <div className="mt-1">
+            <div className="flex items-center mt-1">
               <label htmlFor="title" className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}>
                 書　名
               </label>
@@ -161,7 +161,7 @@ export const BookForm = ({
                 onChange={onChange}
               />
             </div>
-            <div className="mt-1">
+            <div className="flex items-center mt-1">
               <label htmlFor="original_title" className="inline-block w-15">
                 原書名
               </label>
