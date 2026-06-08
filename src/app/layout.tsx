@@ -8,7 +8,7 @@ import { getBookForm } from '@/utils/getBookForm';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '書籍管理【開発】',
+  title: '書籍管理',
   description: 'Database for My Bookshelf'
 };
 
