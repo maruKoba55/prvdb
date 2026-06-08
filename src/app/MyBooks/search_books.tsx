@@ -280,13 +280,13 @@ export function SearchBooks() {
             </div>
             <div className="mt-2 ml-2">
               <label htmlFor="title" className="inline-block w-16">
-                題　名
+                書　名
               </label>
               <input
                 id="title"
                 className={styleItems}
                 type="text"
-                size={88}
+                size={82}
                 value={formData.title}
                 onChange={handleChange}
               />

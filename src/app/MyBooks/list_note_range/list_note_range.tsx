@@ -219,7 +219,7 @@ export default function ListNoteRange() {
                 <tr>
                   <th colSpan={5} className="p-1 font-bold text-blue-600">
                     <span className="text-white bg-gray-400 p-1">No.</span>
-                    <span> 『タイトル』　著者等 （出版社／出版シリーズ、初版年）</span>
+                    <span> 『 書 名 』　著者等 （出版社／出版シリーズ、初版年）</span>
                     <span className=" text-green-500 p-1 ml-2">［書籍分類］</span>
                   </th>
                 </tr>
