@@ -1,36 +1,74 @@
 ■ログインユーザーのみに操作を許可
 
-drop policy if exists "booktype_master insert : only own user_id" on booktype_master;
-drop policy if exists "booktype_master delete : only own user_id" on booktype_master;
-drop policy if exists "booktype_master update : only own user_id" on booktype_master;
-drop policy if exists "booktype_master select : only own user_id" on booktype_master;
+drop policy if exists "bookclass_master insert : only own user_id" on bookclass_master;
+drop policy if exists "bookclass_master delete : only own user_id" on bookclass_master;
+drop policy if exists "bookclass_master update : only own user_id" on bookclass_master;
+drop policy if exists "bookclass_master select : only own user_id" on bookclass_master;
 
-create policy "booktype_master insert : only own user_id"
-on "public"."booktype_master"
+create policy "bookclass_master insert : only own user_id"
+on "public"."bookclass_master"
 as PERMISSIVE
 for INSERT
 to public
 with check (
   (auth.uid() = user_id)
 );
-create policy "booktype_master delete : only own user_id"
-on "public"."booktype_master"
+create policy "bookclass_master delete : only own user_id"
+on "public"."bookclass_master"
 as PERMISSIVE
 for DELETE
 to public
 using (
   (auth.uid() = user_id)
 );
-create policy "booktype_master update : only own user_id"
-on "public"."booktype_master"
+create policy "bookclass_master update : only own user_id"
+on "public"."bookclass_master"
 as PERMISSIVE
 for UPDATE
 to public
 using (
   (auth.uid() = user_id)
 );
-create policy "booktype_master select : only own user_id"
-on "public"."booktype_master"
+create policy "bookclass_master select : only own user_id"
+on "public"."bookclass_master"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "bookform_master insert : only own user_id" on bookform_master;
+drop policy if exists "bookform_master delete : only own user_id" on bookform_master;
+drop policy if exists "bookform_master update : only own user_id" on bookform_master;
+drop policy if exists "bookform_master select : only own user_id" on bookform_master;
+
+create policy "bookform_master insert : only own user_id"
+on "public"."bookform_master"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "bookform_master delete : only own user_id"
+on "public"."bookform_master"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "bookform_master update : only own user_id"
+on "public"."bookform_master"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "bookform_master select : only own user_id"
+on "public"."bookform_master"
 as PERMISSIVE
 for SELECT
 to public
@@ -221,6 +259,44 @@ using (
 );
 create policy "book_note select : only own user_id"
 on "public"."book_note"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
+drop policy if exists "system_constants insert : only own user_id" on system_constants;
+drop policy if exists "system_constants delete : only own user_id" on system_constants;
+drop policy if exists "system_constants update : only own user_id" on system_constants;
+drop policy if exists "system_constants select : only own user_id" on system_constants;
+
+create policy "system_constants insert : only own user_id"
+on "public"."system_constants"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "system_constants delete : only own user_id"
+on "public"."system_constants"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "system_constants update : only own user_id"
+on "public"."system_constants"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "system_constants select : only own user_id"
+on "public"."system_constants"
 as PERMISSIVE
 for SELECT
 to public

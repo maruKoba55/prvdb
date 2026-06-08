@@ -1,6 +1,5 @@
 import { supabaseServer } from '@/lib/Server';
 import ViewBook from '@/app/MyBooks/view_book/view_book';
-import { dbSearchMax } from '@/app/constants';
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -19,17 +18,17 @@ export default async function ViewBookPage({ searchParams }: PageProps) {
     p_role_cd: (params.role_cd as string) || null,
     p_person_name: (params.person_name as string) || null,
     p_person_search_type: (params.person_search_type as string) || 'top',
-    p_booktype_cd: (params.booktype_cd as string) || null,
-    p_limit_comic: (params.limit_comic as string) || 'noLimit',
+    p_bookclass_cd: (params.bookclass_cd as string) || null,
+    p_bookform_cd: (params.bookform_cd as string) || null,
     p_limit_possess: (params.limit_possess as string) || 'noLimit',
     p_display_order: (params.display_order as string) || 'publish',
-    p_select_limit: (dbSearchMax as number) || 9999
+    p_select_limit: (params.sqlLimit as string) || '0'
   });
   if (error) {
     console.error(error);
     return (
       <div>
-        データ取得失敗 error.code={error.code} :{error.message}
+        書籍検索（個別）データ取得失敗 error.code={error.code} :{error.message}
       </div>
     );
   }

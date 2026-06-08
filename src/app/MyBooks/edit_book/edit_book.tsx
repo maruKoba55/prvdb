@@ -6,29 +6,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { BookForm } from '@/app/MyBooks/BookForm';
+import { useBookClassMaster } from '@/context/AppContext';
+import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 import { AddRoleModal } from '@/app/MyBooks/AddRoleModal';
 import { AddPossessModal } from '@/app/MyBooks/AddPossessModal';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
-
-// BookForm.tsx とのインターフェース
-interface BookFormData {
-  isbn10: string;
-  isbn13: string;
-  c_cd: string;
-  ndc: string;
-  title: string;
-  original_title: string;
-  colophon: string;
-  publisher: string;
-  publish_series: string;
-  publish_series_no: string;
-  first_publish_year: number;
-  remarks: string;
-  comic_f: boolean;
-  image_url: string;
-}
 
 export default function EditBook({ book }: { book: any }) {
   const supabase = supabaseClient();
@@ -53,7 +36,12 @@ export default function EditBook({ book }: { book: any }) {
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    if (!formData.title.trim() || !formData.publisher.trim() || String(formData.first_publish_year).trim() === '') {
+    if (
+      !formData.title.trim() ||
+      !formData.publisher.trim() ||
+      String(formData.first_publish_year).trim() === '' ||
+      !formData.bookclass_cd.trim()
+    ) {
       alert('基本情報の必須項目が未入力です。');
       return null;
     }
@@ -83,8 +71,8 @@ export default function EditBook({ book }: { book: any }) {
         publish_series: formData.publish_series,
         publish_series_no: formData.publish_series_no,
         first_publish_year: formData.first_publish_year,
+        bookclass_cd: formData.bookclass_cd,
         remarks: formData.remarks,
-        comic_f: formData.comic_f,
         image_url: formData.image_url
       })
       .eq('book_id', bookId);
@@ -174,6 +162,9 @@ export default function EditBook({ book }: { book: any }) {
     router.refresh();
   };
 
+  // マスタ値取得（カスタムフック）
+  const bookClassMaster = useBookClassMaster();
+
   //［閉じる］ボタンの処理
   const handleClose = () => {
     window.close();
@@ -204,14 +195,22 @@ export default function EditBook({ book }: { book: any }) {
       [id]: value
     }));
   };
-  // book_role更新用（配列対応）
+  // 書籍分類セレクト用
+  const handleBookClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      bookclass_cd: e.target.value
+    });
+  };
+
+  // book_role更新ハンドラ（配列対応）
   const handleRoleChange = (id: number, field: string, value: any) => {
     setFormData((prev: any) => ({
       ...prev,
       book_role: prev.book_role.map((r: any) => (r.id === id ? { ...r, [field]: value } : r))
     }));
   };
-  // book_possess更新用（配列対応）
+  // book_possess更新ハンドラ（配列対応）
   const handlePossessChange = (id: number, field: string, value: any) => {
     setFormData((prev: any) => ({
       ...prev,
@@ -251,8 +250,10 @@ export default function EditBook({ book }: { book: any }) {
           screenTitle="書籍管理（編集）"
           bookId={formData.book_id}
           formData={formData}
+          bookClassMaster={bookClassMaster}
           onChange={handleChange}
           onChangeF={handleChangeF}
+          onChangeS={handleBookClass}
           onClearField={handleEraseField}
           isReadOnly={readOnly_f}
           extraFields={
@@ -340,7 +341,7 @@ export default function EditBook({ book }: { book: any }) {
                       className={`flex items-center text-sm gap-2 ${deletePossessions.includes(p.book_possess_id) ? 'opacity-30' : ''}`}
                     >
                       <div className="w-22">
-                        <div className="underline flex flex-col"> {p.booktype_master?.booktype}</div>
+                        <div className="underline flex flex-col"> {p.bookform_master?.bookform}</div>
                         <button
                           type="button"
                           title="実際の削除は、下の［変更を保存］により実行されます。"

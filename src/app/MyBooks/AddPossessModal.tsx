@@ -4,15 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { supabaseClient } from '@/lib/Client';
 import { Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { useBookFormMaster } from '@/context/AppContext';
 import { styleItems } from '@/app/constants';
 import Image from 'next/image';
-
-type BookTypeMaster = {
-  booktype_cd: string;
-  booktype: string;
-  selectable: boolean;
-  user_id: string;
-};
 
 // 本日日付（ローカル）
 const todayLocal = [
@@ -37,8 +31,8 @@ export function AddPossessModal({
   const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    booktype_cd: '',
-    get_date: '',
+    bookform_cd: '',
+    get_date: todayLocal,
     dispose_date: '',
     remarks: '',
     image_url: '',
@@ -46,7 +40,7 @@ export function AddPossessModal({
   });
   const insertData = {
     book_id: bookId,
-    booktype_cd: formData.booktype_cd,
+    bookform_cd: formData.bookform_cd,
     get_date: formData.get_date || null,
     dispose_date: formData.dispose_date || null,
     remarks: formData.remarks,
@@ -54,7 +48,10 @@ export function AddPossessModal({
     user_id: user
   };
 
-  // 画面マウント時のフォーカス用(書籍種別セレクトに当てるため、HTMLSelectElement)
+  // マスタ取得（カスタムフック）
+  const bookFormMaster = useBookFormMaster();
+
+  // 画面マウント時のフォーカス用(書籍形態セレクトに当てるため、HTMLSelectElement)
   const firstInputRef = useRef<HTMLSelectElement>(null);
   useEffect(() => {
     if (firstInputRef.current) {
@@ -71,7 +68,7 @@ export function AddPossessModal({
       return;
     }
 
-    if (!formData.booktype_cd || !formData.get_date.trim()) {
+    if (!formData.bookform_cd || !formData.get_date.trim()) {
       alert('必須項目が未入力です。');
       setLoading(false);
       return;
@@ -106,8 +103,8 @@ export function AddPossessModal({
     setPreviewUrl(`/api/proxy?url=${encodeURIComponent(formData.image_url.trim())}`);
   };
 
-  // 汎用的な入力変更ハンドラ
-  // チェックボックスの場合はchecked、それ以外はvalueを格納
+  // 入力変更ハンドラ
+  // 汎用；チェックボックスの場合はchecked、それ以外はvalueを格納
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -116,34 +113,18 @@ export function AddPossessModal({
       [id]: type === 'checkbox' ? checked : value
     }));
   };
+  // 書籍形態マスタ select用
+  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      bookform_cd: e.target.value // ここでbookform_cdが取得される
+    });
+  };
 
   // 書影URLを Table 'books' に反映
   const updateBookImageUrl = async () => {
     const { error } = await supabase.from('books').update({ image_url: formData.image_url }).eq('book_id', bookId);
     if (error) throw error;
-  };
-
-  // 書籍種別マスターの展開・取得
-  const [bookTypes, setBookTypes] = useState<BookTypeMaster[]>([]);
-  useEffect(() => {
-    const fetchBookTypes = async () => {
-      const { data, error } = await supabase
-        .from('booktype_master')
-        .select('*')
-        .order('booktype_cd', { ascending: true });
-      if (error) {
-        console.error('Error fetching book types:', error);
-      } else {
-        setBookTypes(data || []);
-      }
-    };
-    fetchBookTypes();
-  }, []);
-  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      booktype_cd: e.target.value // ここでbooktype_cdが取得される
-    });
   };
 
   return (
@@ -158,26 +139,26 @@ export function AddPossessModal({
         <form onSubmit={handleSubmit} className="space-y-2">
           <div className="flex-1">
             <div className="mt-1 ml-2">
-              <label htmlFor="booktype" className="font-bold text-orange-500">
-                書籍種別
+              <label htmlFor="bookform" className="font-bold text-orange-500">
+                書籍形態
               </label>
               <select
-                id="booktype"
+                id="bookform"
                 required
                 ref={firstInputRef}
-                value={formData.booktype_cd}
+                value={formData.bookform_cd}
                 className={styleItems}
                 onChange={handleSelect}
               >
                 <option value="">選択してください</option>
-                {bookTypes.map((item) =>
+                {bookFormMaster.map((item: any) =>
                   item.selectable ? (
-                    <option key={item.booktype_cd} value={item.booktype_cd}>
-                      {item.booktype}
+                    <option key={item.bookform_cd} value={item.bookform_cd}>
+                      {item.bookform}
                     </option>
                   ) : (
-                    <option key={item.booktype_cd} disabled>
-                      {item.booktype}
+                    <option key={item.bookform_cd} disabled>
+                      {item.bookform}
                     </option>
                   )
                 )}

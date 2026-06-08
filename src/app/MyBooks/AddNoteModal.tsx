@@ -40,7 +40,6 @@ export function AddNoteModal({
     note: formData.note,
     user_id: user
   };
-  console.log('addNote user:', user);
 
   // 画面マウント時のフォーカス用
   const firstInputRef = useRef<HTMLInputElement>(null);

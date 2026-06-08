@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Notebook, Pencil, RefreshCw, StepBack, StepForward, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { useSystemConstant, useBookClassMaster, useBookFormMaster, useBookRoleMaster } from '@/context/AppContext';
 import { BookForm } from '@/app/MyBooks/BookForm';
 
 export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
@@ -23,7 +24,13 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const isNextDisabled = currentIndex >= bookIds.length - 1;
   const readOnly_f = true;
 
-  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
+  // システム変数、マスタ値取得（カスタムフック）
+  const viewAlert = (useSystemConstant('viewAlert') as number) ?? 0;
+  const bookClassMaster = useBookClassMaster();
+  const bookFormMaster = useBookFormMaster();
+  const bookRoleMaster = useBookRoleMaster();
+
+  // 各ボタンの処理
   //［前］
   const handlePrev = () => {
     if (!isPrevDisabled) {
@@ -55,8 +62,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   useHotkeys(
     'alt+n',
     (event) => {
-      event.preventDefault(); // ブラウザのデフォルト挙動を防止
-      handleNext(); // handleNext内の「!isNextDisabled」判定が通る時だけ実行される
+      event.preventDefault();
+      handleNext();
     },
     [isNextDisabled, handleNext]
   );
@@ -66,6 +73,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     const params = new URLSearchParams({
       book_id: book_id?.toString() || '',
       title: title || '',
+      role_cd: book.book_role?.[0]?.role_cd || '',
+      person_name: book.book_role?.[0]?.person_name || '',
       user: user || ''
     });
     window.open(`/MyBooks/list_note_book?${params.toString()}`, '_blank', 'width=840,height=600');
@@ -86,7 +95,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     try {
       const { error } = await supabase.from('books').delete().eq('book_id', book.book_id);
       if (error) throw error;
-      alert(`『${book.title}』（${book.publisher}）を削除しました`);
+      alert(`『${book.title}』（${book.publisher}）を削除しました。`);
       //削除したIDを除去した新しいリストを作成
       const nextIds = bookIds.filter((_, index) => index !== currentIndex);
       if (nextIds.length === 0) {
@@ -119,7 +128,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     window.close();
   };
   useHotkeys('alt+c', (event) => {
-    event.preventDefault(); // ブラウザのデフォルト挙動を防止
+    event.preventDefault();
     handleClose();
   });
 
@@ -141,12 +150,12 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   //初期表示件数確認
   useEffect(() => {
     if (bookIdList.length === 0) {
-      alert('該当データがありません');
+      alert('該当する書籍がありません。');
       window.close();
       return;
     }
-    if (bookIdList.length > 50) {
-      const confirmed = window.confirm(`該当データ${bookIdList.length}件。時間のかかる場合がありますが続けますか？`);
+    if (viewAlert > 0 && bookIdList.length > viewAlert) {
+      const confirmed = window.confirm(`該当書籍${bookIdList.length}件。時間のかかる場合がありますが続けますか？`);
       if (!confirmed) {
         window.close();
         return;
@@ -162,17 +171,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       .select(
         `
         *,
-        book_role (
-          *,
-          book_role_master (
-            role_name
-          )
-        ),
-        book_possess (
-          *,
-          booktype_master (
-            booktype
-          )
+        book_role (*) ,
+        book_possess (*)
         )
         `
       )
@@ -196,6 +196,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       screenTitle="書籍管理（閲覧）"
       bookId={book.book_id}
       formData={book}
+      bookClassMaster={bookClassMaster}
       isReadOnly={readOnly_f}
       totalCount={bookIds.length}
       currentCount={currentIndex + 1}
@@ -207,7 +208,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
               {book.book_role?.map((r: any) => (
                 <div key={r.id} className="flex items-start text-sm border-b border-gray-50 flex-col">
                   <div className="mr-2">
-                    {r.book_role_master?.role_name}：{r.person_name}
+                    {bookRoleMaster.find((item: any) => item.role_cd === r.role_cd)?.role_name || null}：{r.person_name}
                   </div>
                   <div className="ml-4">{r.remarks}</div>
                 </div>
@@ -220,7 +221,9 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
               {book.book_possess?.map((p: any) => (
                 <div key={p.book_possess_id} className="flex items-start text-sm border-b border-gray-50">
                   <div className="flex flex-col mr-2">
-                    <div>種　別：{p.booktype_master?.booktype}</div>
+                    <div>
+                      種　別：{bookFormMaster.find((item: any) => item.bookform_cd === p.bookform_cd)?.bookform || null}
+                    </div>
                     <div>入手日：{p.get_date}</div>
                     <div>処分日：{p.dispose_date}</div>
                     <div>備　考：</div>

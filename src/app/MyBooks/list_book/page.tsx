@@ -1,6 +1,5 @@
 import { supabaseServer } from '@/lib/Server';
 import ListBook from '@/app/MyBooks/list_book';
-import { dbSearchMax } from '@/app/constants';
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -19,30 +18,31 @@ export default async function ListBookPage({ searchParams }: PageProps) {
     p_role_cd: (params.role_cd as string) || null,
     p_person_name: (params.person_name as string) || null,
     p_person_search_type: (params.person_search_type as string) || 'top',
-    p_booktype_cd: (params.booktype_cd as string) || null,
-    p_limit_comic: (params.limit_comic as string) || 'noLimit',
+    p_bookclass_cd: (params.bookclass_cd as string) || null,
+    p_bookform_cd: (params.bookform_cd as string) || null,
     p_limit_possess: (params.limit_possess as string) || 'noLimit',
     p_display_order: (params.display_order as string) || 'publish',
-    p_select_limit: (dbSearchMax as number) || 9999
+    p_select_limit: (params.sqlLimit as string) || '0'
   });
   if (error) {
     console.error(error);
     return (
       <div>
-        データ取得失敗 error.code={error.code} :{error.message}
+        書籍検索（一覧）データ取得失敗 error.code={error.code} :{error.message}
       </div>
     );
   }
   // book_id 配列 (例: [10001, 10005, ...])
   const bookIdList = idListData?.map((item: any) => item.book_id) || [];
 
-  // build時のエラー避けのため、booktype_cd、limit_comicが undefined、string[]となる可能性を排除
+  // build時のエラー避けのため、bookclass_cd等が undefined、string[]となる可能性を排除
   return (
     <div>
       <ListBook
         titleAdd=""
-        booktype_cd={Array.isArray(params.booktype_cd) ? params.booktype_cd[0] : (params.booktype_cd ?? '')}
-        limit_comic={Array.isArray(params.limit_comic) ? params.limit_comic[0] : (params.limit_comic ?? '')}
+        bookclass_cd={Array.isArray(params.bookclass_cd) ? params.bookclass_cd[0] : (params.bookclass_cd ?? '')}
+        bookform_cd={Array.isArray(params.bookform_cd) ? params.bookform_cd[0] : (params.bookform_cd ?? '')}
+        limit_possess={Array.isArray(params.limit_possess) ? params.limit_possess[0] : (params.limit_possess ?? '')}
         bookIdList={bookIdList}
       />
     </div>

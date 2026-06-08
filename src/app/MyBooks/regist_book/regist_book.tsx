@@ -9,7 +9,8 @@ import { CommonButton } from '@/components/ui/button';
 import { AddRoleModal } from '@/app/MyBooks/AddRoleModal';
 import { AddPossessModal } from '@/app/MyBooks/AddPossessModal';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
-import { BookForm } from '@/app/MyBooks/BookForm';
+import { useBookClassMaster } from '@/context/AppContext';
+import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 
 const initialFormState = {
   isbn10: '',
@@ -23,28 +24,10 @@ const initialFormState = {
   publish_series: '',
   publish_series_no: '',
   first_publish_year: 0,
+  bookclass_cd: '',
   remarks: '',
-  comic_f: false,
   image_url: ''
 };
-
-// BookForm.tsx とのインターフェース
-interface BookFormData {
-  isbn10: string;
-  isbn13: string;
-  c_cd: string;
-  ndc: string;
-  title: string;
-  original_title: string;
-  colophon: string;
-  publisher: string;
-  publish_series: string;
-  publish_series_no: string;
-  first_publish_year: number;
-  remarks: string;
-  comic_f: boolean;
-  image_url: string;
-}
 
 export default function RegistBook() {
   const supabase = supabaseClient();
@@ -56,7 +39,10 @@ export default function RegistBook() {
   const [isAddRoleModal, setIsAddRoleModal] = useState(false);
   const [isAddPossessModal, setIsAddPossessModal] = useState(false);
 
-  // 各ボタンの処理（ホットキー設定は return ,if文より前に書かないとエラー？）
+  // マスタ値取得（カスタムフック）
+  const bookClassMaster = useBookClassMaster();
+
+  // 各ボタンの処理
   // ［基本情報を登録］
   const handleBaseRegist = async () => {
     try {
@@ -107,10 +93,22 @@ export default function RegistBook() {
       [id]: value
     }));
   };
+  // 書籍分類セレクト用
+  const handleBookClass = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      bookclass_cd: e.target.value
+    });
+  };
 
   // 画面内容をTable 'books' へ登録
   const editBookData = async () => {
-    if (!formData.title.trim() || !formData.publisher.trim() || String(formData.first_publish_year).trim() === '') {
+    if (
+      !formData.title.trim() ||
+      !formData.publisher.trim() ||
+      String(formData.first_publish_year).trim() === '' ||
+      !formData.bookclass_cd.trim()
+    ) {
       alert('必須項目が未入力です。');
       return null;
     }
@@ -138,6 +136,7 @@ export default function RegistBook() {
       publisher: formData.publisher || null,
       publish_series: formData.publish_series || null,
       publish_series_no: formData.publish_series_no || null,
+      bookclass_cd: formData.bookclass_cd || null,
       remarks: formData.remarks || null,
       image_url: formData.image_url || null,
       user_id: user || null
@@ -163,8 +162,10 @@ export default function RegistBook() {
         screenTitle="書籍管理（登録）"
         bookId={registeredBook ? registeredBook.book_id : ''}
         formData={formData}
+        bookClassMaster={bookClassMaster}
         onChange={handleChange}
         onChangeF={handleChangeF}
+        onChangeS={handleBookClass}
         onClearField={handleEraseField}
         buttons={
           <>

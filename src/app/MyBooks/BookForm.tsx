@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eraser } from 'lucide-react';
+import { BookClassMaster } from '@/utils/getBookClass';
 import { isbnHyphen10 } from '@/utils/isbnHyphen10';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { toWarekiYear } from '@/utils/toWarekiYear';
@@ -17,8 +18,8 @@ export type BookFormData = {
   publish_series: string;
   publish_series_no: string;
   first_publish_year: number;
+  bookclass_cd: string;
   remarks: string;
-  comic_f: boolean;
   image_url: string;
 };
 
@@ -26,11 +27,13 @@ type Props = {
   screenTitle: string; // 画面の見出し
   bookId: string; // 表示対象の書籍ID
   formData: BookFormData;
+  bookClassMaster: BookClassMaster[]; // 書籍分類マスタ
   isReadOnly?: boolean; // 表示専用モード
   totalCount?: number; // 総件数
   currentCount?: number; // 現在件数
-  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onChangeF?: (id: any, value: any) => void; // 関数を介する項目用（ISBN等）
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void; //入力変更ハンドラ（一般項目用）
+  onChangeF?: (id: any, value: any) => void; //入力変更ハンドラ（関数を介する項目用）
+  onChangeS?: (e: React.ChangeEvent<HTMLSelectElement>) => void; //入力変更ハンドラ（セレクト項目用）
   onClearField?: (field: keyof BookFormData) => void; //入力内容消去ボタン用
   extraFields?: React.ReactNode; // 追加表示項目
   buttons?: React.ReactNode; // ボタンエリア
@@ -40,15 +43,20 @@ export const BookForm = ({
   screenTitle,
   bookId,
   formData,
+  bookClassMaster,
   isReadOnly = false,
   totalCount = 0,
   currentCount = 0,
   onChange,
   onChangeF,
+  onChangeS,
   onClearField,
   extraFields,
   buttons
 }: Props) => {
+  // 現在選択されている書籍分類を取得（表示モード用）
+  const currentClassName =
+    bookClassMaster.find((item) => item.bookclass_cd === formData.bookclass_cd)?.bookclass || '（未分類）';
   const screenMinW = 1100; //画面最小幅
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
@@ -65,7 +73,7 @@ export const BookForm = ({
             </div>
             {isReadOnly ? null : (
               <div className="ml-6">
-                （<span className="font-bold text-orange-500">オレンジ色</span>項目は空白不可）
+                （<span className="font-bold text-orange-500">オレンジ色</span>項目は省略不可）
               </div>
             )}
             <div className="flex mt-1">
@@ -221,14 +229,14 @@ export const BookForm = ({
                   id="publish_series"
                   className={styleItems}
                   type="text"
-                  size={26}
+                  size={40}
                   readOnly={isReadOnly}
                   value={formData.publish_series}
                   onChange={onChange}
                 />
               </div>
               <div>
-                <label htmlFor="publish_series_no" className="ml-4">
+                <label htmlFor="publish_series_no" className="ml-6">
                   シリーズ番号
                 </label>
                 <input
@@ -242,31 +250,67 @@ export const BookForm = ({
                 />
               </div>
             </div>
-            <div className="flex items-center mt-1">
-              <label
-                htmlFor="first_publish_year"
-                className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
-              >
-                初版年
-              </label>
-              <input
-                id="first_publish_year"
-                className={styleItems}
-                type="number"
-                required
-                size={4}
-                min={0}
-                max={9999}
-                readOnly={isReadOnly}
-                value={formData.first_publish_year}
-                onChange={onChange}
-              />
-              {toWarekiYear(parseInt(String(formData.first_publish_year))) //nullでない＝和暦変換成功
-                ? formData.first_publish_year && (
-                    <span>（{toWarekiYear(parseInt(String(formData.first_publish_year)) || 0)}）</span>
-                  )
-                : null}
-              <div className="ml-1">※不詳の場合は 0（zero）</div>
+            <div className="flex  mt-1">
+              <div className="flex items-center w-4/7">
+                <label
+                  htmlFor="first_publish_year"
+                  className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
+                >
+                  初版年
+                </label>
+                <input
+                  id="first_publish_year"
+                  className={styleItems}
+                  type="number"
+                  required
+                  size={4}
+                  min={0}
+                  max={9999}
+                  readOnly={isReadOnly}
+                  value={formData.first_publish_year}
+                  onChange={onChange}
+                />
+                {toWarekiYear(parseInt(String(formData.first_publish_year))) //nullでない＝和暦変換成功
+                  ? formData.first_publish_year && (
+                      <span>（{toWarekiYear(parseInt(String(formData.first_publish_year)) || 0)}）</span>
+                    )
+                  : null}
+                <div className="ml-1">※不詳の場合は 0（zero）</div>
+              </div>
+              <div className="flex items-center ml-5">
+                <label
+                  htmlFor="bookclass_cd"
+                  className={`inline-block w-20 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
+                >
+                  書籍分類
+                </label>
+                {isReadOnly ? (
+                  <span id="bookclass_cd" className={`${styleItems} w-30`}>
+                    {currentClassName}
+                  </span>
+                ) : (
+                  <select
+                    id="bookclass_cd"
+                    name="bookclass_cd"
+                    className={styleItems}
+                    value={formData.bookclass_cd || ''}
+                    onChange={onChangeS}
+                  >
+                    <option value="">選択してください</option>
+                    {bookClassMaster.map((item) =>
+                      item.selectable ? (
+                        <option key={item.bookclass_cd} value={item.bookclass_cd}>
+                          {item.bookclass}
+                        </option>
+                      ) : (
+                        <option key={item.bookclass_cd} disabled>
+                          {item.bookclass}
+                        </option>
+                      )
+                    )}
+                  </select>
+                )}
+              </div>
             </div>
             <div className="mt-1">
               <label htmlFor="remarks" className="inline-block w-15 align-top">
@@ -275,7 +319,7 @@ export const BookForm = ({
               <textarea
                 id="remarks"
                 className={styleItems}
-                cols={80}
+                cols={95}
                 rows={2}
                 readOnly={isReadOnly}
                 value={formData.remarks}
@@ -316,17 +360,6 @@ export const BookForm = ({
               <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex justify-end mb-1">
                 （書影URL）
               </label>
-            </div>
-            <div className="flex mt-6 justify-end">
-              <label htmlFor="comic_f">コミック</label>
-              <input
-                id="comic_f"
-                className="ml-2"
-                type="checkbox"
-                readOnly={isReadOnly}
-                checked={formData.comic_f}
-                onChange={onChange}
-              />
             </div>
           </div>
         </div>
