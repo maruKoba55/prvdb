@@ -286,7 +286,7 @@ export function SearchBooks() {
                 id="title"
                 className={styleItems}
                 type="text"
-                size={82}
+                size={78}
                 value={formData.title}
                 onChange={handleChange}
               />
@@ -374,7 +374,7 @@ export function SearchBooks() {
                   id="person_name"
                   className={styleItems}
                   type="text"
-                  size={40}
+                  size={42}
                   required
                   value={formData.person_name}
                   onChange={handleChange}
