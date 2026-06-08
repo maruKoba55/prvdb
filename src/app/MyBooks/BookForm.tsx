@@ -155,7 +155,7 @@ export const BookForm = ({
                 className={styleItems}
                 type="text"
                 required
-                size={94}
+                size={88}
                 readOnly={isReadOnly}
                 value={formData.title}
                 onChange={onChange}
@@ -169,7 +169,7 @@ export const BookForm = ({
                 id="original_title"
                 className={styleItems}
                 type="text"
-                size={94}
+                size={88}
                 readOnly={isReadOnly}
                 value={formData.original_title}
                 onChange={onChange}
@@ -183,7 +183,7 @@ export const BookForm = ({
                 <textarea
                   id="colophon"
                   className={styleItems}
-                  cols={80}
+                  cols={74}
                   rows={4}
                   readOnly={isReadOnly}
                   value={formData.colophon}
@@ -319,7 +319,7 @@ export const BookForm = ({
               <textarea
                 id="remarks"
                 className={styleItems}
-                cols={95}
+                cols={88}
                 rows={2}
                 readOnly={isReadOnly}
                 value={formData.remarks}
