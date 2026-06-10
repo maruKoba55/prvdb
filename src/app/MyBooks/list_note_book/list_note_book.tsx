@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Pencil, Save, X, Plus, Trash2 } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { AddNoteModal } from '@/app/MyBooks/AddNoteModal';
+import { AddNoteModal } from './AddNoteModal';
 import { useSystemConstant, useBookRoleMaster } from '@/context/AppContext';
 
 type BookNote = {

@@ -8,8 +8,8 @@ import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { useBookClassMaster } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
-import { AddRoleModal } from '@/app/MyBooks/AddRoleModal';
-import { AddPossessModal } from '@/app/MyBooks/AddPossessModal';
+import { AddRoleModal } from './AddRoleModal';
+import { AddPossessModal } from './AddPossessModal';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 

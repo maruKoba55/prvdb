@@ -47,13 +47,13 @@ BEGIN
     (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：前方一致
-    AND (p_publisher IS NULL OR b.publisher ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,' ',''),'　','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,' ',''),'　','') ILIKE p_publish_series || '%')
     -- タイトル：前方一致 or 部分一致
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE '%' || p_title || '%' END))
     -- 役割 ：存在する場合のみ絞り込む = !inner相当
     AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE '%' || p_person_name || '%' END))
     -- 保有状況
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
     AND (CASE 
@@ -117,17 +117,17 @@ BEGIN
         SELECT 1 FROM book_role br 
         WHERE br.book_id = b.book_id
           AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE '%' || p_person_name || '%' END))
       )
     )
     -- 4. その他のフィルタ
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：前方一致
-    AND (p_publisher IS NULL OR b.publisher ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,' ',''),'　','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,' ',''),'　','') ILIKE p_publish_series || '%')
     -- タイトル：前方一致 or 部分一致
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE '%' || p_title || '%' END))
     -- 保有状況
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   GROUP BY b.book_id
@@ -213,13 +213,13 @@ BEGIN
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：前方一致
-    AND (p_publisher IS NULL OR b.publisher ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,' ',''),'　','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,' ',''),'　','') ILIKE p_publish_series || '%')
     -- タイトル：前方一致 or 部分一致
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE '%' || p_title || '%' END))
     -- 役割
     AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE '%' || p_person_name || '%' END))
     -- 保有状況
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   ORDER BY bn.read_st_date ASC,

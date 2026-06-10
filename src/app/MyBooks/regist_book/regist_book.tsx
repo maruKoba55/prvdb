@@ -4,10 +4,8 @@ import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { BookCopy, Eraser, Save, UserRoundPen, X } from 'lucide-react';
+import { Eraser, Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { AddRoleModal } from '@/app/MyBooks/AddRoleModal';
-import { AddPossessModal } from '@/app/MyBooks/AddPossessModal';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { useBookClassMaster } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
@@ -36,8 +34,6 @@ export default function RegistBook() {
   const user = searchParams.get('user');
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
-  const [isAddRoleModal, setIsAddRoleModal] = useState(false);
-  const [isAddPossessModal, setIsAddPossessModal] = useState(false);
 
   // マスタ値取得（カスタムフック）
   const bookClassMaster = useBookClassMaster();
@@ -49,7 +45,18 @@ export default function RegistBook() {
       const data = await editBookData();
       if (data) {
         setRegisteredBook(data);
-        alert(`『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました。`);
+        if (
+          confirm(
+            `『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました。編集画面に移動します。`
+          )
+        ) {
+          const params = new URLSearchParams({
+            book_id: data?.book_id.toString() || '',
+            user: user || ''
+          });
+          window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
+          window.close();
+        }
       }
     } catch (error: any) {
       if (error.code === '23505') {
@@ -101,6 +108,14 @@ export default function RegistBook() {
     });
   };
 
+  // 指定フィールドを消去する関数
+  const handleEraseField = (field: keyof BookFormData) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: ''
+    }));
+  };
+
   // 画面内容をTable 'books' へ登録
   const editBookData = async () => {
     if (
@@ -148,14 +163,6 @@ export default function RegistBook() {
     return data ? data[0] : null;
   };
 
-  // フィールド名を指定して値を空にする関数
-  const handleEraseField = (field: keyof BookFormData) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: ''
-    }));
-  };
-
   return (
     <div>
       <BookForm
@@ -182,30 +189,6 @@ export default function RegistBook() {
             <CommonButton
               label={
                 <>
-                  <UserRoundPen size={20} />
-                  役割情報登録
-                </>
-              }
-              variant="orange"
-              onClick={() => setIsAddRoleModal(true)}
-              disabled={!registeredBook?.book_id}
-              title="基本情報の保存後、検索用の著者名などを入力"
-            />
-            <CommonButton
-              label={
-                <>
-                  <BookCopy size={20} />
-                  保有情報登録
-                </>
-              }
-              variant="red"
-              onClick={() => setIsAddPossessModal(true)}
-              disabled={!registeredBook?.book_id}
-              title="基本情報の保存後、保有する書籍の情報を入力"
-            />
-            <CommonButton
-              label={
-                <>
                   <Eraser size={20} />
                   画面初期化
                 </>
@@ -226,38 +209,6 @@ export default function RegistBook() {
           </>
         }
       />
-      {/* 役割情報登録 */}
-      {isAddRoleModal && (
-        <AddRoleModal
-          bookId={Number(registeredBook.book_id) || 0}
-          bookTitle={formData.title || ''}
-          user={user || ''}
-          onClose={() => setIsAddRoleModal(false)}
-          onSuccess={() => {
-            setIsAddRoleModal(false);
-            router.refresh();
-            //  window.location.reload();
-            // ↑これで画面更新すると、追加したbook_roleが表示される一方、
-            //  他の変更内容が元に戻ってしまう。
-          }}
-        />
-      )}
-      {/* 保有情報登録 */}
-      {isAddPossessModal && (
-        <AddPossessModal
-          bookId={Number(registeredBook.book_id) || 0}
-          bookTitle={formData.title || ''}
-          user={user || ''}
-          onClose={() => setIsAddPossessModal(false)}
-          onSuccess={() => {
-            setIsAddPossessModal(false);
-            router.refresh();
-            //  window.location.reload();
-            // ↑これで画面更新すると、追加したbook_roleが表示される一方、
-            //  他の変更内容が元に戻ってしまう。
-          }}
-        />
-      )}
     </div>
   );
 }
