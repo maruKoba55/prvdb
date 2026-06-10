@@ -73,17 +73,17 @@ export function SearchBooks() {
   };
 
   // 各ボタンの処理
-  // ［書籍検索（個別）］
+  // ［書籍検索（個別）］ ※書名等は空白を除去
   const handleBookSearch = async () => {
     if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
-      title: formData.title || '',
+      title: formData.title.replace(/\s+/g, '') || '',
       title_search_type: formData.titleSearch || '',
-      publisher: formData.publisher || '',
-      publish_series: formData.publish_series || '',
+      publisher: formData.publisher.replace(/\s+/g, '') || '',
+      publish_series: formData.publish_series.replace(/\s+/g, '') || '',
       role_cd: formData.role_cd || '',
-      person_name: formData.person_name || '',
+      person_name: formData.person_name.replace(/\s+/g, '') || '',
       person_search_type: formData.personSearch,
       bookclass_cd: formData.bookclass_cd || '',
       bookform_cd: formData.bookform_cd || '',
@@ -94,17 +94,17 @@ export function SearchBooks() {
     });
     window.open(`/MyBooks/view_book?${params.toString()}`, '_blank', 'width=1110,height=880');
   };
-  // ［書籍検索（一覧）］
+  // ［書籍検索（一覧）］ ※書名等は空白を除去
   const handleBookList = async () => {
     if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
-      title: formData.title || '',
+      title: formData.title.replace(/\s+/g, '') || '',
       title_search_type: formData.titleSearch || '',
-      publisher: formData.publisher || '',
-      publish_series: formData.publish_series || '',
+      publisher: formData.publisher.replace(/\s+/g, '') || '',
+      publish_series: formData.publish_series.replace(/\s+/g, '') || '',
       role_cd: formData.role_cd || '',
-      person_name: formData.person_name || '',
+      person_name: formData.person_name.replace(/\s+/g, '') || '',
       person_search_type: formData.personSearch,
       bookclass_cd: formData.bookclass_cd || '',
       bookform_cd: formData.bookform_cd || '',
@@ -122,7 +122,7 @@ export function SearchBooks() {
       read_st_to: formData.read_st_to
     });
   };
-  // ［ノート検索］
+  // ［ノート検索］ ※書名等は空白を除去
   const handleNoteSearch = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
     if (!SearchChk(formData)) return;
@@ -130,30 +130,30 @@ export function SearchBooks() {
       read_st_from: formData.read_st_from || '0001-01-01',
       read_st_to: formData.read_st_to || '9999-12-31',
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
-      title: formData.title || '',
+      title: formData.title.replace(/\s+/g, '') || '',
       title_search_type: formData.titleSearch || '',
-      publisher: formData.publisher || '',
-      publish_series: formData.publish_series || '',
+      publisher: formData.publisher.replace(/\s+/g, '') || '',
+      publish_series: formData.publish_series.replace(/\s+/g, '') || '',
       role_cd: formData.role_cd || '',
-      person_name: formData.person_name || '',
+      person_name: formData.person_name.replace(/\s+/g, '') || '',
       person_search_type: formData.personSearch,
       bookclass_cd: formData.bookclass_cd || '',
       bookform_cd: formData.bookform_cd || ''
     });
     window.open(`/MyBooks/list_note_range?${params.toString()}`, '_blank', 'width=840,height=600');
   };
-  // ［未読一覧］
+  // ［未読一覧］ ※書名等は空白を除去
   const handleUnRead = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
     if (!SearchChk(formData)) return;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
-      title: formData.title || '',
+      title: formData.title.replace(/\s+/g, '') || '',
       title_search_type: formData.titleSearch || '',
-      publisher: formData.publisher || '',
-      publish_series: formData.publish_series || '',
+      publisher: formData.publisher.replace(/\s+/g, '') || '',
+      publish_series: formData.publish_series.replace(/\s+/g, '') || '',
       role_cd: formData.role_cd || '',
-      person_name: formData.person_name || '',
+      person_name: formData.person_name.replace(/\s+/g, '') || '',
       person_search_type: formData.personSearch,
       bookclass_cd: formData.bookclass_cd || '',
       bookform_cd: formData.bookform_cd || '',
