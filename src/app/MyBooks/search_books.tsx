@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { supabaseClient } from '@/lib/Client';
-import { BookCopy, BookSearch, CalendarSearch, Eraser, LogIn, LogOut, Plus, TextSearch, Toolbox } from 'lucide-react';
+import { BookSearch, BookX, CalendarSearch, Eraser, LogIn, LogOut, Plus, TextSearch, Toolbox } from 'lucide-react';
 import { EditProfile } from '@/components/editProfile';
 import { CommonButton } from '@/components/ui/button';
 import { useSystemConstant, useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
@@ -621,7 +621,7 @@ export function SearchBooks() {
                 <CommonButton
                   label={
                     <>
-                      <BookCopy size={20} />
+                      <BookX size={20} />
                       未読一覧
                     </>
                   }

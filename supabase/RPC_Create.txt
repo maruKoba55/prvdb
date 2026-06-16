@@ -1,10 +1,9 @@
-DROP FUNCTION IF EXISTS search_books_complex;
-※引数を変更したために同名FUNCTIONが複数存在する場合は、引数のリストを付けてそれぞれDROPする。
-  （例）DROP FUNCTION IF EXISTS search_books_complex(text, text, text, text, text, text, text, text, text, text, text, text);
+-- DROP FUNCTION IF EXISTS search_books_complex;
+-- ※引数を変更したために同名FUNCTIONが複数存在する場合は、引数のリストを付けてそれぞれDROPする。
+--  （例）DROP FUNCTION IF EXISTS search_books_complex(text, text, text, text, text, text, text, text, text, text, text, text);
 
 
-■書籍閲覧、一覧用
-DROP FUNCTION IF EXISTS search_books_complex;
+-- ■書籍閲覧、一覧
 CREATE OR REPLACE FUNCTION search_books_complex(
   p_isbn13 TEXT DEFAULT NULL,
   p_title TEXT DEFAULT NULL,
@@ -77,8 +76,7 @@ END;
 $$;
 
 
-■未読一覧用
-DROP FUNCTION IF EXISTS search_books_unread;
+-- ■未読一覧
 CREATE OR REPLACE FUNCTION search_books_unread(
   p_isbn13 TEXT DEFAULT NULL,
   p_title TEXT DEFAULT NULL,
@@ -143,8 +141,7 @@ END;
 $$;
 
 
-■ノート一覧（範囲指定）用
-DROP FUNCTION IF EXISTS search_note_range;
+-- ■ノート一覧（範囲指定）
 CREATE OR REPLACE FUNCTION search_note_range(
   p_read_st_from DATE DEFAULT '0001-01-01',
   p_read_st_to DATE DEFAULT '9999-12-31',
@@ -229,8 +226,55 @@ END;
 $$;
 
 
-■書籍分類マスタ・分類コード変更用
-DROP FUNCTION IF EXISTS update_bookclass_cd;
+-- ■書籍複製
+CREATE OR REPLACE FUNCTION duplicate_book(p_src_book_id INT)
+RETURNS INT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_new_book_id INT;
+  v_timestamp_suffix TEXT;
+BEGIN
+  v_timestamp_suffix := '_' || to_char(NOW(), 'YYYYMMDDHH24MISS');
+  -- (1) booksを複製（書名にタイムスタンプ付加；UNIQUE制約回避）
+  INSERT INTO books (
+      isbn10, isbn13, c_cd, ndc, title, original_title, colophon, 
+      publisher, publish_series, publish_series_no, first_publish_year, 
+      bookclass_cd, remarks, image_url, user_id
+  )
+  SELECT 
+      isbn10, isbn13, c_cd, ndc, title || v_timestamp_suffix, original_title, colophon, 
+      publisher, publish_series, publish_series_no, first_publish_year, 
+      bookclass_cd, remarks, image_url, user_id
+  FROM books
+  WHERE book_id = p_src_book_id
+  RETURNING book_id INTO v_new_book_id; -- コピー先book_id
+  IF v_new_book_id IS NULL THEN
+      RAISE EXCEPTION '指定された book_id (%) が見つかりません。', p_src_book_id;
+  END IF;
+  -- (2) book_roleを複製
+  INSERT INTO book_role (
+      book_id, role_cd, role_order, person_name, remarks, user_id
+  )
+  SELECT 
+      v_new_book_id, role_cd, role_order, person_name, remarks, user_id
+  FROM book_role
+  WHERE book_id = p_src_book_id;
+  -- (3) book_possessを複製
+  INSERT INTO book_possess (
+      book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+  )
+  SELECT 
+      v_new_book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+  FROM book_possess
+  WHERE book_id = p_src_book_id;
+  -- (4) コピー先の book_id を返却
+  RETURN v_new_book_id;
+END;
+$$;
+
+
+-- ■書籍分類マスタ・分類コード変更用
 CREATE OR REPLACE FUNCTION update_bookclass_cd(
   old_cd CHAR(3),
   new_cd CHAR(3),
@@ -244,10 +288,9 @@ AS $$
 DECLARE
   v_current_user uuid;
   v_avoid_error text;  -- コードを変更して分類名が元のままの時、分類名の重複エラーを避けるため一時的に付加する文字列
-  current_ts timestamp := now();
 BEGIN
   v_current_user := auth.uid();
-  v_avoid_error := to_char(current_ts, 'YYYY-MM-DD HH24:MI:SS');
+  v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
   IF v_current_user IS NULL THEN
       RAISE EXCEPTION 'ユーザーがログインしていません。';
   END IF;
@@ -268,8 +311,7 @@ END;
 $$;
 
 
-■書籍役割マスタ・役割コード変更用
-DROP FUNCTION IF EXISTS update_role_cd;
+-- ■書籍役割マスタ・役割コード変更用
 CREATE OR REPLACE FUNCTION update_role_cd(
   old_cd CHAR(3),
   new_cd CHAR(3),
@@ -283,10 +325,9 @@ AS $$
 DECLARE
   v_current_user uuid;
   v_avoid_error text;  -- コードを変更して役割名が元のままの時、役割名の重複エラーを避けるため一時的に付加する文字列
-  current_ts timestamp := now();
 BEGIN
   v_current_user := auth.uid();
-  v_avoid_error := to_char(current_ts, 'YYYY-MM-DD HH24:MI:SS');
+  v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
   IF v_current_user IS NULL THEN
       RAISE EXCEPTION 'ユーザーがログインしていません。';
   END IF;
@@ -307,8 +348,7 @@ END;
 $$;
 
 
-■書籍形態マスタ・形態コード変更用
-DROP FUNCTION IF EXISTS update_bookform_cd;
+-- ■書籍形態マスタ・形態コード変更用
 CREATE OR REPLACE FUNCTION update_bookform_cd(
   old_cd CHAR(3),
   new_cd CHAR(3),
@@ -322,10 +362,9 @@ AS $$
 DECLARE
   v_current_user uuid;
   v_avoid_error text;  -- コードを変更して形態名が元のままの時、形態名の重複エラーを避けるため一時的に付加する文字列
-  current_ts timestamp := now();
 BEGIN
   v_current_user := auth.uid();
-  v_avoid_error := to_char(current_ts, 'YYYY-MM-DD HH24:MI:SS');
+  v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
   IF v_current_user IS NULL THEN
       RAISE EXCEPTION 'ユーザーがログインしていません。';
   END IF;
@@ -346,8 +385,7 @@ END;
 $$;
 
 
-■データ保存用
-DROP FUNCTION IF EXISTS public.backup_books;
+-- ■データ保存
 CREATE OR REPLACE FUNCTION public.backup_books()
 RETURNS void
 LANGUAGE plpgsql

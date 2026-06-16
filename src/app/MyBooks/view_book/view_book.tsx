@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { Notebook, Pencil, RefreshCw, StepBack, StepForward, Trash2, X } from 'lucide-react';
+import { BookCopy, Notebook, Pencil, RefreshCw, StepBack, StepForward, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { useSystemConstant, useBookClassMaster, useBookFormMaster, useBookRoleMaster } from '@/context/AppContext';
 import { BookForm } from '@/app/MyBooks/BookForm';
@@ -115,6 +115,24 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       }
     }
   };
+  //［複製］
+  const handleDuplicate = async () => {
+    const confirmed = confirm(
+      `『${book.title}』（${book.publisher}）を複製し、編集画面を開きます。書名の他、適宜に修正してください。`
+    );
+    if (!confirmed) return;
+    const { data: newBookId, error } = await supabase.rpc('duplicate_book', { p_src_book_id: book.book_id });
+    if (!error) {
+      const params = new URLSearchParams({
+        book_id: newBookId.toString() || '',
+        user: user || ''
+      });
+      window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
+    } else {
+      console.error(error);
+      alert(`複製失敗 code=${error.code} : ${error.message}`);
+    }
+  };
   //［画面最新化］
   const handleRefresh = () => {
     fetchBookData(bookIds, currentIndex);
@@ -180,6 +198,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       .order('role_cd', { referencedTable: 'book_role', ascending: true })
       .order('role_order', { referencedTable: 'book_role', ascending: true })
       .order('get_date', { referencedTable: 'book_possess', ascending: true })
+      .order('bookform_cd', { referencedTable: 'book_possess', ascending: true })
       .single();
 
     if (data) {
@@ -286,13 +305,13 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
           <CommonButton
             label={
               <>
-                <Trash2 size={20} />
-                削除
+                <BookCopy size={20} />
+                複製
               </>
             }
-            variant="red"
-            title="書籍情報を削除します。読書ノートが存在する場合は、先に削除してください。"
-            onClick={handleDelete}
+            variant="orange"
+            title="仮の書名で書籍情報を複製します。"
+            onClick={handleDuplicate}
           />
           <CommonButton
             type="button"
@@ -304,6 +323,17 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
             }
             variant="outline"
             onClick={handleRefresh}
+          />
+          <CommonButton
+            label={
+              <>
+                <Trash2 size={20} />
+                削除
+              </>
+            }
+            variant="red"
+            title="書籍情報を削除します。読書ノートが存在する場合は、先に削除してください。"
+            onClick={handleDelete}
           />
           <CommonButton
             label={
