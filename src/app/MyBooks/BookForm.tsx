@@ -100,7 +100,9 @@ export const BookForm = ({
                 {formData.isbn10 && !isbnHyphen10(formData.isbn10) ? <div className="text-red-500 ml-1">?</div> : null}
               </div>
               <div className="flex items-center ml-4">
-                <label htmlFor="isbn13">ISBN-13</label>
+                <label htmlFor="isbn13" className="inline-block w-15">
+                  ISBN-13
+                </label>
                 <input
                   id="isbn13"
                   className={styleItems}
@@ -119,7 +121,7 @@ export const BookForm = ({
                 />
                 {formData.isbn13 && !isbnHyphenate(formData.isbn13) ? <div className="text-red-500 ml-1">?</div> : null}
               </div>
-              <div className="ml-4">
+              <div className="flex items-center ml-4">
                 <label htmlFor="c_cd">Cコード</label>
                 <input
                   id="c_cd"
@@ -132,7 +134,7 @@ export const BookForm = ({
                   onChange={onChange}
                 />
               </div>
-              <div className="ml-4">
+              <div className="flex items-center ml-4">
                 <label htmlFor="ndc">十進分類</label>
                 <input
                   id="ndc"

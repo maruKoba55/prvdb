@@ -81,7 +81,7 @@ export default function DataMaint() {
     fetchBackupHistory();
   }, []);
 
-  const screenW = 630; //画面幅
+  const screenW = 640; //画面幅
 
   return (
     <div style={{ width: `${screenW}px` }}>
@@ -90,7 +90,7 @@ export default function DataMaint() {
         <div className="text-xl font-bold text-blue-500 m-1">データメンテナンス</div>
         <div className="flex flex-col justify-around ml-4 p-2">
           <div className="flex mt-1">
-            <div className="flex flex-col justify-center w-38">
+            <div className="flex flex-col justify-center w-40">
               <CommonButton
                 label={
                   <>
@@ -107,7 +107,7 @@ export default function DataMaint() {
             <div className="flex flex-col justify-center ml-1">書籍に関わる人・団体に付与する【役割】の管理</div>
           </div>
           <div className="flex mt-3">
-            <div className="flex flex-col justify-center w-38">
+            <div className="flex flex-col justify-center w-40">
               <CommonButton
                 label={
                   <>
@@ -124,7 +124,7 @@ export default function DataMaint() {
             <div className="flex flex-col justify-center ml-1">書籍を保有する【形態】の管理</div>
           </div>
           <div className="flex mt-3">
-            <div className="flex flex-col justify-center w-38">
+            <div className="flex flex-col justify-center w-40">
               <CommonButton
                 label={
                   <>
@@ -141,7 +141,7 @@ export default function DataMaint() {
             <div className="flex flex-col justify-center ml-1">書籍に割り当てる【分類】の管理</div>
           </div>
           <div className="flex mt-3">
-            <div className="flex flex-col justify-center w-38">
+            <div className="flex flex-col justify-center w-40">
               <CommonButton
                 label={
                   <>
@@ -156,7 +156,7 @@ export default function DataMaint() {
             <div className="flex flex-col justify-center ml-1">書籍管理システムで参照する定数の調整</div>
           </div>
           <div className="flex mt-3">
-            <div className="flex flex-col justify-center w-38">
+            <div className="flex flex-col justify-center w-40">
               <CommonButton
                 label={
                   <>
