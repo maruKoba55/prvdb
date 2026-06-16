@@ -341,3 +341,41 @@ to public
 using (
   (auth.uid() = user_id)
 );
+
+drop policy if exists "backup_history insert : only own user_id" on backup_history;
+drop policy if exists "backup_history delete : only own user_id" on backup_history;
+drop policy if exists "backup_history update : only own user_id" on backup_history;
+drop policy if exists "backup_history select : only own user_id" on backup_history;
+
+create policy "backup_history insert : only own user_id"
+on "public"."backup_history"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "backup_history delete : only own user_id"
+on "public"."backup_history"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "backup_history update : only own user_id"
+on "public"."backup_history"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "backup_history select : only own user_id"
+on "public"."backup_history"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);

@@ -296,7 +296,7 @@ export const BookForm = ({
                     value={formData.bookclass_cd || ''}
                     onChange={onChangeS}
                   >
-                    <option value="">選択してください</option>
+                    {/*    <option value="">選択してください</option> */}
                     {bookClassMaster.map((item) =>
                       item.selectable ? (
                         <option key={item.bookclass_cd} value={item.bookclass_cd}>

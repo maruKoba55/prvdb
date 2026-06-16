@@ -1,11 +1,6 @@
-'use client';
-import dynamic from 'next/dynamic';
+import ListNoteRange from './list_note_range';
 
-const ListNoteRange = dynamic(() => import('@/app/MyBooks/list_note_range/list_note_range'), {
-  ssr: false // サーバーサイドレンダリングを無効化
-});
-
-export default function Home() {
+export default async function ListNoteRangePage() {
   return (
     <div>
       <ListNoteRange />

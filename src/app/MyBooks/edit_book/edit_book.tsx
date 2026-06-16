@@ -96,6 +96,19 @@ export default function EditBook({ book }: { book: any }) {
       }
     }
     if (deletePossessions.length > 0) {
+      const { count: countNote, error: errorNote } = await supabase
+        .from('book_note')
+        .select('*', { count: 'exact', head: true })
+        .eq('book_id', bookId);
+      if (errorNote) {
+        console.error(errorNote);
+        alert(`ノート存在確認失敗 code=${errorNote.code} : ${errorNote.message}`);
+        return;
+      }
+      if (countNote && countNote > 0 && deletePossessions.length === formData.book_possess.length) {
+        alert('この書籍にはノートが登録されているため、すべての保有情報を削除することはできません。');
+        return;
+      }
       const { error: deletePossessErr } = await supabase
         .from('book_possess')
         .delete()

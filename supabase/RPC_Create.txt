@@ -47,13 +47,13 @@ BEGIN
     (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：前方一致
-    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,' ',''),'　','') ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,' ',''),'　','') ILIKE p_publish_series || '%')
+    AND (p_publisher IS NULL OR b.publisher ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
     -- タイトル：前方一致 or 部分一致
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE '%' || p_title || '%' END))
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
     -- 役割 ：存在する場合のみ絞り込む = !inner相当
     AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE '%' || p_person_name || '%' END))
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
     -- 保有状況
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
     AND (CASE 
@@ -117,17 +117,17 @@ BEGIN
         SELECT 1 FROM book_role br 
         WHERE br.book_id = b.book_id
           AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE '%' || p_person_name || '%' END))
+          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
       )
     )
     -- 4. その他のフィルタ
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：前方一致
-    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,' ',''),'　','') ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,' ',''),'　','') ILIKE p_publish_series || '%')
+    AND (p_publisher IS NULL OR b.publisher ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
     -- タイトル：前方一致 or 部分一致
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE '%' || p_title || '%' END))
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
     -- 保有状況
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   GROUP BY b.book_id
@@ -213,13 +213,13 @@ BEGIN
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：前方一致
-    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,' ',''),'　','') ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,' ',''),'　','') ILIKE p_publish_series || '%')
+    AND (p_publisher IS NULL OR b.publisher ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR b.publish_series ILIKE p_publish_series || '%')
     -- タイトル：前方一致 or 部分一致
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,' ',''),'　','') ILIKE '%' || p_title || '%' END))
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN b.title ILIKE p_title || '%' ELSE b.title ILIKE '%' || p_title || '%' END))
     -- 役割
     AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,' ',''),'　','') ILIKE '%' || p_person_name || '%' END))
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN br.person_name ILIKE p_person_name || '%' ELSE br.person_name ILIKE '%' || p_person_name || '%' END))
     -- 保有状況
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   ORDER BY bn.read_st_date ASC,
@@ -228,3 +228,448 @@ BEGIN
 END;
 $$;
 
+
+■書籍分類マスタ・分類コード変更用
+DROP FUNCTION IF EXISTS update_bookclass_cd;
+CREATE OR REPLACE FUNCTION update_bookclass_cd(
+  old_cd CHAR(3),
+  new_cd CHAR(3),
+  new_name TEXT,
+  new_selectable BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_avoid_error text;  -- コードを変更して分類名が元のままの時、分類名の重複エラーを避けるため一時的に付加する文字列
+  current_ts timestamp := now();
+BEGIN
+  v_current_user := auth.uid();
+  v_avoid_error := to_char(current_ts, 'YYYY-MM-DD HH24:MI:SS');
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION 'ユーザーがログインしていません。';
+  END IF;
+  -- (1) 書籍分類マスタに新コードを追加（分類名にエラー避けの文字列付加）
+  INSERT INTO bookclass_master (bookclass_cd, bookclass, selectable, user_id)
+  VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
+  -- (2) 書籍の分類コードを書換え
+  UPDATE books SET bookclass_cd = new_cd
+  WHERE  bookclass_cd = old_cd AND user_id = v_current_user;
+  -- (3) 書籍分類マスタから旧コードを削除
+  DELETE FROM bookclass_master
+  WHERE bookclass_cd = old_cd AND user_id = v_current_user;
+  -- (4) 新コードの書籍分類マスタの分類名からエラー避けを除去
+  UPDATE bookclass_master
+  SET bookclass = REGEXP_REPLACE(bookclass, v_avoid_error || '$', '', 'g')
+  WHERE bookclass_cd = new_cd AND user_id = v_current_user;
+END;
+$$;
+
+
+■書籍役割マスタ・役割コード変更用
+DROP FUNCTION IF EXISTS update_role_cd;
+CREATE OR REPLACE FUNCTION update_role_cd(
+  old_cd CHAR(3),
+  new_cd CHAR(3),
+  new_name TEXT,
+  new_selectable BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_avoid_error text;  -- コードを変更して役割名が元のままの時、役割名の重複エラーを避けるため一時的に付加する文字列
+  current_ts timestamp := now();
+BEGIN
+  v_current_user := auth.uid();
+  v_avoid_error := to_char(current_ts, 'YYYY-MM-DD HH24:MI:SS');
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION 'ユーザーがログインしていません。';
+  END IF;
+  -- (1) 書籍役割マスタに新コードを追加（役割名にエラー避けの文字列付加）
+  INSERT INTO book_role_master (role_cd, role_name, selectable, user_id)
+  VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
+  -- (2) 書籍の役割コードを書換え
+  UPDATE book_role SET role_cd = new_cd
+  WHERE  role_cd = old_cd AND user_id = v_current_user;
+  -- (3) 書籍役割マスタから旧コードを削除
+  DELETE FROM book_role_master
+  WHERE role_cd = old_cd AND user_id = v_current_user;
+  -- (4) 新コードの書籍役割マスタの役割名からエラー避けを除去
+  UPDATE book_role_master
+  SET role_name = REGEXP_REPLACE(role_name, v_avoid_error || '$', '', 'g')
+  WHERE role_cd = new_cd AND user_id = v_current_user;
+END;
+$$;
+
+
+■書籍形態マスタ・形態コード変更用
+DROP FUNCTION IF EXISTS update_bookform_cd;
+CREATE OR REPLACE FUNCTION update_bookform_cd(
+  old_cd CHAR(3),
+  new_cd CHAR(3),
+  new_name TEXT,
+  new_selectable BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_avoid_error text;  -- コードを変更して形態名が元のままの時、形態名の重複エラーを避けるため一時的に付加する文字列
+  current_ts timestamp := now();
+BEGIN
+  v_current_user := auth.uid();
+  v_avoid_error := to_char(current_ts, 'YYYY-MM-DD HH24:MI:SS');
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION 'ユーザーがログインしていません。';
+  END IF;
+  -- (1) 書籍形態マスタに新コードを追加（形態名にエラー避けの文字列付加）
+  INSERT INTO bookform_master (bookform_cd, bookform, selectable, user_id)
+  VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
+  -- (2) 書籍の形態コードを書換え
+  UPDATE book_possess SET bookform_cd = new_cd
+  WHERE  bookform_cd = old_cd AND user_id = v_current_user;
+  -- (3) 書籍形態マスタから旧コードを削除
+  DELETE FROM bookform_master
+  WHERE bookform_cd = old_cd AND user_id = v_current_user;
+  -- (4) 新コードの書籍形態マスタの形態名からエラー避けを除去
+  UPDATE bookform_master
+  SET bookform = REGEXP_REPLACE(bookform, v_avoid_error || '$', '', 'g')
+  WHERE bookform_cd = new_cd AND user_id = v_current_user;
+END;
+$$;
+
+
+■データ保存用
+DROP FUNCTION IF EXISTS public.backup_books;
+CREATE OR REPLACE FUNCTION public.backup_books()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER -- ログインユーザーの権限に関わらずテーブル操作を実行するため
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_history_count integer;
+  v_oldest_id integer;
+BEGIN
+  v_current_user := auth.uid();
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION 'ユーザーがログインしていません。';
+  END IF;
+  -- (1) スキーマ 'backup2' のテーブルからログインユーザのデータを削除
+  CREATE SCHEMA IF NOT EXISTS backup2;
+  CREATE TABLE IF NOT EXISTS backup2.bookclass_master (
+    id                  INTEGER
+   ,bookclass_cd        CHAR(03)
+   ,bookclass           TEXT
+   ,selectable          BOOLEAN
+   ,user_id             UUID
+   ,PRIMARY KEY (bookclass_cd, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.bookform_master (
+    id                  INTEGER
+   ,bookform_cd         CHAR(03)
+   ,bookform            TEXT
+   ,selectable          BOOLEAN
+   ,user_id             UUID
+   ,PRIMARY KEY (bookform_cd, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_role_master (
+    id                  INTEGER
+   ,role_cd             CHAR(03)
+   ,role_name           TEXT
+   ,selectable          BOOLEAN
+   ,user_id             UUID
+   ,PRIMARY KEY (role_cd, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.books (
+    book_id             INTEGER      PRIMARY KEY
+   ,isbn10              VARCHAR(10)
+   ,isbn13              VARCHAR(13)
+   ,c_cd                VARCHAR(05)
+   ,ndc                 VARCHAR(10)
+   ,title               TEXT
+   ,original_title      TEXT
+   ,colophon            TEXT
+   ,publisher           TEXT
+   ,publish_series      TEXT
+   ,publish_series_no   TEXT
+   ,first_publish_year  INTEGER
+   ,bookclass_cd        CHAR(03)
+   ,remarks             TEXT
+   ,image_url           TEXT
+   ,user_id             UUID
+   ,UNIQUE (title, publisher, first_publish_year, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_possess (
+    book_possess_id     INTEGER      PRIMARY KEY
+   ,book_id             INTEGER
+   ,bookform_cd         CHAR(03)
+   ,get_date            DATE
+   ,dispose_date        DATE
+   ,image_url           TEXT
+   ,remarks             TEXT
+   ,user_id             UUID
+   ,UNIQUE (book_id, bookform_cd, get_date, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_role (
+    id                  INTEGER      PRIMARY KEY
+   ,book_id             INTEGER
+   ,role_cd             CHAR(03)
+   ,role_order          INTEGER
+   ,person_name         TEXT
+   ,remarks             TEXT
+   ,user_id             UUID
+   ,UNIQUE (book_id, role_cd, person_name, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_note (
+    id                  INTEGER      PRIMARY KEY
+   ,book_id             INTEGER
+   ,read_st_date        DATE
+   ,read_ed_date        DATE
+   ,note                TEXT
+   ,user_id             UUID
+   ,UNIQUE (book_id, read_st_date, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.system_constants (
+    id                  INTEGER
+   ,constant_name       TEXT
+   ,constant_type       TEXT
+   ,constant_value      TEXT
+   ,remarks             TEXT
+   ,user_id             UUID
+   ,PRIMARY KEY (constant_name, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup2.profile (
+    id                  INTEGER
+   ,user_id             UUID         PRIMARY KEY
+   ,user_name           TEXT
+   ,profile_icon        BOOLEAN
+  );
+  DELETE FROM backup2.profile WHERE user_id = v_current_user;
+  DELETE FROM backup2.system_constants WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_note WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_role WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_possess WHERE user_id = v_current_user;
+  DELETE FROM backup2.books WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_role_master WHERE user_id = v_current_user;
+  DELETE FROM backup2.bookform_master WHERE user_id = v_current_user;
+  DELETE FROM backup2.bookclass_master WHERE user_id = v_current_user;
+  -- (2) スキーマ 'backup1' の各テーブルから 'backup2' にコピー
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'bookclass_master') THEN
+        INSERT INTO backup2.bookclass_master (id, bookclass_cd, bookclass, selectable, user_id)
+        SELECT id, bookclass_cd, bookclass, selectable, user_id
+        FROM backup1.bookclass_master WHERE user_id = v_current_user;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'bookform_master') THEN
+        INSERT INTO backup2.bookform_master (id, bookform_cd, bookform, selectable, user_id)
+        SELECT id, bookform_cd, bookform, selectable, user_id
+        FROM backup1.bookform_master WHERE user_id = v_current_user;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_role_master') THEN
+        INSERT INTO backup2.book_role_master (id, role_cd, role_name, selectable, user_id)
+        SELECT id, role_cd, role_name, selectable, user_id
+        FROM backup1.book_role_master WHERE user_id = v_current_user;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'books') THEN
+        INSERT INTO backup2.books (book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id)
+      SELECT book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id
+      FROM backup1.books WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_possess') THEN
+      INSERT INTO backup2.book_possess (book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id)
+      SELECT book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+      FROM backup1.book_possess WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_role') THEN
+      INSERT INTO backup2.book_role (id, book_id, role_cd, role_order, person_name, remarks, user_id)
+      SELECT id, book_id, role_cd, role_order, person_name, remarks, user_id
+      FROM backup1.book_role WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_note') THEN
+      INSERT INTO backup2.book_note (id, book_id, read_st_date, read_ed_date, note, user_id)
+      SELECT id, book_id, read_st_date, read_ed_date, note, user_id
+      FROM backup1.book_note WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'system_constants') THEN
+      INSERT INTO backup2.system_constants (id, constant_name, constant_type, constant_value, remarks, user_id)
+      SELECT id, constant_name, constant_type, constant_value, remarks, user_id
+      FROM backup1.system_constants WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'profile') THEN
+      INSERT INTO backup2.profile (id, user_id, user_name, profile_icon)
+      SELECT id, user_id, user_name, profile_icon
+      FROM backup1.profile WHERE user_id = v_current_user;
+  END IF;
+  -- (3) スキーマ 'backup1' のテーブルからログインユーザのデータを削除
+  CREATE SCHEMA IF NOT EXISTS backup1;
+  CREATE TABLE IF NOT EXISTS backup1.bookclass_master (
+    id                  INTEGER
+   ,bookclass_cd        CHAR(03)
+   ,bookclass           TEXT
+   ,selectable          BOOLEAN
+   ,user_id             UUID
+   ,PRIMARY KEY (bookclass_cd, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.bookform_master (
+    id                  INTEGER
+   ,bookform_cd         CHAR(03)
+   ,bookform            TEXT
+   ,selectable          BOOLEAN
+   ,user_id             UUID
+   ,PRIMARY KEY (bookform_cd, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_role_master (
+    id                  INTEGER
+   ,role_cd             CHAR(03)
+   ,role_name           TEXT
+   ,selectable          BOOLEAN
+   ,user_id             UUID
+   ,PRIMARY KEY (role_cd, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.books (
+    book_id             INTEGER      PRIMARY KEY
+   ,isbn10              VARCHAR(10)
+   ,isbn13              VARCHAR(13)
+   ,c_cd                VARCHAR(05)
+   ,ndc                 VARCHAR(10)
+   ,title               TEXT
+   ,original_title      TEXT
+   ,colophon            TEXT
+   ,publisher           TEXT
+   ,publish_series      TEXT
+   ,publish_series_no   TEXT
+   ,first_publish_year  INTEGER
+   ,bookclass_cd        CHAR(03)
+   ,remarks             TEXT
+   ,image_url           TEXT
+   ,user_id             UUID
+   ,UNIQUE (title, publisher, first_publish_year, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_possess (
+    book_possess_id     INTEGER      PRIMARY KEY
+   ,book_id             INTEGER
+   ,bookform_cd         CHAR(03)
+   ,get_date            DATE
+   ,dispose_date        DATE
+   ,image_url           TEXT
+   ,remarks             TEXT
+   ,user_id             UUID
+   ,UNIQUE (book_id, bookform_cd, get_date, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_role (
+    id                  INTEGER      PRIMARY KEY
+   ,book_id             INTEGER
+   ,role_cd             CHAR(03)
+   ,role_order          INTEGER
+   ,person_name         TEXT
+   ,remarks             TEXT
+   ,user_id             UUID
+   ,UNIQUE (book_id, role_cd, person_name, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_note (
+    id                  INTEGER      PRIMARY KEY
+   ,book_id             INTEGER
+   ,read_st_date        DATE
+   ,read_ed_date        DATE
+   ,note                TEXT
+   ,user_id             UUID
+   ,UNIQUE (book_id, read_st_date, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.system_constants (
+    id                  INTEGER
+   ,constant_name       TEXT
+   ,constant_type       TEXT
+   ,constant_value      TEXT
+   ,remarks             TEXT
+   ,user_id             UUID
+   ,PRIMARY KEY (constant_name, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS backup1.profile (
+    id                  INTEGER
+   ,user_id             UUID         PRIMARY KEY
+   ,user_name           TEXT
+   ,profile_icon        BOOLEAN
+  );
+  DELETE FROM backup1.profile WHERE user_id = v_current_user;
+  DELETE FROM backup1.system_constants WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_note WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_role WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_possess WHERE user_id = v_current_user;
+  DELETE FROM backup1.books WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_role_master WHERE user_id = v_current_user;
+  DELETE FROM backup1.bookform_master WHERE user_id = v_current_user;
+  DELETE FROM backup1.bookclass_master WHERE user_id = v_current_user;
+  -- (4) スキーマ 'public' の各テーブルから 'backup1' にコピー
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookclass_master') THEN
+      INSERT INTO backup1.bookclass_master (id, bookclass_cd, bookclass, selectable, user_id)
+      SELECT id, bookclass_cd, bookclass, selectable, user_id
+      FROM public.bookclass_master WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookform_master') THEN
+      INSERT INTO backup1.bookform_master (id, bookform_cd, bookform, selectable, user_id)
+      SELECT id, bookform_cd, bookform, selectable, user_id
+      FROM public.bookform_master WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_role_master') THEN
+      INSERT INTO backup1.book_role_master (id, role_cd, role_name, selectable, user_id)
+      SELECT id, role_cd, role_name, selectable, user_id
+      FROM public.book_role_master WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'books') THEN
+      INSERT INTO backup1.books (book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id)
+      SELECT book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id
+      FROM public.books WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_possess') THEN
+      INSERT INTO backup1.book_possess (book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id)
+      SELECT book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+      FROM public.book_possess WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_role') THEN
+      INSERT INTO backup1.book_role (id, book_id, role_cd, role_order, person_name, remarks, user_id)
+      SELECT id, book_id, role_cd, role_order, person_name, remarks, user_id
+      FROM public.book_role WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_note') THEN
+      INSERT INTO backup1.book_note (id, book_id, read_st_date, read_ed_date, note, user_id)
+      SELECT id, book_id, read_st_date, read_ed_date, note, user_id
+      FROM public.book_note WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'system_constants') THEN
+      INSERT INTO backup1.system_constants (id, constant_name, constant_type, constant_value, remarks, user_id)
+      SELECT id, constant_name, constant_type, constant_value, remarks, user_id
+      FROM public.system_constants WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profile') THEN
+      INSERT INTO backup1.profile (id, user_id, user_name, profile_icon)
+      SELECT id, user_id, user_name, profile_icon
+      FROM public.profile WHERE user_id = v_current_user;
+  END IF;
+  -- (5) バックアップ履歴を保存
+  INSERT INTO public.backup_history (data_name, backup_date, user_id)
+  VALUES ('books', CURRENT_TIMESTAMP, v_current_user);
+  -- (6) 最古のバックアップ履歴を削除（3件以上存在する場合）
+  SELECT COUNT(*) INTO v_history_count
+  FROM public.backup_history
+  WHERE data_name = 'books'
+    AND user_id = v_current_user;
+  IF v_history_count >= 3 THEN
+      SELECT id INTO v_oldest_id
+      FROM public.backup_history
+      WHERE data_name = 'books'
+        AND user_id = v_current_user
+      ORDER BY backup_date ASC, id ASC
+      LIMIT 1;
+      IF v_oldest_id IS NOT NULL THEN
+          DELETE FROM public.backup_history WHERE id = v_oldest_id;
+      END IF;
+  END IF;
+END;
+$$;

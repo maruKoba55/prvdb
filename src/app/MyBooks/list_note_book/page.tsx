@@ -1,11 +1,6 @@
-'use client';
-import dynamic from 'next/dynamic';
+import ListNoteBook from './list_note_book';
 
-const ListNoteBook = dynamic(() => import('@/app/MyBooks/list_note_book/list_note_book'), {
-  ssr: false // サーバーサイドレンダリングを無効化
-});
-
-export default function Home() {
+export default async function ListNoteBookPage() {
   return (
     <div>
       <ListNoteBook />

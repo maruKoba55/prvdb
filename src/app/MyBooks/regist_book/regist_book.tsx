@@ -10,33 +10,34 @@ import { isbnHyphenate } from '@/utils/isbnHyphenate';
 import { useBookClassMaster } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 
-const initialFormState = {
-  isbn10: '',
-  isbn13: '',
-  c_cd: '',
-  ndc: '',
-  title: '',
-  original_title: '',
-  colophon: '年月日初版発行\n著者：\n翻訳者：\n発行所：',
-  publisher: '',
-  publish_series: '',
-  publish_series_no: '',
-  first_publish_year: 0,
-  bookclass_cd: '',
-  remarks: '',
-  image_url: ''
-};
-
 export default function RegistBook() {
+  // マスタ値取得（カスタムフック）
+  const bookClassMaster = useBookClassMaster();
+  const defaultClassCd = bookClassMaster.find((item: any) => item.selectable)?.bookclass_cd || '';
+
+  const initialFormState = {
+    isbn10: '',
+    isbn13: '',
+    c_cd: '',
+    ndc: '',
+    title: '',
+    original_title: '',
+    colophon: '年月日初版発行\n著者：\n翻訳者：\n発行所：',
+    publisher: '',
+    publish_series: '',
+    publish_series_no: '',
+    first_publish_year: 0,
+    bookclass_cd: defaultClassCd,
+    remarks: '',
+    image_url: ''
+  };
+
   const supabase = supabaseClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = searchParams.get('user');
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
-
-  // マスタ値取得（カスタムフック）
-  const bookClassMaster = useBookClassMaster();
 
   // 各ボタンの処理
   // ［基本情報を登録］

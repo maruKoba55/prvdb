@@ -28,10 +28,14 @@ export function AddPossessModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  // マスタ取得（カスタムフック）
+  const bookFormMaster = useBookFormMaster();
+  const defaultFormCd = bookFormMaster.find((item: any) => item.selectable)?.bookform_cd || '';
+
   const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    bookform_cd: '',
+    bookform_cd: defaultFormCd,
     get_date: todayLocal,
     dispose_date: '',
     remarks: '',
@@ -47,9 +51,6 @@ export function AddPossessModal({
     image_url: formData.image_url,
     user_id: user
   };
-
-  // マスタ取得（カスタムフック）
-  const bookFormMaster = useBookFormMaster();
 
   // 画面マウント時のフォーカス用(書籍形態セレクトに当てるため、HTMLSelectElement)
   const firstInputRef = useRef<HTMLSelectElement>(null);
@@ -150,7 +151,7 @@ export function AddPossessModal({
                 className={styleItems}
                 onChange={handleSelect}
               >
-                <option value="">選択してください</option>
+                {/*  <option value="">選択してください</option> */}
                 {bookFormMaster.map((item: any) =>
                   item.selectable ? (
                     <option key={item.bookform_cd} value={item.bookform_cd}>

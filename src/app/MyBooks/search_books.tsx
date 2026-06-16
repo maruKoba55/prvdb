@@ -49,11 +49,16 @@ export function SearchBooks() {
   const bookFormMaster = useBookFormMaster();
 
   //検索件数上限の設定
-  if (supabaseMaxRows === 0) {
-    alert(`システム定数（Table'system_constants'）不正。supabaseMaxRowsを確認してください。`);
-    return null;
+  let dbSearchMax = 0;
+  if (sqlLimit === 0) {
+    dbSearchMax = supabaseMaxRows;
+  } else if (supabaseMaxRows === 0) {
+    dbSearchMax = sqlLimit;
+  } else if (sqlLimit < supabaseMaxRows) {
+    dbSearchMax = sqlLimit;
+  } else {
+    dbSearchMax = supabaseMaxRows;
   }
-  const dbSearchMax = sqlLimit === 0 || sqlLimit > supabaseMaxRows ? supabaseMaxRows : sqlLimit;
 
   // 書籍検索条件の組合せチェック
   const SearchChk = (formData: any) => {
@@ -174,12 +179,15 @@ export function SearchBooks() {
     handleRegist();
   });
   // ［データメンテ］
-  const handleAssistMaint = () => {
-    null;
+  const handleDataMaint = () => {
+    const params = new URLSearchParams({
+      user: user || ''
+    });
+    window.open(`/MyBooks/data_maintenance?${params.toString()}`);
   };
   useHotkeys('alt+m', (event) => {
     event.preventDefault();
-    handleAssistMaint();
+    handleDataMaint();
   });
   // ［閉じる］
   const handleClose = () => {
@@ -568,13 +576,26 @@ export function SearchBooks() {
               <span className="text-xl font-bold text-blue-500">読書ノート・未読書籍検索</span>
               <span className="ml-3">※ノートの登録・削除は当該書籍の閲覧画面から</span>
             </div>
-            <div className="mt-2 ml-3">
-              <span className="text-lg text-white bg-blue-500">［ノート一覧］</span>
-              ：書籍検索条件（
-              <span className="underline underline-offset-3">書籍保有、表示順を除く</span>
-              ）＋読書開始日でノートを一覧・編集
+            <div className="flex mt-2 ml-3">
+              <div className="flex items-center">
+                <CommonButton
+                  label={
+                    <>
+                      <CalendarSearch size={20} />
+                      ノート一覧
+                    </>
+                  }
+                  variant="blue"
+                  onClick={handleNoteSearch}
+                />
+                <div className="flex items-center">
+                  ：書籍検索条件（
+                  <span className="underline underline-offset-3">書籍保有、表示順を除く</span>
+                  ）＋読書開始日でノートを一覧・編集
+                </div>
+              </div>
             </div>
-            <div className="flex items-center mt-2 ml-36">
+            <div className="flex items-center ml-36">
               <label htmlFor="read_st_date" className="inline-block w-16">
                 読書開始
               </label>
@@ -595,34 +616,27 @@ export function SearchBooks() {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center mt-1 ml-3">
+            <div className="flex mt-2 ml-3">
               <div className="flex items-center">
-                <span className="text-lg text-white bg-blue-500">［未読一覧］</span>
-                ：書籍検索条件（<span className="underline underline-offset-3">書籍保有を除く</span>
-                ）でノート未存在の書籍を一覧表示
+                <CommonButton
+                  label={
+                    <>
+                      <BookCopy size={20} />
+                      未読一覧
+                    </>
+                  }
+                  variant="blue"
+                  onClick={handleUnRead}
+                />
+                <div className="flex items-center">：</div>
+                <div className="flex  flex-col justify-center">
+                  <div className="flex">
+                    書籍検索条件（<span className="underline underline-offset-3">書籍保有を除く</span>
+                    ）でノート未存在の書籍を一覧表示
+                  </div>
+                  <div className="flex ml-2">（保有履歴の無い書籍は対象外）</div>
+                </div>
               </div>
-            </div>
-            <div className="flex mt-2 ml-2 p-2 justify-around">
-              <CommonButton
-                label={
-                  <>
-                    <CalendarSearch size={20} />
-                    ノート一覧
-                  </>
-                }
-                variant="blue"
-                onClick={handleNoteSearch}
-              />
-              <CommonButton
-                label={
-                  <>
-                    <BookCopy size={20} />
-                    未読一覧
-                  </>
-                }
-                variant="blue"
-                onClick={handleUnRead}
-              />
             </div>
           </div>
         </div>
@@ -631,9 +645,8 @@ export function SearchBooks() {
         <div className="flex flex-col w-1/5 flex-1">
           {/* 右側上段：検索件数制限 */}
           <div className="flex flex-col border-solid border-2 rounded-lg h-1/8 mt-3 mr-1 p-2 flex items-center justify-center">
-            <div className="text-lg font-bold text-red-500">データ検索件数制限</div>
-            <div>最大{dbSearchMax}件</div>
-            {sqlLimit === 0 || sqlLimit > supabaseMaxRows ? <div>（supabase設定値）</div> : null}
+            <div className="text-lg font-bold text-red-500">データ検索数上限</div>
+            {dbSearchMax === 0 ? <div>supabaseによる制限あり</div> : <div>{dbSearchMax}件</div>}
           </div>
           {/* 右側中段：ボタンエリア */}
           <div className="flex flex-col border-solid border-2 rounded-lg h-4/8 justify-around mt-3 mr-1 p-1">
@@ -655,8 +668,8 @@ export function SearchBooks() {
                 </>
               }
               variant="orange"
-              onClick={handleAssistMaint}
-              disabled={true}
+              onClick={handleDataMaint}
+              disabled={false}
             />
             {/* window.close()は window.openで開いたウィンドウ以外に無効のため、ボタンを見せない
           <CommonButton

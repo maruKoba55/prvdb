@@ -4,15 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { supabaseClient } from '@/lib/Client';
 import { Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { useBookRoleMaster } from '@/context/AppContext';
 import { styleItems } from '@/app/constants';
-
-type BookRoleMaster = {
-  role_cd: string;
-  role_order: number;
-  role_name: string;
-  selectable: boolean;
-  user_id: string;
-};
 
 export function AddRoleModal({
   bookId,
@@ -27,11 +20,15 @@ export function AddRoleModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  // マスタ取得（カスタムフック）
+  const bookRoleMaster = useBookRoleMaster();
+  const defaultRoleCd = bookRoleMaster.find((item: any) => item.selectable)?.role_cd || '';
+
   const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    role_cd: '',
-    role_order: '',
+    role_cd: defaultRoleCd,
+    role_order: '1',
     person_name: '',
     remarks: ''
   });
@@ -81,19 +78,7 @@ export function AddRoleModal({
     }
   };
 
-  // 役割マスターの展開・取得
-  const [roles, setRoles] = useState<BookRoleMaster[]>([]);
-  useEffect(() => {
-    const fetchRoles = async () => {
-      const { data, error } = await supabase.from('book_role_master').select('*').order('role_cd', { ascending: true });
-      if (error) {
-        console.error('Error fetching book_role_master:', error);
-      } else {
-        setRoles(data || []);
-      }
-    };
-    fetchRoles();
-  }, []);
+  // 書籍役割マスタ select用
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -123,8 +108,8 @@ export function AddRoleModal({
               value={formData.role_cd}
               onChange={handleSelect}
             >
-              <option value="">選択してください</option>
-              {roles.map((item) =>
+              {/*    <option value="">選択してください</option> */}
+              {bookRoleMaster.map((item: any) =>
                 item.selectable ? (
                   <option key={item.role_cd} value={item.role_cd}>
                     {item.role_name}

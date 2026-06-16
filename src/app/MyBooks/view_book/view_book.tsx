@@ -208,7 +208,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
               {book.book_role?.map((r: any) => (
                 <div key={r.id} className="flex items-start text-sm border-b border-gray-50 flex-col">
                   <div className="mr-2">
-                    {bookRoleMaster.find((item: any) => item.role_cd === r.role_cd)?.role_name || null}：{r.person_name}
+                    {bookRoleMaster.find((item: any) => item.role_cd === r.role_cd)?.role_name || null}：
+                    {r.person_name.replace(/\s+/g, '')}
                   </div>
                   <div className="ml-4">{r.remarks}</div>
                 </div>

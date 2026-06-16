@@ -7,11 +7,12 @@ export interface SystemConstant {
   constant_name: string;
   constant_type: string;
   constant_value: string;
+  remarks: string;
 }
 
 export async function getSystemConstants(constantName: string | 'all' = 'all'): Promise<SystemConstant[] | null> {
   const supabase = await supabaseServer();
-  let query = supabase.from('system_constants').select('constant_name, constant_type, constant_value');
+  let query = supabase.from('system_constants').select('constant_name, constant_type, constant_value, remarks');
   if (constantName !== 'all') {
     query = query.eq('constant_name', constantName);
   }

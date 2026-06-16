@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/Server';
-import ViewBook from '@/app/MyBooks/view_book/view_book';
+import ViewBook from './view_book';
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

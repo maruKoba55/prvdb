@@ -34,6 +34,24 @@ export default function ListNoteBook() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // 各ボタンの処理
+  // ［ノート追加］
+  const handleNoteAdd = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('book_possess')
+        .select('*', { count: 'exact', head: true })
+        .eq('book_id', bookId);
+      if (error) throw error;
+      if (!count || count === 0) {
+        alert('ノートの登録には、この書籍の保有情報が必要です。');
+        return;
+      }
+      setIsAddModalOpen(true);
+    } catch (error: any) {
+      console.error(error);
+      alert(`書籍保有確認失敗 code=${error.code} : ${error.message}`);
+    }
+  };
   // ［閉じる］
   const handleClose = () => {
     window.close();
@@ -187,21 +205,23 @@ export default function ListNoteBook() {
                             onChange={(e) => setEditForm({ ...editForm, note: e.target.value })}
                           />
                         </td>
-                        <td className="p-2 flex gap-2">
-                          <button
-                            onClick={() => handleUpdate(note.id)}
-                            className="text-green-600 hover:text-green-800"
-                            title="編集内容を保存"
-                          >
-                            <Save size={20} />
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="text-gray-500 hover:text-gray-700"
-                            title="編集内容を破棄"
-                          >
-                            <X size={20} />
-                          </button>
+                        <td className="p-2 text-center align-middle">
+                          <div className="flex gap-3 justify-center items-center h-full min-h-[40px]">
+                            <button
+                              onClick={() => handleUpdate(note.id)}
+                              className="text-green-600 hover:text-green-800"
+                              title="編集内容を保存"
+                            >
+                              <Save size={20} />
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="text-gray-500 hover:text-gray-700"
+                              title="編集内容を破棄"
+                            >
+                              <X size={20} />
+                            </button>
+                          </div>
                         </td>
                       </>
                     ) : (
@@ -209,21 +229,21 @@ export default function ListNoteBook() {
                         <td className="flex-col text-center p-2">{note.read_st_date}</td>
                         <td className="flex-col text-center p-2">{note.read_ed_date}</td>
                         <td className="flex-col text-left p-2 whitespace-pre-wrap break-words">{note.note}</td>
-                        <td className="p-2">
-                          <div className="flex gap-3 justify-center">
+                        <td className="p-2 text-center align-middle">
+                          <div className="flex gap-3 justify-center items-center h-full min-h-[40px]">
                             <button
                               onClick={() => handleEdit(note)}
                               className="text-blue-600 hover:text-blue-800"
                               title="編集"
                             >
-                              <Pencil size={18} />
+                              <Pencil size={20} />
                             </button>
                             <button
                               onClick={() => handleDelete(note.id, note.read_st_date)}
                               className="text-red-600 hover:text-red-800"
                               title="削除"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={20} />
                             </button>
                           </div>
                         </td>
@@ -245,7 +265,7 @@ export default function ListNoteBook() {
             </>
           }
           variant="blue"
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={handleNoteAdd}
           disabled={editingId !== null} // 編集中の場合はdisable
         />
         <CommonButton
