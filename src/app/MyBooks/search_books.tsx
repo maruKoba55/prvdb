@@ -169,6 +169,10 @@ export function SearchBooks() {
   };
   // ［書籍新規登録］
   const handleRegist = () => {
+    if (bookClassMaster.length === 0) {
+      alert('書籍に割り当てる【分類】が存在しません。書籍新規登録の前に、［データメンテ］から分類を追加してください。');
+      return;
+    }
     const params = new URLSearchParams({
       user: user || ''
     });

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useBookClassMaster } from '@/context/AppContext';
+import { useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 import { AddRoleModal } from './AddRoleModal';
 import { AddPossessModal } from './AddPossessModal';
@@ -177,7 +177,9 @@ export default function EditBook({ book }: { book: any }) {
   };
 
   // マスタ値取得（カスタムフック）
+  const bookRoleMaster = useBookRoleMaster();
   const bookClassMaster = useBookClassMaster();
+  const bookFormMaster = useBookFormMaster();
 
   // 各ボタンの処理
   // ［画面最新化］
@@ -193,6 +195,24 @@ export default function EditBook({ book }: { book: any }) {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
     handleClose(); // handlePrev内の「!isNextDisabled」判定が通る時だけ実行される
   });
+  // ［役割情報追加］
+  const handleRoleAdd = async () => {
+    if (bookRoleMaster.length === 0) {
+      alert(
+        '人（団体）に付与する【役割】が存在しません。役割情報追加の前に、［データメンテ］から役割を追加してください。'
+      );
+      return;
+    }
+    setIsAddRoleModal(true);
+  };
+  // ［保有情報追加］
+  const handlePossessAdd = async () => {
+    if (bookFormMaster.length === 0) {
+      alert('書籍を保有する【形態】が存在しません。保有情報追加の前に、［データメンテ］から形態を追加してください。');
+      return;
+    }
+    setIsAddPossessModal(true);
+  };
 
   // 入力変更ハンドラ
   // 汎用：チェックボックスの場合はchecked、それ以外はvalueを格納
@@ -280,7 +300,7 @@ export default function EditBook({ book }: { book: any }) {
                   <button
                     type="button"
                     title="子画面での追加データは、本画面とは無関係に保存されます。"
-                    onClick={() => setIsAddRoleModal(true)}
+                    onClick={handleRoleAdd}
                     className="flex items-center bg-blue-600 rounded-md text-sm text-white p-1 ml-2 hover:bg-blue-700"
                   >
                     <Plus size={16} /> 追加
@@ -344,7 +364,7 @@ export default function EditBook({ book }: { book: any }) {
                   <button
                     type="button"
                     title="子画面での追加データは、本画面とは無関係に保存されます。"
-                    onClick={() => setIsAddPossessModal(true)}
+                    onClick={handlePossessAdd}
                     className="flex items-center bg-blue-600 rounded-md text-sm text-white p-1 ml-2 hover:bg-blue-700"
                   >
                     <Plus size={16} /> 追加

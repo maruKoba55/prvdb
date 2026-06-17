@@ -225,7 +225,7 @@ export const BookForm = ({
               <div className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>
             </div>
             <div className="flex mt-1 ml-17">
-              <div>
+              <div className="flex items-center">
                 <label htmlFor="publish_series">出版シリーズ</label>
                 <input
                   id="publish_series"
@@ -237,7 +237,7 @@ export const BookForm = ({
                   onChange={onChange}
                 />
               </div>
-              <div>
+              <div className="flex items-center">
                 <label htmlFor="publish_series_no" className="ml-5">
                   シリーズ番号
                 </label>
@@ -252,7 +252,7 @@ export const BookForm = ({
                 />
               </div>
             </div>
-            <div className="flex  mt-1">
+            <div className="flex mt-1">
               <div className="flex items-center w-4/7">
                 <label
                   htmlFor="first_publish_year"

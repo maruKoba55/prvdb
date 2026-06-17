@@ -244,7 +244,8 @@ export default function MainteBookClass() {
           )}
         </div>
         <div className="flex mt-1 ml-2">
-          ※分類の追加・削除・変更は、トップページを更新したタイミングで選択肢に反映されます。
+          ※分類の追加・削除・変更は、
+          <span className="font-bold text-red-500">トップページを更新したタイミングで選択肢に反映</span>されます。
         </div>
         <div className="flex ml-2">※書籍に付与している分類の変更は慎重に行ってください。</div>
         <div className="flex ml-6">

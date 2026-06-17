@@ -163,7 +163,7 @@ export default function DataMaint() {
                     <DatabaseBackup size={20} />デ ー タ 保 存
                   </>
                 }
-                variant="blue"
+                variant="outline"
                 onClick={handleDataBackup}
               />
             </div>

@@ -174,7 +174,8 @@ export default function MainteSystemConstants({ constantAdd }: { constantAdd: bo
           )}
         </div>
         <div className="flex mt-1 ml-2">
-          ※定数値の変更は、トップページを更新したタイミングでシステムに反映されます。
+          ※定数値の変更は、
+          <span className="font-bold text-red-500">トップページを更新したタイミングでシステムに反映</span>されます。
         </div>
         <div className="flex mt-1 ml-2">※ 【開発者向け】システム定数の規定値は下記コード中に記述</div>
         <div className="flex ml-8">\app\MyBooks\data_maintenance\system_constants\page.tsx</div>
