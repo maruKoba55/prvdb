@@ -4,7 +4,7 @@
 
 
 -- ■書籍閲覧、一覧
-CREATE OR REPLACE FUNCTION search_books_complex(
+CREATE OR REPLACE FUNCTION search_books(
   p_isbn13 TEXT DEFAULT NULL,
   p_title TEXT DEFAULT NULL,
   p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
@@ -389,7 +389,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.backup_books()
 RETURNS void
 LANGUAGE plpgsql
-SECURITY DEFINER -- ログインユーザーの権限に関わらずテーブル操作を実行するため
+SECURITY DEFINER -- ログインユーザーの権限に関わらずテーブル操作を実行
 AS $$
 DECLARE
   v_current_user uuid;
@@ -489,6 +489,339 @@ BEGIN
    ,user_id             UUID         PRIMARY KEY
    ,user_name           TEXT
    ,profile_icon        BOOLEAN
+  );
+  ALTER TABLE backup2.bookclass_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookclass_master insert : only own user_id" on backup2.bookclass_master;
+  drop policy if exists "bookclass_master delete : only own user_id" on backup2.bookclass_master;
+  drop policy if exists "bookclass_master update : only own user_id" on backup2.bookclass_master;
+  drop policy if exists "bookclass_master select : only own user_id" on backup2.bookclass_master;
+  create policy "bookclass_master insert : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master delete : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master update : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master select : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.bookform_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookform_master insert : only own user_id" on backup2.bookform_master;
+  drop policy if exists "bookform_master delete : only own user_id" on backup2.bookform_master;
+  drop policy if exists "bookform_master update : only own user_id" on backup2.bookform_master;
+  drop policy if exists "bookform_master select : only own user_id" on backup2.bookform_master;
+  create policy "bookform_master insert : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master delete : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master update : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master select : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_role_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role_master insert : only own user_id" on backup2.book_role_master;
+  drop policy if exists "book_role_master delete : only own user_id" on backup2.book_role_master;
+  drop policy if exists "book_role_master update : only own user_id" on backup2.book_role_master;
+  drop policy if exists "book_role_master select : only own user_id" on backup2.book_role_master;
+  create policy "book_role_master insert : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master delete : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master update : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master select : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.books ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "books insert : only own user_id" on backup2.books;
+  drop policy if exists "books delete : only own user_id" on backup2.books;
+  drop policy if exists "books update : only own user_id" on backup2.books;
+  drop policy if exists "books select : only own user_id" on backup2.books;
+  create policy "books insert : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "books delete : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books update : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books select : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_possess ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_possess insert : only own user_id" on backup2.book_possess;
+  drop policy if exists "book_possess delete : only own user_id" on backup2.book_possess;
+  drop policy if exists "book_possess update : only own user_id" on backup2.book_possess;
+  drop policy if exists "book_possess select : only own user_id" on backup2.book_possess;
+  create policy "book_possess insert : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess delete : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess update : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess select : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_role ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role insert : only own user_id" on backup2.book_role;
+  drop policy if exists "book_role delete : only own user_id" on backup2.book_role;
+  drop policy if exists "book_role update : only own user_id" on backup2.book_role;
+  drop policy if exists "book_role select : only own user_id" on backup2.book_role;
+  create policy "book_role insert : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role delete : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role update : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role select : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_note ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_note insert : only own user_id" on backup2.book_note;
+  drop policy if exists "book_note delete : only own user_id" on backup2.book_note;
+  drop policy if exists "book_note update : only own user_id" on backup2.book_note;
+  drop policy if exists "book_note select : only own user_id" on backup2.book_note;
+  create policy "book_note insert : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note delete : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note update : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note select : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.system_constants ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "system_constants insert : only own user_id" on backup2.system_constants;
+  drop policy if exists "system_constants delete : only own user_id" on backup2.system_constants;
+  drop policy if exists "system_constants update : only own user_id" on backup2.system_constants;
+  drop policy if exists "system_constants select : only own user_id" on backup2.system_constants;
+  create policy "system_constants insert : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants delete : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants update : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants select : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.profile ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "profile insert : only own user_id" on backup2.profile;
+  drop policy if exists "profile delete : only own user_id" on backup2.profile;
+  drop policy if exists "profile update : only own user_id" on backup2.profile;
+  drop policy if exists "profile select : only own user_id" on backup2.profile;
+  create policy "profile insert : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "profile delete : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile update : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile select : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
   );
   DELETE FROM backup2.profile WHERE user_id = v_current_user;
   DELETE FROM backup2.system_constants WHERE user_id = v_current_user;
@@ -634,6 +967,339 @@ BEGIN
    ,user_id             UUID         PRIMARY KEY
    ,user_name           TEXT
    ,profile_icon        BOOLEAN
+  );
+  ALTER TABLE backup1.bookclass_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookclass_master insert : only own user_id" on backup1.bookclass_master;
+  drop policy if exists "bookclass_master delete : only own user_id" on backup1.bookclass_master;
+  drop policy if exists "bookclass_master update : only own user_id" on backup1.bookclass_master;
+  drop policy if exists "bookclass_master select : only own user_id" on backup1.bookclass_master;
+  create policy "bookclass_master insert : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master delete : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master update : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master select : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.bookform_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookform_master insert : only own user_id" on backup1.bookform_master;
+  drop policy if exists "bookform_master delete : only own user_id" on backup1.bookform_master;
+  drop policy if exists "bookform_master update : only own user_id" on backup1.bookform_master;
+  drop policy if exists "bookform_master select : only own user_id" on backup1.bookform_master;
+  create policy "bookform_master insert : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master delete : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master update : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master select : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_role_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role_master insert : only own user_id" on backup1.book_role_master;
+  drop policy if exists "book_role_master delete : only own user_id" on backup1.book_role_master;
+  drop policy if exists "book_role_master update : only own user_id" on backup1.book_role_master;
+  drop policy if exists "book_role_master select : only own user_id" on backup1.book_role_master;
+  create policy "book_role_master insert : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master delete : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master update : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master select : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.books ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "books insert : only own user_id" on backup1.books;
+  drop policy if exists "books delete : only own user_id" on backup1.books;
+  drop policy if exists "books update : only own user_id" on backup1.books;
+  drop policy if exists "books select : only own user_id" on backup1.books;
+  create policy "books insert : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "books delete : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books update : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books select : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_possess ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_possess insert : only own user_id" on backup1.book_possess;
+  drop policy if exists "book_possess delete : only own user_id" on backup1.book_possess;
+  drop policy if exists "book_possess update : only own user_id" on backup1.book_possess;
+  drop policy if exists "book_possess select : only own user_id" on backup1.book_possess;
+  create policy "book_possess insert : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess delete : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess update : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess select : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_role ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role insert : only own user_id" on backup1.book_role;
+  drop policy if exists "book_role delete : only own user_id" on backup1.book_role;
+  drop policy if exists "book_role update : only own user_id" on backup1.book_role;
+  drop policy if exists "book_role select : only own user_id" on backup1.book_role;
+  create policy "book_role insert : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role delete : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role update : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role select : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_note ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_note insert : only own user_id" on backup1.book_note;
+  drop policy if exists "book_note delete : only own user_id" on backup1.book_note;
+  drop policy if exists "book_note update : only own user_id" on backup1.book_note;
+  drop policy if exists "book_note select : only own user_id" on backup1.book_note;
+  create policy "book_note insert : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note delete : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note update : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note select : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.system_constants ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "system_constants insert : only own user_id" on backup1.system_constants;
+  drop policy if exists "system_constants delete : only own user_id" on backup1.system_constants;
+  drop policy if exists "system_constants update : only own user_id" on backup1.system_constants;
+  drop policy if exists "system_constants select : only own user_id" on backup1.system_constants;
+  create policy "system_constants insert : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants delete : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants update : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants select : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.profile ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "profile insert : only own user_id" on backup1.profile;
+  drop policy if exists "profile delete : only own user_id" on backup1.profile;
+  drop policy if exists "profile update : only own user_id" on backup1.profile;
+  drop policy if exists "profile select : only own user_id" on backup1.profile;
+  create policy "profile insert : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "profile delete : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile update : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile select : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
   );
   DELETE FROM backup1.profile WHERE user_id = v_current_user;
   DELETE FROM backup1.system_constants WHERE user_id = v_current_user;

@@ -45,6 +45,14 @@ export default function ListNoteRange() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<RangeNote>>({});
 
+  // システム変数、マスタ値取得（カスタムフック）
+  const sqlLimit = parseInt(useSystemConstant('sqlLimit') as string) || 0;
+  const supabaseMaxRows = parseInt(useSystemConstant('supabaseMaxRows') as string) || 0;
+  const listAlert = parseInt(useSystemConstant('listAlert') as string) || 0;
+  const bookRoleMaster = useBookRoleMaster();
+  const bookClassMaster = useBookClassMaster();
+  const bookFormMaster = useBookFormMaster();
+
   // 各ボタンの処理
   // ［閉じる］
   const handleClose = () => {
@@ -87,15 +95,12 @@ export default function ListNoteRange() {
     }
   };
 
-  // システム変数、マスタ値取得（カスタムフック）
-  const sqlLimit = parseInt(useSystemConstant('sqlLimit') as string) || 0;
-  const supabaseMaxRows = parseInt(useSystemConstant('supabaseMaxRows') as string) || 0;
-  const listAlert = parseInt(useSystemConstant('listAlert') as string) || 0;
-  const bookRoleMaster = useBookRoleMaster();
-  const bookClassMaster = useBookClassMaster();
-  const bookFormMaster = useBookFormMaster();
-
   // データ取得
+  //  ※page.tsx側で検索条件に合致するbook_noteのid配列を作成し、本モジュールで
+  //    books、book_roleの項目を付加する方法も考えられる。
+  //    しかし、親テーブル（books）を経由して子テーブル（book_role）の最初の1件を取得する
+  //   （Limitをかける）ネストは、Supabase（PostgREST）の仕様上クライアント側では正確に
+  //    動作せず、データベース関数（RPC） またはビュー（View）が必要になる。
   // 範囲日付の編集
   const dateMin = '0001-01-01'; // 日付最小値
   const dateMax = '9999-12-31'; // 日付最大値
