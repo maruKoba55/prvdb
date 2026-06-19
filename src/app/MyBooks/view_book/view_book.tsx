@@ -121,17 +121,18 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   };
   //［複製］
   const handleDuplicate = async () => {
-    const confirmed = confirm(
-      `『${book.title}』（${book.publisher}）を複製し、編集画面を開きます。書名の他、適宜に修正してください。`
-    );
-    if (!confirmed) return;
+    if (
+      !confirm(`『${book.title}』（${book.publisher}）を複製し、編集画面を開きます。書名の他、適宜に修正してください。`)
+    )
+      return;
     const { data: newBookId, error } = await supabase.rpc('duplicate_book', { p_src_book_id: book.book_id });
     if (!error) {
+      const windowName = `edit_book_window_${newBookId || 'new'}`;
       const params = new URLSearchParams({
         book_id: newBookId.toString() || '',
         user: user || ''
       });
-      window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
+      window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');
     } else {
       console.error(error);
       alert(`複製失敗 code=${error.code} : ${error.message}`);
