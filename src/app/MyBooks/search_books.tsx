@@ -81,6 +81,7 @@ export function SearchBooks() {
   // ［書籍検索（個別）］ ※書名等は空白を除去
   const handleBookSearch = async () => {
     if (!SearchChk(formData)) return;
+    const windowName = `view_book_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.limitPossess}${formData.bookOrder}`;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title.replace(/\s+/g, '') || '',
@@ -97,11 +98,13 @@ export function SearchBooks() {
       sqlLimit: sqlLimit.toString() || '0',
       user: user || ''
     });
-    window.open(`/MyBooks/view_book?${params.toString()}`, '_blank', 'width=1110,height=880');
+    const win = window.open(`/MyBooks/view_book?${params.toString()}`, windowName, 'width=1110,height=880');
+    if (win) win.focus();
   };
   // ［書籍検索（一覧）］ ※書名等は空白を除去
   const handleBookList = async () => {
     if (!SearchChk(formData)) return;
+    const windowName = `list_book_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.limitPossess}${formData.bookOrder}`;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title.replace(/\s+/g, '') || '',
@@ -117,7 +120,8 @@ export function SearchBooks() {
       display_order: formData.bookOrder || '',
       sqlLimit: sqlLimit.toString() || '0'
     });
-    window.open(`/MyBooks/list_book?${params.toString()}`, '_blank', 'width=1080,height=600');
+    const win = window.open(`/MyBooks/list_book?${params.toString()}`, windowName, 'width=1080,height=600');
+    if (win) win.focus();
   };
   // ［条件消去］
   const handleErase = () => {
@@ -131,6 +135,7 @@ export function SearchBooks() {
   const handleNoteSearch = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
     if (!SearchChk(formData)) return;
+    const windowName = `list_note_range_window_${formData.read_st_from}${formData.read_st_to}${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}`;
     const params = new URLSearchParams({
       read_st_from: formData.read_st_from || '0001-01-01',
       read_st_to: formData.read_st_to || '9999-12-31',
@@ -145,12 +150,14 @@ export function SearchBooks() {
       bookclass_cd: formData.bookclass_cd || '',
       bookform_cd: formData.bookform_cd || ''
     });
-    window.open(`/MyBooks/list_note_range?${params.toString()}`, '_blank', 'width=840,height=600');
+    const win = window.open(`/MyBooks/list_note_range?${params.toString()}`, windowName, 'width=840,height=600');
+    if (win) win.focus();
   };
   // ［未読一覧］ ※書名等は空白を除去
   const handleUnRead = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
     if (!SearchChk(formData)) return;
+    const windowName = `list_book_unread_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.bookOrder}`;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title.replace(/\s+/g, '') || '',
@@ -165,7 +172,8 @@ export function SearchBooks() {
       display_order: formData.bookOrder || '',
       sqlLimit: sqlLimit.toString() || '0'
     });
-    window.open(`/MyBooks/list_book_unread?${params.toString()}`, '_blank', 'width=1080,height=600');
+    const win = window.open(`/MyBooks/list_book_unread?${params.toString()}`, windowName, 'width=1080,height=600');
+    if (win) win.focus();
   };
   // ［書籍新規登録］
   const handleRegist = () => {
@@ -176,7 +184,8 @@ export function SearchBooks() {
     const params = new URLSearchParams({
       user: user || ''
     });
-    window.open(`/MyBooks/regist_book?${params.toString()}`, '_blank', 'width=1120,height=640');
+    const win = window.open(`/MyBooks/regist_book?${params.toString()}`, 'regist_book_window', 'width=1120,height=640');
+    if (win) win.focus();
   };
   useHotkeys('alt+r', (event) => {
     event.preventDefault(); // ブラウザのデフォルト挙動を防止
@@ -187,7 +196,8 @@ export function SearchBooks() {
     const params = new URLSearchParams({
       user: user || ''
     });
-    window.open(`/MyBooks/data_maintenance?${params.toString()}`);
+    const win = window.open(`/MyBooks/data_maintenance?${params.toString()}`, 'data_maintenance_window');
+    if (win) win.focus();
   };
   useHotkeys('alt+m', (event) => {
     event.preventDefault();

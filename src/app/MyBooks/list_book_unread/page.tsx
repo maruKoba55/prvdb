@@ -42,6 +42,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
         bookclass_cd={Array.isArray(params.bookclass_cd) ? params.bookclass_cd[0] : (params.bookclass_cd ?? '')}
         bookform_cd={Array.isArray(params.bookform_cd) ? params.bookform_cd[0] : (params.bookform_cd ?? '')}
         limit_possess=""
+        display_order={Array.isArray(params.display_order) ? params.display_order[0] : (params.display_order ?? '')}
         bookIdList={bookIdList}
       />
     </div>

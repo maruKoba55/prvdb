@@ -42,21 +42,42 @@ export default function RegistBook() {
   // 各ボタンの処理
   // ［基本情報を登録］
   const handleBaseRegist = async () => {
+    if (!BaseInputChk(formData)) return;
     try {
-      const data = await editBookData();
-      if (data) {
-        setRegisteredBook(data);
+      const insertData = {
+        ...formData,
+        isbn10: formData.isbn10.toUpperCase().replaceAll('-', '') || null,
+        isbn13: formData.isbn13.replaceAll('-', '') || null,
+        c_cd: formData.c_cd.toUpperCase() || null,
+        ndc: formData.ndc || null,
+        original_title: formData.original_title || null,
+        colophon: formData.colophon || null,
+        first_publish_year: formData.first_publish_year || 0,
+        publisher: formData.publisher || null,
+        publish_series: formData.publish_series || null,
+        publish_series_no: formData.publish_series_no || null,
+        bookclass_cd: formData.bookclass_cd || null,
+        remarks: formData.remarks || null,
+        image_url: formData.image_url || null,
+        user_id: user || null
+      };
+      const { data, error } = await supabase.from('books').insert([insertData]).select();
+      if (error) throw error;
+      const insertedData = data[0];
+      if (insertedData) {
+        setRegisteredBook(insertedData);
         if (
           confirm(
-            `『${data.title}』（${data.publisher}、${data.first_publish_year}）を登録しました。編集画面に移動します。`
+            `『${insertedData.title}』（${insertedData.publisher}、${insertedData.first_publish_year}）を登録しました。編集画面に移動します。`
           )
         ) {
+          window.close();
+          const windowName = `edit_book_window_${insertedData.book_id || 'new'}`;
           const params = new URLSearchParams({
-            book_id: data?.book_id.toString() || '',
+            book_id: insertedData?.book_id.toString() || '',
             user: user || ''
           });
-          window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
-          window.close();
+          window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');
         }
       }
     } catch (error: any) {
@@ -117,8 +138,8 @@ export default function RegistBook() {
     }));
   };
 
-  // 画面内容をTable 'books' へ登録
-  const editBookData = async () => {
+  // 基本情報入力内容確認 ；エラーあり ⇒ null return
+  const BaseInputChk = (formData: any) => {
     if (
       !formData.title.trim() ||
       !formData.publisher.trim() ||
@@ -128,40 +149,40 @@ export default function RegistBook() {
       alert('必須項目が未入力です。');
       return null;
     }
+    if (formData.isbn10) {
+      if (
+        !formData.isbn10
+          .toUpperCase()
+          .replaceAll('-', '')
+          .match(/^[A-Z0-9]+$/)
+      ) {
+        alert(`ISBN-10に不正な文字（半角英数字、'-' 以外）が含まれています。`);
+        return null;
+      }
+    }
+    if (formData.isbn13) {
+      if (!formData.isbn13.replaceAll('-', '').match(/^[0-9]+$/)) {
+        alert(`ISBN-13に不正な文字（半角数字、'-' 以外）が含まれています。`);
+        return null;
+      }
+    }
+    if (formData.c_cd) {
+      if (!formData.c_cd.toUpperCase().match(/^C\d{4}$/)) {
+        alert(`Cコードは'C'+4桁の半角数字です。`);
+        return null;
+      }
+    }
     if (formData.first_publish_year > new Date().getFullYear() + 1) {
       alert('初版年を確認してください。');
       return null;
     }
-
     if (formData.isbn10 && !formData.isbn13 && isbnHyphenate(formData.isbn10)) {
       if (confirm('ISBN-10を変換してISBN-13としますか？')) {
         formData.isbn13 = isbnHyphenate(formData.isbn10) ?? '';
         router.refresh();
       }
     }
-
-    const insertData = {
-      ...formData,
-      isbn10: formData.isbn10.replaceAll('-', '') || null,
-      isbn13: formData.isbn13.replaceAll('-', '') || null,
-      c_cd: formData.c_cd || null,
-      ndc: formData.ndc || null,
-      original_title: formData.original_title || null,
-      colophon: formData.colophon || null,
-      first_publish_year: formData.first_publish_year || 0,
-      publisher: formData.publisher || null,
-      publish_series: formData.publish_series || null,
-      publish_series_no: formData.publish_series_no || null,
-      bookclass_cd: formData.bookclass_cd || null,
-      remarks: formData.remarks || null,
-      image_url: formData.image_url || null,
-      user_id: user || null
-    };
-
-    // Table 'books'にinsertし、その内容を取得
-    const { data, error } = await supabase.from('books').insert([insertData]).select();
-    if (error) throw error;
-    return data ? data[0] : null;
+    return true;
   };
 
   return (

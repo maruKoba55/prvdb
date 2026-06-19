@@ -35,34 +35,14 @@ export default function EditBook({ book }: { book: any }) {
 
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
-    if (
-      !formData.title.trim() ||
-      !formData.publisher.trim() ||
-      String(formData.first_publish_year).trim() === '' ||
-      !formData.bookclass_cd.trim()
-    ) {
-      alert('基本情報の必須項目が未入力です。');
-      return null;
-    }
-    if (formData.first_publish_year > new Date().getFullYear() + 1) {
-      alert('初版年を確認してください。');
-      return null;
-    }
-    if (formData.isbn10 && !formData.isbn13 && isbnHyphenate(formData.isbn10)) {
-      if (confirm('ISBN-10を変換してISBN-13としますか？')) {
-        formData.isbn13 = isbnHyphenate(formData.isbn10);
-        router.refresh();
-      }
-    }
-
+    if (!BaseInputChk(formData)) return;
     // 書籍基本情報（Books）の更新
     const { error: bookErr } = await supabase
       .from('books')
       .update({
-        isbn10: formData.isbn10 ? formData.isbn10.replaceAll('-', '') : '',
+        isbn10: formData.isbn10 ? formData.isbn10.toUpperCase().replaceAll('-', '') : '',
         isbn13: formData.isbn13 ? formData.isbn13.replaceAll('-', '') : '',
-        c_cd: formData.c_cd,
+        c_cd: formData.c_cd.toUpperCase(),
         ndc: formData.ndc,
         title: formData.title,
         original_title: formData.original_title,
@@ -277,6 +257,53 @@ export default function EditBook({ book }: { book: any }) {
       ...prev,
       [field]: ''
     }));
+  };
+
+  // 基本情報入力内容確認 ；エラーあり ⇒ null return
+  const BaseInputChk = (formData: any) => {
+    if (
+      !formData.title.trim() ||
+      !formData.publisher.trim() ||
+      String(formData.first_publish_year).trim() === '' ||
+      !formData.bookclass_cd.trim()
+    ) {
+      alert('基本情報の必須項目が未入力です。');
+      return null;
+    }
+    if (formData.isbn10) {
+      if (
+        !formData.isbn10
+          .toUpperCase()
+          .replaceAll('-', '')
+          .match(/^[A-Z0-9]+$/)
+      ) {
+        alert(`ISBN-10に不正な文字（半角英数字、'-' 以外）が含まれています。`);
+        return null;
+      }
+    }
+    if (formData.isbn13) {
+      if (!formData.isbn13.replaceAll('-', '').match(/^[0-9]+$/)) {
+        alert(`ISBN-13に不正な文字（半角数字、'-' 以外）が含まれています。`);
+        return null;
+      }
+    }
+    if (formData.c_cd) {
+      if (!formData.c_cd.toUpperCase().match(/^C\d{4}$/)) {
+        alert(`Cコードは'C'+4桁の半角数字です。`);
+        return null;
+      }
+    }
+    if (formData.first_publish_year > new Date().getFullYear() + 1) {
+      alert('初版年を確認してください。');
+      return null;
+    }
+    if (formData.isbn10 && !formData.isbn13 && isbnHyphenate(formData.isbn10)) {
+      if (confirm('ISBN-10を変換してISBN-13としますか？')) {
+        formData.isbn13 = isbnHyphenate(formData.isbn10);
+        router.refresh();
+      }
+    }
+    return true;
   };
 
   return (

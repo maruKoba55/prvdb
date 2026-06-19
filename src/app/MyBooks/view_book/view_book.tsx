@@ -70,6 +70,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   //［読書ノート］
   const handleNote = () => {
     const { book_id, title } = book;
+    const windowName = `list_note_book_window_${book_id || 'new'}`;
     const params = new URLSearchParams({
       book_id: book_id?.toString() || '',
       title: title || '',
@@ -77,16 +78,19 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       person_name: book.book_role?.[0]?.person_name || '',
       user: user || ''
     });
-    window.open(`/MyBooks/list_note_book?${params.toString()}`, '_blank', 'width=840,height=600');
+    const win = window.open(`/MyBooks/list_note_book?${params.toString()}`, windowName, 'width=840,height=600');
+    if (win) win.focus();
   };
   //［編集］
   const handleEdit = () => {
     const { book_id } = book;
+    const windowName = `edit_book_window_${book_id || 'new'}`;
     const params = new URLSearchParams({
       book_id: book_id?.toString() || '',
       user: user || ''
     });
-    window.open(`/MyBooks/edit_book?${params.toString()}`, '_blank', 'width=1110,height=880');
+    const win = window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');
+    if (win) win.focus();
   };
   //［削除］
   const handleDelete = async () => {

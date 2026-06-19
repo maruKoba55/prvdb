@@ -15,12 +15,14 @@ export default function ListBook({
   bookclass_cd,
   bookform_cd,
   limit_possess,
+  display_order,
   bookIdList
 }: {
   titleAdd: string;
   bookclass_cd: string;
   bookform_cd: string;
   limit_possess: string;
+  display_order: string;
   bookIdList: number[];
 }) {
   const supabase = supabaseClient();
@@ -82,6 +84,21 @@ export default function ListBook({
     }
   } else if (limit_possess === 'nonPossess') {
     const titleTmp = '保有せず';
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  }
+  if (display_order === 'publish') {
+    const titleTmp = '刊行順';
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  } else if (display_order === 'get') {
+    const titleTmp = '入手順';
     if (titleAdd2) {
       titleAdd2 = titleAdd2 + '／' + titleTmp;
     } else {

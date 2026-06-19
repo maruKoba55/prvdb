@@ -18,28 +18,48 @@ export default function DataMaint() {
     const params = new URLSearchParams({
       user: user || ''
     });
-    window.open(`/MyBooks/data_maintenance/book_role_master/?${params.toString()}`, '_blank', 'width=800,height=820');
+    const win = window.open(
+      `/MyBooks/data_maintenance/book_role_master/?${params.toString()}`,
+      'book_role_master_window',
+      'width=800,height=820'
+    );
+    if (win) win.focus();
   };
   // ［書籍形態マスタ］
   const handleBookFormMaster = () => {
     const params = new URLSearchParams({
       user: user || ''
     });
-    window.open(`/MyBooks/data_maintenance/bookform_master/?${params.toString()}`, '_blank', 'width=800,height=820');
+    const win = window.open(
+      `/MyBooks/data_maintenance/bookform_master/?${params.toString()}`,
+      'bookform_master_window',
+      'width=800,height=820'
+    );
+    if (win) win.focus();
   };
   // ［書籍分類マスタ］
   const handleBookClassMaster = () => {
     const params = new URLSearchParams({
       user: user || ''
     });
-    window.open(`/MyBooks/data_maintenance/bookclass_master/?${params.toString()}`, '_blank', 'width=800,height=820');
+    const win = window.open(
+      `/MyBooks/data_maintenance/bookclass_master/?${params.toString()}`,
+      'bookclass_master_window',
+      'width=800,height=820'
+    );
+    if (win) win.focus();
   };
   // ［システム定数］
   const handleSystemConstants = () => {
     const params = new URLSearchParams({
       user: user || ''
     });
-    window.open(`/MyBooks/data_maintenance/system_constants/?${params.toString()}`, '_blank', 'width=800,height=640');
+    const win = window.open(
+      `/MyBooks/data_maintenance/system_constants/?${params.toString()}`,
+      'system_constants_window',
+      'width=800,height=640'
+    );
+    if (win) win.focus();
   };
   // ［データ保存］
   const handleDataBackup = async () => {
