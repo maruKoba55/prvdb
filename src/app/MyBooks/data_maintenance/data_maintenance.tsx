@@ -63,6 +63,7 @@ export default function DataMaint() {
   };
   // ［データ保存］
   const handleDataBackup = async () => {
+    if (!confirm('書籍データをバックアップ用領域に保存します。前々回の保存データは消去されます。')) return;
     const { data, error } = await supabase.rpc('backup_books', {});
     if (!error) {
       alert('データ保存完了');
