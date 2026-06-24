@@ -42,7 +42,7 @@ export default function EditBook({ book }: { book: any }) {
       .update({
         isbn10: formData.isbn10 ? formData.isbn10.toUpperCase().replaceAll('-', '') : '',
         isbn13: formData.isbn13 ? formData.isbn13.replaceAll('-', '') : '',
-        c_cd: formData.c_cd.toUpperCase(),
+        c_cd: formData.c_cd ? formData.c_cd.toUpperCase() : '',
         ndc: formData.ndc,
         title: formData.title,
         original_title: formData.original_title,
