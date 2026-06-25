@@ -222,7 +222,7 @@ export const BookForm = ({
                 value={formData.publisher}
                 onChange={onChange}
               />
-              <div className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>
+              {isReadOnly ? '' : <div className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>}
             </div>
             <div className="flex mt-1 ml-17">
               <div className="flex items-center">
@@ -277,7 +277,7 @@ export const BookForm = ({
                       <span>（{toWarekiYear(parseInt(String(formData.first_publish_year)) || 0)}）</span>
                     )
                   : null}
-                <div className="ml-1">※不詳の場合は 0（zero）</div>
+                {isReadOnly ? '' : <div className="ml-1">※不詳の場合は 0（zero）</div>}
               </div>
               <div className="flex items-center ml-4">
                 <label
