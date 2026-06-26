@@ -10,6 +10,7 @@ export default async function ViewBookPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const { data: idListData, error } = await supabase.rpc('search_books', {
+    p_book_id: (params.book_id as string) || null,
     p_isbn13: (params.isbn13 as string) || null,
     p_title: (params.title as string) || null,
     p_title_search_type: (params.title_search_type as string) || 'top',
@@ -22,6 +23,7 @@ export default async function ViewBookPage({ searchParams }: PageProps) {
     p_bookform_cd: (params.bookform_cd as string) || null,
     p_limit_possess: (params.limit_possess as string) || 'noLimit',
     p_display_order: (params.display_order as string) || 'publish',
+    p_sort_option: (params.sort_option as string) || 'asc',
     p_select_limit: (params.sqlLimit as string) || '0'
   });
   if (error) {

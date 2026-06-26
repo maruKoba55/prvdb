@@ -311,6 +311,7 @@ export default function EditBook({ book }: { book: any }) {
       <form className="space-y-8">
         <BookForm
           screenTitle="書籍管理（編集）"
+          titleAdd=""
           bookId={formData.book_id}
           formData={formData}
           bookClassMaster={bookClassMaster}

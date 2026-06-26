@@ -189,6 +189,7 @@ export default function RegistBook() {
     <div>
       <BookForm
         screenTitle="書籍管理（登録）"
+        titleAdd=""
         bookId={registeredBook ? registeredBook.book_id : ''}
         formData={formData}
         bookClassMaster={bookClassMaster}

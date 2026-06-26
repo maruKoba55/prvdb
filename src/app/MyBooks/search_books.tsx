@@ -23,6 +23,7 @@ const initialFormState = {
   bookform_cd: '',
   limitPossess: 'noLimit',
   bookOrder: 'publish',
+  sortOption: 'asc',
   read_st_from: '',
   read_st_to: ''
 };
@@ -81,8 +82,9 @@ export function SearchBooks() {
   // ［書籍検索（個別）］ ※書名等は空白を除去
   const handleBookSearch = async () => {
     if (!SearchChk(formData)) return;
-    const windowName = `view_book_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.limitPossess}${formData.bookOrder}`;
+    const windowName = `view_book_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.limitPossess}${formData.bookOrder}${formData.sortOption}`;
     const params = new URLSearchParams({
+      book_id: '', //特定のbook_idは、書籍一覧から個別選択した場合に指定
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title.replace(/\s+/g, '') || '',
       title_search_type: formData.titleSearch || '',
@@ -95,6 +97,7 @@ export function SearchBooks() {
       bookform_cd: formData.bookform_cd || '',
       limit_possess: formData.limitPossess || '',
       display_order: formData.bookOrder || '',
+      sort_option: formData.sortOption || '',
       sqlLimit: sqlLimit.toString() || '0',
       user: user || ''
     });
@@ -104,7 +107,7 @@ export function SearchBooks() {
   // ［書籍検索（一覧）］ ※書名等は空白を除去
   const handleBookList = async () => {
     if (!SearchChk(formData)) return;
-    const windowName = `list_book_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.limitPossess}${formData.bookOrder}`;
+    const windowName = `list_book_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.limitPossess}${formData.bookOrder}${formData.sortOption}`;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title.replace(/\s+/g, '') || '',
@@ -118,7 +121,9 @@ export function SearchBooks() {
       bookform_cd: formData.bookform_cd || '',
       limit_possess: formData.limitPossess || '',
       display_order: formData.bookOrder || '',
-      sqlLimit: sqlLimit.toString() || '0'
+      sort_option: formData.sortOption || '',
+      sqlLimit: sqlLimit.toString() || '0',
+      user: user || ''
     });
     const win = window.open(`/MyBooks/list_book?${params.toString()}`, windowName, 'width=1080,height=600');
     if (win) win.focus();
@@ -157,7 +162,7 @@ export function SearchBooks() {
   const handleUnRead = () => {
     formData.limitPossess = 'noLimit'; //書籍保有の限定条件は無効
     if (!SearchChk(formData)) return;
-    const windowName = `list_book_unread_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.bookOrder}`;
+    const windowName = `list_book_unread_window_${formData.isbn13?.replaceAll('-', '')}${formData.title.replace(/\s+/g, '')}${formData.titleSearch}${formData.publisher.replace(/\s+/g, '')}${formData.publish_series.replace(/\s+/g, '')}${formData.role_cd}${formData.person_name.replace(/\s+/g, '')}${formData.personSearch}${formData.bookclass_cd}${formData.bookform_cd}${formData.bookOrder}${formData.sortOption}`;
     const params = new URLSearchParams({
       isbn13: formData.isbn13?.replaceAll('-', '') || '',
       title: formData.title.replace(/\s+/g, '') || '',
@@ -170,7 +175,9 @@ export function SearchBooks() {
       bookclass_cd: formData.bookclass_cd || '',
       bookform_cd: formData.bookform_cd || '',
       display_order: formData.bookOrder || '',
-      sqlLimit: sqlLimit.toString() || '0'
+      sort_option: formData.sortOption || '',
+      sqlLimit: sqlLimit.toString() || '0',
+      user: user || ''
     });
     const win = window.open(`/MyBooks/list_book_unread?${params.toString()}`, windowName, 'width=1080,height=600');
     if (win) win.focus();
@@ -275,7 +282,7 @@ export function SearchBooks() {
       <div className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理</div>
       <div className="flex">
         {/* 左側エリア */}
-        <div className=" flex-col w-4/5 border-solid border-2 rounded-lg m-3 p-1">
+        <div className="flex flex-col w-4/5 border-solid border-2 rounded-lg m-3 p-1">
           {/* 左側上段：書籍検索 */}
           <div className="border-solid border-1 rounded-lg m-3 p-2">
             <div className="text-xl font-bold text-blue-500 m-1">書籍検索</div>
@@ -313,7 +320,7 @@ export function SearchBooks() {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex mt-1 ml-22">
+            <div className="flex items-center mt-1 ml-22">
               <div className="flex px-2">
                 <label className="block ml-1">
                   <input
@@ -353,7 +360,7 @@ export function SearchBooks() {
               />
               <span className="ml-2">から始まる（先頭一致）</span>
             </div>
-            <div className="mt-2 ml-22">
+            <div className="flex items-center mt-2 ml-22">
               <div>
                 <label htmlFor="publish_series">出版シリーズ</label>
                 <input
@@ -367,7 +374,7 @@ export function SearchBooks() {
                 <span className="ml-2">から始まる（先頭一致）</span>
               </div>
             </div>
-            <div className="flex mt-2 ml-2">
+            <div className="flex items-center mt-2 ml-2">
               <div>
                 <label htmlFor="role" className="inline-block w-16">
                   役　割
@@ -427,14 +434,14 @@ export function SearchBooks() {
                 </div>
               </div>
             </div>
-            <div className="flex mt-3 ml-2">
+            <div className="flex mt-2 ml-2">
               <div className="flex items-center">
                 <label htmlFor="bookclass" className="inline-block w-16">
                   書籍分類
                 </label>
                 <select
                   id="bookclass"
-                  className={styleItems}
+                  className={`${styleItems}`}
                   required
                   value={formData.bookclass_cd}
                   onChange={handleBookClass}
@@ -459,7 +466,7 @@ export function SearchBooks() {
                 </label>
                 <select
                   id="bookform"
-                  className={styleItems}
+                  className={`${styleItems}`}
                   required
                   value={formData.bookform_cd}
                   onChange={handleBookForm}
@@ -520,12 +527,13 @@ export function SearchBooks() {
                   </label>
                 </div>
               </div>
-              <div className="border-solid border-1 rounded-lg flex ml-44 p-1 items-center bg-yellow-200">
-                <label htmlFor="bookOrder" className="inline-block ml-2">
-                  表示順：
+              <div className="border-solid border-1 rounded-lg bg-yellow-200 flex items-center ml-5 p-1">
+                <label htmlFor="bookOrder" className="inline-block ml-1">
+                  表示順 ：
                 </label>
-                <div className="flex ml-2">
-                  <label className="block w-20">
+                <div className="flex">
+                  ［
+                  <label>
                     <input
                       type="radio"
                       name="bookOrder"
@@ -534,9 +542,9 @@ export function SearchBooks() {
                       onChange={handleChangeR}
                       className="mr-1"
                     />
-                    刊行順
+                    刊行
                   </label>
-                  <label className="block w-20">
+                  <label className="ml-2">
                     <input
                       type="radio"
                       name="bookOrder"
@@ -545,8 +553,36 @@ export function SearchBooks() {
                       onChange={handleChangeR}
                       className="mr-1"
                     />
-                    入手順
+                    入手
                   </label>
+                  ］
+                </div>
+                の
+                <div className="flex">
+                  ［
+                  <label>
+                    <input
+                      type="radio"
+                      name="sortOption"
+                      value="asc"
+                      checked={formData.sortOption === 'asc'}
+                      onChange={handleChangeR}
+                      className="mr-1"
+                    />
+                    早い順
+                  </label>
+                  <label className="ml-2">
+                    <input
+                      type="radio"
+                      name="sortOption"
+                      value="desc"
+                      checked={formData.sortOption === 'desc'}
+                      onChange={handleChangeR}
+                      className="mr-1"
+                    />
+                    遅い順
+                  </label>
+                  ］
                 </div>
               </div>
             </div>

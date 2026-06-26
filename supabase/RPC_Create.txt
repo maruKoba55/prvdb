@@ -1,10 +1,11 @@
 -- DROP FUNCTION IF EXISTS search_books_complex;
 -- ※引数を変更したために同名FUNCTIONが複数存在する場合は、引数のリストを付けてそれぞれDROPする。
---  （例）DROP FUNCTION IF EXISTS search_books_complex(text, text, text, text, text, text, text, text, text, text, text, text);
+--  （例）DROP FUNCTION IF EXISTS search_books(text, text, text, text, text, text, text, text, text, text, text, text, int);
 
 
 -- ■書籍閲覧、一覧
 CREATE OR REPLACE FUNCTION search_books(
+  p_book_id TEXT DEFAULT NULL,
   p_isbn13 TEXT DEFAULT NULL,
   p_title TEXT DEFAULT NULL,
   p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
@@ -17,7 +18,8 @@ CREATE OR REPLACE FUNCTION search_books(
   p_bookform_cd TEXT DEFAULT NULL,
   p_limit_possess TEXT DEFAULT 'noLimit',   -- 'possess', 'nonPossess', 'noLimit'
   p_display_order TEXT DEFAULT 'publish',   -- 'publish', 'get'
-  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:LIMIT
+  p_sort_option TEXT DEFAULT 'asc',   -- 'asc', 'desc'
+  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:limit
 )
 RETURNS TABLE (
   book_id INTEGER,
@@ -42,8 +44,10 @@ BEGIN
   LEFT JOIN book_role br ON b.book_id = br.book_id
   LEFT JOIN book_possess bp ON b.book_id = bp.book_id
   WHERE 
+    -- 特定のbook_idが指定された時、他の条件は未指定
+    (p_book_id IS NULL OR b.book_id = CAST(p_book_id AS INTEGER))
     -- 基本フィルタ
-    (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
     -- 出版社、出版シリーズ：空白除去、前方一致
     AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'　',''),' ','') ILIKE p_publisher || '%')
@@ -65,12 +69,18 @@ BEGIN
           ELSE true END)
   GROUP BY b.book_id
   ORDER BY 
-    CASE WHEN p_display_order = 'publish' THEN b.first_publish_year ELSE NULL END ASC,
-    CASE WHEN p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC,
-    b.publisher ASC, 
-    b.isbn13 ASC,
-    b.isbn10 ASC,
-    b.title ASC
+    CASE WHEN p_sort_option = 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' THEN b.publisher ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn13    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn10    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.title     ELSE NULL END ASC, 
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' THEN b.publisher ELSE NULL END DESC, 
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn13    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn10    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.title     ELSE NULL END DESC
   LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
 END;
 $$;
@@ -89,7 +99,8 @@ CREATE OR REPLACE FUNCTION search_books_unread(
   p_bookclass_cd TEXT DEFAULT NULL,
   p_bookform_cd TEXT DEFAULT NULL,
   p_display_order TEXT DEFAULT 'publish',   -- 'publish', 'get'
-  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:LIMIT
+  p_sort_option TEXT DEFAULT 'asc',   -- 'asc', 'desc'
+  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:limit
 )
 RETURNS TABLE (
   book_id INTEGER
@@ -130,12 +141,18 @@ BEGIN
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   GROUP BY b.book_id
   ORDER BY 
-    CASE WHEN p_display_order = 'publish' THEN b.first_publish_year ELSE NULL END ASC,
-    CASE WHEN p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC,
-    b.publisher ASC, 
-    b.isbn13 ASC,
-    b.isbn10 ASC,
-    b.title ASC
+    CASE WHEN p_sort_option = 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' THEN b.publisher ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn13    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn10    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.title     ELSE NULL END ASC, 
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' THEN b.publisher ELSE NULL END DESC, 
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn13    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn10    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.title     ELSE NULL END DESC
   LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
 END;
 $$;
@@ -155,7 +172,7 @@ CREATE OR REPLACE FUNCTION search_note_range(
   p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
   p_bookclass_cd TEXT DEFAULT NULL,
   p_bookform_cd TEXT DEFAULT NULL,
-  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:LIMIT
+  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:limit
 )
 RETURNS TABLE (
   note_id INTEGER,

@@ -4,29 +4,24 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { X } from 'lucide-react';
+import { BookSearch, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { useSystemConstant, useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
 import { isbnHyphen10 } from '@/utils/isbnHyphen10';
 import { isbnHyphenate } from '@/utils/isbnHyphenate';
 
-export default function ListBook({
-  titleAdd,
-  bookclass_cd,
-  bookform_cd,
-  limit_possess,
-  display_order,
-  bookIdList
-}: {
-  titleAdd: string;
-  bookclass_cd: string;
-  bookform_cd: string;
-  limit_possess: string;
-  display_order: string;
-  bookIdList: number[];
-}) {
+export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; bookIdList: number[] }) {
   const supabase = supabaseClient();
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const bookclass_cd = searchParams.get('bookclass_cd');
+  const bookform_cd = searchParams.get('bookform_cd');
+  const limit_possess = searchParams.get('limit_possess');
+  const display_order = searchParams.get('display_order');
+  const sort_option = searchParams.get('sort_option');
+  const user = searchParams.get('user');
+
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // 読み込み状態を管理
 
@@ -37,6 +32,31 @@ export default function ListBook({
   const bookFormMaster = useBookFormMaster();
 
   // 各ボタンの処理
+  //［書籍閲覧］
+  const handleBookView = (book_id: string) => {
+    const windowName = `view_book_window_${book_id}`;
+    const params = {
+      book_id: book_id,
+      isbn13: '',
+      title: '',
+      title_search_type: '',
+      publisher: '',
+      publish_series: '',
+      role_cd: '',
+      person_name: '',
+      person_search_type: '',
+      bookclass_cd: '',
+      bookform_cd: '',
+      limit_possess: '',
+      display_order: '',
+      sort_option: '',
+      sqlLimit: '0',
+      user: user || ''
+    };
+    const queryString = new URLSearchParams(params).toString();
+    const win = window.open(`/MyBooks/view_book?${queryString}`, windowName, 'width=1110,height=880');
+    if (win) win.focus();
+  };
   //［閉じる］
   const handleClose = () => {
     window.close();
@@ -61,50 +81,6 @@ export default function ListBook({
       }
     }
   }, []); // 第2引数を空配列にすることで「初回のみ」実行
-
-  // 一覧タイトル追加文字（書籍分類／書籍形態／書籍保有）
-  let titleAdd2 = null;
-  if (bookclass_cd) {
-    titleAdd2 = bookClassMaster.find((item: any) => item.bookclass_cd === bookclass_cd)?.bookclass || null;
-  }
-  if (bookform_cd) {
-    const titleTmp = bookFormMaster.find((item: any) => item.bookform_cd === bookform_cd)?.bookform || null;
-    if (titleAdd2) {
-      titleAdd2 = titleAdd2 + '／' + titleTmp;
-    } else {
-      titleAdd2 = titleTmp;
-    }
-  }
-  if (limit_possess === 'possess') {
-    const titleTmp = '保有中';
-    if (titleAdd2) {
-      titleAdd2 = titleAdd2 + '／' + titleTmp;
-    } else {
-      titleAdd2 = titleTmp;
-    }
-  } else if (limit_possess === 'nonPossess') {
-    const titleTmp = '保有せず';
-    if (titleAdd2) {
-      titleAdd2 = titleAdd2 + '／' + titleTmp;
-    } else {
-      titleAdd2 = titleTmp;
-    }
-  }
-  if (display_order === 'publish') {
-    const titleTmp = '刊行順';
-    if (titleAdd2) {
-      titleAdd2 = titleAdd2 + '／' + titleTmp;
-    } else {
-      titleAdd2 = titleTmp;
-    }
-  } else if (display_order === 'get') {
-    const titleTmp = '入手順';
-    if (titleAdd2) {
-      titleAdd2 = titleAdd2 + '／' + titleTmp;
-    } else {
-      titleAdd2 = titleTmp;
-    }
-  }
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -149,8 +125,62 @@ export default function ListBook({
   if (loading) return <div>読み込み中...</div>;
   if (books.length === 0) return <div>該当書籍無し</div>;
 
-  const screenMinW = 1060; //画面最小幅
+  // 画面追加見出し（書籍分類／書籍形態／書籍保有／表示順）
+  let titleAdd2 = null;
+  let titleTmp = null;
+  if (bookclass_cd) {
+    titleAdd2 = bookClassMaster.find((item: any) => item.bookclass_cd === bookclass_cd)?.bookclass || null;
+  }
+  if (bookform_cd) {
+    titleTmp = bookFormMaster.find((item: any) => item.bookform_cd === bookform_cd)?.bookform || null;
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  }
+  if (limit_possess === 'possess') {
+    titleTmp = '保有中';
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  } else if (limit_possess === 'nonPossess') {
+    titleTmp = '保有せず';
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  }
+  if (display_order === 'publish') {
+    titleTmp = '刊行順';
+    if (sort_option === 'asc') {
+      titleTmp += '↑';
+    } else {
+      titleTmp += '↓';
+    }
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  } else if (display_order === 'get') {
+    titleTmp = '入手順';
+    if (sort_option === 'asc') {
+      titleTmp += '↑';
+    } else {
+      titleTmp += '↓';
+    }
+    if (titleAdd2) {
+      titleAdd2 = titleAdd2 + '／' + titleTmp;
+    } else {
+      titleAdd2 = titleTmp;
+    }
+  }
 
+  const screenMinW = 1060; //画面最小幅
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="space-y-4">
       <div className="text-center bg-cyan-500 mx-2">
@@ -159,7 +189,18 @@ export default function ListBook({
       </div>
       {books.map((book, i) => (
         <div key={book.book_id} className="flex border rounded shadow-sm mx-2 p-1 ">
-          <div className="flex text-white bg-gray-400 min-w-9 align-top justify-end p-1"> {i + 1}</div>
+          <div className="flex flex-col min-w-9 text-white bg-gray-400">
+            <div className="flex justify-end p-1"> {i + 1}</div>
+            <div className="flex justify-center mt-1">
+              <button
+                onClick={() => handleBookView(book.book_id)}
+                className="text-blue-600 hover:text-blue-800"
+                title="書籍閲覧"
+              >
+                <BookSearch size={20} />
+              </button>
+            </div>
+          </div>
           <div className="ml-2">
             <div>
               <span className="font-bold text-lg">『{book.title}』</span>

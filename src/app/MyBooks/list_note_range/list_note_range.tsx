@@ -205,20 +205,16 @@ export default function ListNoteRange() {
   }
 
   const screenMinW = 800;
-
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <div
-        style={{ width: `${screenMinW + 8}px` }}
-        className="text-center text-3xl font-bold underline bg-cyan-500 mx-2"
-      >
-        書籍管理（ノート一覧）
+      <div style={{ width: `${screenMinW + 8}px` }} className="text-center bg-cyan-500 mx-2">
+        <span className="text-3xl font-bold underline">書籍管理（ノート一覧）</span>
+        <span className="text-lg font-bold ml-2">
+          {subTitle1} {subTitle2}
+        </span>
       </div>
       <div style={{ width: `${screenMinW}px` }} className="border-solid border-2 rounded-lg flex m-2 p-2">
         <div className="mb-1">
-          <div className="flex justify-end mr-2">
-            {subTitle1} {subTitle2}
-          </div>
           <div className="overflow-x-auto border rounded-lg">
             <table className="w-full table-fixed text-left text-sm">
               {/* 列幅を固定 */}

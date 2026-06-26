@@ -10,6 +10,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const { data: idListData, error } = await supabase.rpc('search_books', {
+    p_book_id: null,
     p_isbn13: (params.isbn13 as string) || null,
     p_title: (params.title as string) || null,
     p_title_search_type: (params.title_search_type as string) || 'top',
@@ -22,6 +23,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
     p_bookform_cd: (params.bookform_cd as string) || null,
     p_limit_possess: (params.limit_possess as string) || 'noLimit',
     p_display_order: (params.display_order as string) || 'publish',
+    p_sort_option: (params.sort_option as string) || 'asc',
     p_select_limit: (params.sqlLimit as string) || '0'
   });
   if (error) {
@@ -35,17 +37,9 @@ export default async function ListBookPage({ searchParams }: PageProps) {
   // book_id 配列 (例: [10001, 10005, ...])
   const bookIdList = idListData?.map((item: any) => item.book_id) || [];
 
-  // build時のエラー避けのため、bookclass_cd等が undefined、string[]となる可能性を排除
   return (
     <div>
-      <ListBook
-        titleAdd=""
-        bookclass_cd={Array.isArray(params.bookclass_cd) ? params.bookclass_cd[0] : (params.bookclass_cd ?? '')}
-        bookform_cd={Array.isArray(params.bookform_cd) ? params.bookform_cd[0] : (params.bookform_cd ?? '')}
-        limit_possess={Array.isArray(params.limit_possess) ? params.limit_possess[0] : (params.limit_possess ?? '')}
-        display_order={Array.isArray(params.display_order) ? params.display_order[0] : (params.display_order ?? '')}
-        bookIdList={bookIdList}
-      />
+      <ListBook titleAdd="" bookIdList={bookIdList} />
     </div>
   );
 }

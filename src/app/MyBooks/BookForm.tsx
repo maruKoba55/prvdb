@@ -25,6 +25,7 @@ export type BookFormData = {
 
 type Props = {
   screenTitle: string; // 画面の見出し
+  titleAdd: string; // 追加見出し
   bookId: string; // 表示対象の書籍ID
   formData: BookFormData;
   bookClassMaster: BookClassMaster[]; // 書籍分類マスタ
@@ -41,6 +42,7 @@ type Props = {
 
 export const BookForm = ({
   screenTitle,
+  titleAdd,
   bookId,
   formData,
   bookClassMaster,
@@ -60,8 +62,9 @@ export const BookForm = ({
   const screenMinW = 1100; //画面最小幅
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
-      <div style={{ width: `${screenMinW + 8}px` }} className="text-center text-3xl font-bold underline bg-cyan-500">
-        {screenTitle}
+      <div style={{ width: `${screenMinW + 8}px` }} className="text-center bg-cyan-500">
+        <span className="text-3xl font-bold underline">{screenTitle}</span>
+        {titleAdd ? <span className="text-lg font-bold ml-2">（{titleAdd}）</span> : ''}
       </div>
       <div style={{ width: `${screenMinW - 8}px` }}>
         <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">

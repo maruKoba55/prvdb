@@ -21,6 +21,7 @@ export default async function ListBookPage({ searchParams }: PageProps) {
     p_bookclass_cd: (params.bookclass_cd as string) || null,
     p_bookform_cd: (params.bookform_cd as string) || null,
     p_display_order: (params.display_order as string) || 'publish',
+    p_sort_option: (params.sort_option as string) || 'asc',
     p_select_limit: (params.sqlLimit as string) || '0'
   });
   if (error) {
@@ -34,17 +35,9 @@ export default async function ListBookPage({ searchParams }: PageProps) {
   // book_id 配列 (例: [10001, 10005, ...])
   const bookIdList = idListData?.map((item: any) => item.book_id) || [];
 
-  // build時のエラー避けのため、bookclass_cd等が undefined、string[]となる可能性を排除
   return (
     <div>
-      <ListBook
-        titleAdd="未読"
-        bookclass_cd={Array.isArray(params.bookclass_cd) ? params.bookclass_cd[0] : (params.bookclass_cd ?? '')}
-        bookform_cd={Array.isArray(params.bookform_cd) ? params.bookform_cd[0] : (params.bookform_cd ?? '')}
-        limit_possess=""
-        display_order={Array.isArray(params.display_order) ? params.display_order[0] : (params.display_order ?? '')}
-        bookIdList={bookIdList}
-      />
+      <ListBook titleAdd="未読" bookIdList={bookIdList} />
     </div>
   );
 }

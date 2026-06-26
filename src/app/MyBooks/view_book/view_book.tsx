@@ -12,8 +12,15 @@ import { BookForm } from '@/app/MyBooks/BookForm';
 export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const supabase = supabaseClient();
   const router = useRouter();
+
   const searchParams = useSearchParams();
+  const bookclass_cd = searchParams.get('bookclass_cd');
+  const bookform_cd = searchParams.get('bookform_cd');
+  const limit_possess = searchParams.get('limit_possess');
+  const display_order = searchParams.get('display_order');
+  const sort_option = searchParams.get('sort_option');
   const user = searchParams.get('user');
+
   const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
   const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
   const [bookIds, setBookIds] = useState<number[]>(bookIdList);
@@ -94,8 +101,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   };
   //［削除］
   const handleDelete = async () => {
-    const confirmed = confirm(`『${book.title}』（${book.publisher}）を削除しますか？`);
-    if (!confirmed) return;
+    if (!confirm(`『${book.title}』（${book.publisher}）を削除しますか？`)) return;
     try {
       const { error } = await supabase.from('books').delete().eq('book_id', book.book_id);
       if (error) throw error;
@@ -212,12 +218,68 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     setLoading(false);
   };
 
-  if (bookIds.length === 0) return <div>データがありません</div>;
   if (loading || !book) return <div>読み込み中...</div>;
+  if (bookIds.length === 0) return <div>データがありません</div>;
+
+  // 画面追加見出し（書籍分類／書籍形態／書籍保有／表示順）
+  let titleAdd = null;
+  let titleTmp = null;
+  if (bookclass_cd) {
+    titleAdd = bookClassMaster.find((item: any) => item.bookclass_cd === bookclass_cd)?.bookclass || null;
+  }
+  if (bookform_cd) {
+    titleTmp = bookFormMaster.find((item: any) => item.bookform_cd === bookform_cd)?.bookform || null;
+    if (titleAdd) {
+      titleAdd = titleAdd + '／' + titleTmp;
+    } else {
+      titleAdd = titleTmp;
+    }
+  }
+  if (limit_possess === 'possess') {
+    titleTmp = '保有中';
+    if (titleAdd) {
+      titleAdd = titleAdd + '／' + titleTmp;
+    } else {
+      titleAdd = titleTmp;
+    }
+  } else if (limit_possess === 'nonPossess') {
+    titleTmp = '保有せず';
+    if (titleAdd) {
+      titleAdd = titleAdd + '／' + titleTmp;
+    } else {
+      titleAdd = titleTmp;
+    }
+  }
+  if (display_order === 'publish') {
+    titleTmp = '刊行順';
+    if (sort_option === 'asc') {
+      titleTmp += '↑';
+    } else {
+      titleTmp += '↓';
+    }
+    if (titleAdd) {
+      titleAdd = titleAdd + '／' + titleTmp;
+    } else {
+      titleAdd = titleTmp;
+    }
+  } else {
+    titleTmp = '入手順';
+    if (sort_option === 'asc') {
+      titleTmp += '↑';
+    } else {
+      titleTmp += '↓';
+    }
+    if (titleAdd) {
+      titleAdd = titleAdd + '／' + titleTmp;
+    } else {
+      titleAdd = titleTmp;
+    }
+  }
 
   return (
     <BookForm
       screenTitle="書籍管理（閲覧）"
+      titleAdd={titleAdd}
       bookId={book.book_id}
       formData={book}
       bookClassMaster={bookClassMaster}
