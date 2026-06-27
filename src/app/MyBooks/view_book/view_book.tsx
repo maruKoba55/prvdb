@@ -222,8 +222,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   if (bookIds.length === 0) return <div>データがありません</div>;
 
   // 画面追加見出し（書籍分類／書籍形態／書籍保有／表示順）
-  let titleAdd = '';
-  let titleTmp = '';
+  let titleAdd = null;
+  let titleTmp = null;
   if (bookclass_cd) {
     titleAdd = bookClassMaster.find((item: any) => item.bookclass_cd === bookclass_cd)?.bookclass || null;
   }
@@ -271,7 +271,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   return (
     <BookForm
       screenTitle="書籍管理（閲覧）"
-      titleAdd={titleAdd}
+      titleAdd={titleAdd ?? ''}
       bookId={book.book_id}
       formData={book}
       bookClassMaster={bookClassMaster}
