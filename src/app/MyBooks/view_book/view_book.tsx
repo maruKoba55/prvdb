@@ -222,8 +222,8 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   if (bookIds.length === 0) return <div>データがありません</div>;
 
   // 画面追加見出し（書籍分類／書籍形態／書籍保有／表示順）
-  let titleAdd = null;
-  let titleTmp = null;
+  let titleAdd = '';
+  let titleTmp = '';
   if (bookclass_cd) {
     titleAdd = bookClassMaster.find((item: any) => item.bookclass_cd === bookclass_cd)?.bookclass || null;
   }
