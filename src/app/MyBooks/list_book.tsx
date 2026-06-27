@@ -154,20 +154,12 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
       titleAdd2 = titleTmp;
     }
   }
-  if (display_order === 'publish') {
-    titleTmp = '刊行順';
-    if (sort_option === 'asc') {
-      titleTmp += '↑';
+  if (books.length > 1) {
+    if (display_order === 'publish') {
+      titleTmp = '刊行順';
     } else {
-      titleTmp += '↓';
+      titleTmp = '入手順';
     }
-    if (titleAdd2) {
-      titleAdd2 = titleAdd2 + '／' + titleTmp;
-    } else {
-      titleAdd2 = titleTmp;
-    }
-  } else if (display_order === 'get') {
-    titleTmp = '入手順';
     if (sort_option === 'asc') {
       titleTmp += '↑';
     } else {

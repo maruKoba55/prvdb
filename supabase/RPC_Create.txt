@@ -277,12 +277,12 @@ BEGIN
       v_new_book_id, role_cd, role_order, person_name, remarks, user_id
   FROM book_role
   WHERE book_id = p_src_book_id;
-  -- (3) book_possessを複製
+  -- (3) book_possessを複製（get_dateは本日、dispose_dateは省略）
   INSERT INTO book_possess (
-      book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+      book_id, bookform_cd, get_date, image_url, remarks, user_id
   )
   SELECT 
-      v_new_book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+      v_new_book_id, bookform_cd, CURRENT_DATE, image_url, remarks, user_id
   FROM book_possess
   WHERE book_id = p_src_book_id;
   -- (4) コピー先の book_id を返却
