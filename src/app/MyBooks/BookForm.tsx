@@ -352,20 +352,23 @@ export const BookForm = ({
                 <img src="/images/book_NoImage.jpg" alt="No Image" width={170} height={200} />
               )}
             </div>
-            <div className="w-full flex flex-col">
-              <textarea
-                id="image_url"
-                className={`${styleItems} w-full resize-none`}
-                cols={20}
-                rows={1}
-                readOnly={isReadOnly}
-                value={formData.image_url}
-                onChange={onChange}
-              ></textarea>
-              <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex justify-end mb-1">
-                （書影URL）
-              </label>
-            </div>
+            {isReadOnly ? (
+              ''
+            ) : (
+              <div className="w-full flex flex-col">
+                <textarea
+                  id="image_url"
+                  className={`${styleItems} w-full resize-none`}
+                  cols={16}
+                  rows={2}
+                  value={formData.image_url}
+                  onChange={onChange}
+                ></textarea>
+                <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex justify-end mb-1">
+                  （書影URL）
+                </label>
+              </div>
+            )}
           </div>
         </div>
 
