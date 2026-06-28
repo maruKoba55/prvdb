@@ -66,7 +66,7 @@ export const BookForm = ({
         <span className="text-3xl font-bold underline">{screenTitle}</span>
         {titleAdd ? <span className="text-lg font-bold ml-2">（{titleAdd}）</span> : ''}
       </div>
-      <div style={{ width: `${screenMinW - 8}px` }}>
+      <div style={{ width: `${screenMinW - 2}px` }}>
         <div id="mainFraim" className="flex border-solid border-2 rounded-lg m-2 p-2">
           {/* 左側：入力フォーム */}
           <div className="flex-1">
@@ -130,7 +130,7 @@ export const BookForm = ({
                   id="c_cd"
                   className={styleItems}
                   type="text"
-                  size={4}
+                  size={5}
                   maxLength={5}
                   readOnly={isReadOnly}
                   value={formData.c_cd}
@@ -143,7 +143,7 @@ export const BookForm = ({
                   id="ndc"
                   className={styleItems}
                   type="text"
-                  size={9}
+                  size={8}
                   maxLength={10}
                   readOnly={isReadOnly}
                   value={formData.ndc}
