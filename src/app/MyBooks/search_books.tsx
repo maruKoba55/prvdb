@@ -679,7 +679,7 @@ export function SearchBooks() {
                   onClick={handleUnRead}
                 />
                 <div className="flex items-center">：</div>
-                <div className="flex  flex-col justify-center">
+                <div className="flex flex-col justify-center">
                   <div className="flex">
                     書籍検索条件（<span className="underline underline-offset-3">書籍保有を除く</span>
                     ）でノート未存在の書籍を一覧表示

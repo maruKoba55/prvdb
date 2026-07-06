@@ -220,7 +220,7 @@ export const BookForm = ({
                 className={styleItems}
                 type="text"
                 required
-                size={24}
+                size={30}
                 readOnly={isReadOnly}
                 value={formData.publisher}
                 onChange={onChange}

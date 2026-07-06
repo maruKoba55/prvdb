@@ -149,7 +149,7 @@ export function AddRoleModal({
             />
           </div>
           <div className="mt-1 ml-2">
-            <label htmlFor="remarks" className="inline-block  align-top">
+            <label htmlFor="remarks" className="inline-block align-top">
               備　考
             </label>
             <textarea

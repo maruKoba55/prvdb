@@ -24,7 +24,7 @@ export function AddBookClassModal({
   });
   const insertData = {
     bookclass_cd: formData.bookclass_cd,
-    bookclass: formData.bookclass,
+    bookclass: formData.bookclass.trim(),
     selectable: formData.selectable,
     user_id: user
   };
@@ -58,7 +58,7 @@ export function AddBookClassModal({
       onSuccess();
     } else {
       if (error.code === '23505') {
-        alert(`分類コード（${formData.bookclass_cd}）または分類名（${formData.bookclass}）が重複します。`);
+        alert(`分類コード（${insertData.bookclass_cd}）または分類名（${insertData.bookclass}）が重複します。`);
       } else {
         console.error(error);
         alert(`登録失敗 code=${error.code} : ${error.message}`);
@@ -75,7 +75,7 @@ export function AddBookClassModal({
           項目は空白不可）
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="mt-1 ml-2">
+          <div className="flex items-center mt-1 ml-2">
             <label htmlFor="bookclass_cd" className="inline-block font-bold text-orange-500 w-18">
               分類コード
             </label>
@@ -92,7 +92,7 @@ export function AddBookClassModal({
             />
             <span className="ml-2">(3桁の半角英数字)</span>
           </div>
-          <div className="mt-1 ml-2">
+          <div className="flex items-center mt-1 ml-2">
             <label htmlFor="bookclass" className="inline-block font-bold text-orange-500 w-18">
               分 類 名
             </label>
@@ -106,7 +106,7 @@ export function AddBookClassModal({
               onChange={(e) => setFormData({ ...formData, bookclass: e.target.value })}
             />
           </div>
-          <div className="mt-1 ml-2">
+          <div className="flex items-center mt-1 ml-2">
             <label htmlFor="selectable" className="inline-block w-18">
               選択可
             </label>

@@ -42,19 +42,6 @@ export default function MainteBookForm() {
   // ［編集内容を保存］
   const handleUpdate = async () => {
     if (!editForm) return;
-    const handlePostUpdate = (error: any) => {
-      if (!error) {
-        setEditingCd(null);
-        setEditForm(null);
-        fetchData();
-      } else {
-        if (error.code === '23505') {
-          alert(`形態コード（${editForm.bookform_cd}）または形態名（${editForm.bookform}）が重複します。`);
-        } else {
-          alert(`更新失敗 code=${error.code} : ${error.message}`);
-        }
-      }
-    };
     if (editForm.bookform_cd !== editingCd) {
       // 形態コードの変更あり；(RPC)変更後マスタ追加⇒書籍データ書換え⇒変更前マスタ削除
       if (editForm.bookform_cd.trim().length !== 3 || !editForm.bookform_cd.match(/^[A-Za-z0-9]*$/)) {
@@ -82,7 +69,7 @@ export default function MainteBookForm() {
       const { error } = await supabase.rpc('update_bookform_cd', {
         old_cd: editingCd,
         new_cd: editForm.bookform_cd,
-        new_name: editForm.bookform,
+        new_name: editForm.bookform.trim(),
         new_selectable: editForm.selectable
       });
       handlePostUpdate(error);
@@ -91,11 +78,26 @@ export default function MainteBookForm() {
       const { error } = await supabase
         .from('bookform_master')
         .update({
-          bookform: editForm.bookform,
+          bookform: editForm.bookform.trim(),
           selectable: editForm.selectable
         })
         .eq('bookform_cd', editForm.bookform_cd);
       handlePostUpdate(error);
+    }
+  };
+  const handlePostUpdate = (error: any) => {
+    if (!error) {
+      setEditingCd(null);
+      setEditForm(null);
+      fetchData();
+    } else {
+      if (error.code === '23505' && editForm) {
+        alert(
+          `形態コード（${editForm.bookform_cd}）または形態名（${editForm.bookform ? editForm.bookform.trim() : ' '}）が重複します。`
+        );
+      } else {
+        alert(`更新失敗 code=${error.code} : ${error.message}`);
+      }
     }
   };
   // ［削除］

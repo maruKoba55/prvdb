@@ -42,19 +42,6 @@ export default function MainteBookRole() {
   // ［編集内容を保存］
   const handleUpdate = async () => {
     if (!editForm) return;
-    const handlePostUpdate = (error: any) => {
-      if (!error) {
-        setEditingCd(null);
-        setEditForm(null);
-        fetchData();
-      } else {
-        if (error.code === '23505') {
-          alert(`役割コード（${editForm.role_cd}）または役割名（${editForm.role_name}）が重複します。`);
-        } else {
-          alert(`更新失敗 code=${error.code} : ${error.message}`);
-        }
-      }
-    };
     if (editForm.role_cd !== editingCd) {
       // 役割コードの変更あり；(RPC)変更後マスタ追加⇒書籍データ書換え⇒変更前マスタ削除
       if (editForm.role_cd.trim().length !== 3 || !editForm.role_cd.match(/^[A-Za-z0-9]*$/)) {
@@ -82,7 +69,7 @@ export default function MainteBookRole() {
       const { error } = await supabase.rpc('update_role_cd', {
         old_cd: editingCd,
         new_cd: editForm.role_cd,
-        new_name: editForm.role_name,
+        new_name: editForm.role_name.trim(),
         new_selectable: editForm.selectable
       });
       handlePostUpdate(error);
@@ -91,11 +78,26 @@ export default function MainteBookRole() {
       const { error } = await supabase
         .from('book_role_master')
         .update({
-          role_name: editForm.role_name,
+          role_name: editForm.role_name.trim(),
           selectable: editForm.selectable
         })
         .eq('role_cd', editForm.role_cd);
       handlePostUpdate(error);
+    }
+  };
+  const handlePostUpdate = (error: any) => {
+    if (!error) {
+      setEditingCd(null);
+      setEditForm(null);
+      fetchData();
+    } else {
+      if (error.code === '23505' && editForm) {
+        alert(
+          `役割コード（${editForm.role_cd}）または役割名（${editForm.role_name ? editForm.role_name.trim() : ' '}）が重複します。`
+        );
+      } else {
+        alert(`更新失敗 code=${error.code} : ${error.message}`);
+      }
     }
   };
   // ［削除］

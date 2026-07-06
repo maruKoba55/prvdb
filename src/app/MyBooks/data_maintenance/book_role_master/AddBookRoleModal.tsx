@@ -24,7 +24,7 @@ export function AddBookRoleModal({
   });
   const insertData = {
     role_cd: formData.role_cd,
-    role_name: formData.role_name,
+    role_name: formData.role_name.trim(),
     selectable: formData.selectable,
     user_id: user
   };
@@ -58,7 +58,7 @@ export function AddBookRoleModal({
       onSuccess();
     } else {
       if (error.code === '23505') {
-        alert(`役割コード（${formData.role_cd}）または役割名（${formData.role_name}）が重複します。`);
+        alert(`役割コード（${insertData.role_cd}）または役割名（${insertData.role_name}）が重複します。`);
       } else {
         console.error(error);
         alert(`登録失敗 code=${error.code} : ${error.message}`);
@@ -75,7 +75,7 @@ export function AddBookRoleModal({
           項目は空白不可）
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="mt-1 ml-2">
+          <div className="flex items-center mt-1 ml-2">
             <label htmlFor="role_cd" className="inline-block font-bold text-orange-500 w-18">
               役割コード
             </label>
@@ -92,7 +92,7 @@ export function AddBookRoleModal({
             />
             <span className="ml-2">(3桁の半角英数字)</span>
           </div>
-          <div className="mt-1 ml-2">
+          <div className="flex items-center mt-1 ml-2">
             <label htmlFor="role_name" className="inline-block font-bold text-orange-500 w-18">
               役 割 名
             </label>
@@ -106,7 +106,7 @@ export function AddBookRoleModal({
               onChange={(e) => setFormData({ ...formData, role_name: e.target.value })}
             />
           </div>
-          <div className="mt-1 ml-2">
+          <div className="flex items-center mt-1 ml-2">
             <label htmlFor="selectable" className="inline-block w-18">
               選択可
             </label>
