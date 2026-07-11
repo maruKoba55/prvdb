@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { BookImage, DatabaseBackup, FolderPen, Landmark, UserCheck, X } from 'lucide-react';
+import { BookImage, Building, DatabaseBackup, FolderPen, Landmark, UserCheck, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 
 export default function DataMaint() {
@@ -49,6 +49,18 @@ export default function DataMaint() {
     );
     if (win) win.focus();
   };
+  // ［出版社リスト］
+  const handlePublisherList = () => {
+    const params = new URLSearchParams({
+      user: user || ''
+    });
+    const win = window.open(
+      `/MyBooks/data_maintenance/publisher_list/?${params.toString()}`,
+      'publisher_list_window',
+      'width=830,height=870'
+    );
+    if (win) win.focus();
+  };
   // ［システム定数］
   const handleSystemConstants = () => {
     const params = new URLSearchParams({
@@ -66,7 +78,7 @@ export default function DataMaint() {
     if (!confirm('書籍データをバックアップ用領域に保存します。前々回の保存データは消去されます。')) return;
     const { data, error } = await supabase.rpc('backup_books', {});
     if (!error) {
-      alert('データ保存完了');
+      alert('書籍データを保存しました。');
       fetchBackupHistory(); // バックアップ履歴の表示を更新
     } else {
       console.error(error);
@@ -160,6 +172,22 @@ export default function DataMaint() {
             </div>
             <div className="flex flex-col justify-center ml-1">： </div>
             <div className="flex flex-col justify-center ml-1">書籍に割り当てる【分類】の管理</div>
+          </div>
+          <div className="flex mt-3">
+            <div className="flex flex-col justify-center w-40">
+              <CommonButton
+                label={
+                  <>
+                    <Building size={20} />出 版 社 リ ス ト
+                  </>
+                }
+                variant="orange"
+                onClick={handlePublisherList}
+                disabled={false}
+              />
+            </div>
+            <div className="flex flex-col justify-center ml-1">： </div>
+            <div className="flex flex-col justify-center ml-1">選択リストに表示する【出版社】の管理</div>
           </div>
           <div className="flex mt-3">
             <div className="flex flex-col justify-center w-40">

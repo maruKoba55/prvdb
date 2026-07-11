@@ -7,7 +7,7 @@ import { supabaseClient } from '@/lib/Client';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { AddBookRoleModal } from './AddBookRoleModal';
-import { BookRoleMaster } from '@/utils/getBookRole';
+import { BookRoleMaster } from '@/utils/MyBooks/getBookRole';
 
 export default function MainteBookRole() {
   const supabase = supabaseClient();

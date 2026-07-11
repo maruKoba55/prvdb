@@ -6,14 +6,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Eraser, Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { isbnHyphenate } from '@/utils/isbnHyphenate';
-import { useBookClassMaster } from '@/context/AppContext';
+import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
+import { useBookClassMaster, usePublisherList } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 
 export default function RegistBook() {
   // マスタ値取得（カスタムフック）
   const bookClassMaster = useBookClassMaster();
   const defaultClassCd = bookClassMaster.find((item: any) => item.selectable)?.bookclass_cd || '';
+  const publisherList = usePublisherList();
 
   const initialFormState = {
     isbn10: '',
@@ -193,6 +194,7 @@ export default function RegistBook() {
         bookId={registeredBook ? registeredBook.book_id : ''}
         formData={formData}
         bookClassMaster={bookClassMaster}
+        publisherList={publisherList}
         onChange={handleChange}
         onChangeF={handleChangeF}
         onChangeS={handleBookClass}

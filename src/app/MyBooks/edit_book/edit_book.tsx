@@ -6,11 +6,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
+import { useBookRoleMaster, useBookClassMaster, useBookFormMaster, usePublisherList } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 import { AddRoleModal } from './AddRoleModal';
 import { AddPossessModal } from './AddPossessModal';
-import { isbnHyphenate } from '@/utils/isbnHyphenate';
+import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 
 export default function EditBook({ book }: { book: any }) {
@@ -156,10 +156,11 @@ export default function EditBook({ book }: { book: any }) {
     window.location.reload();
   };
 
-  // マスタ値取得（カスタムフック）
+  // マスタ、リスト値取得（カスタムフック）
   const bookRoleMaster = useBookRoleMaster();
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
+  const publisherList = usePublisherList();
 
   // 各ボタンの処理
   // ［画面最新化］
@@ -315,6 +316,7 @@ export default function EditBook({ book }: { book: any }) {
           bookId={formData.book_id}
           formData={formData}
           bookClassMaster={bookClassMaster}
+          publisherList={publisherList}
           onChange={handleChange}
           onChangeF={handleChangeF}
           onChangeS={handleBookClass}
@@ -349,7 +351,7 @@ export default function EditBook({ book }: { book: any }) {
                             type="number"
                             min={0}
                             max={999}
-                            value={r.role_order || 0}
+                            value={r.role_order ?? 0}
                             className={`${styleItems} text-sm inline-block w-12 mr-1`}
                             onChange={(e) => handleRoleChange(r.id, 'role_order', e.target.value)}
                           />
@@ -369,7 +371,7 @@ export default function EditBook({ book }: { book: any }) {
                           id={`person_name-${r.id}`}
                           type="text"
                           size={30}
-                          value={r.person_name || ''}
+                          value={r.person_name ?? ''}
                           className={`${styleItems} text-sm`}
                           onChange={(e) => handleRoleChange(r.id, 'person_name', e.target.value)}
                         />
@@ -377,7 +379,7 @@ export default function EditBook({ book }: { book: any }) {
                           id={`role_remarks-${r.id}`}
                           cols={30}
                           rows={2}
-                          value={r.remarks || ''}
+                          value={r.remarks ?? ''}
                           className={`${styleItems} text-sm`}
                           onChange={(e) => handleRoleChange(r.id, 'remarks', e.target.value)}
                         />
@@ -423,7 +425,7 @@ export default function EditBook({ book }: { book: any }) {
                           <input
                             id={`get_date-${p.book_possess_id}`}
                             type="date"
-                            value={p.get_date || null}
+                            value={p.get_date ?? ''}
                             className={`${styleItems} text-sm`}
                             onChange={(e) => handlePossessChange(p.book_possess_id, 'get_date', e.target.value)}
                           />
@@ -435,8 +437,8 @@ export default function EditBook({ book }: { book: any }) {
                           <input
                             id={`dispose_date-${p.book_possess_id}`}
                             type="date"
-                            value={p.dispose_date || null}
-                            min={p.get_date || null}
+                            value={p.dispose_date ?? ''}
+                            min={p.get_date ?? ''}
                             className={`${styleItems} text-sm`}
                             onChange={(e) => handlePossessChange(p.book_possess_id, 'dispose_date', e.target.value)}
                           />
@@ -452,7 +454,7 @@ export default function EditBook({ book }: { book: any }) {
                             id={`possess_remarks-${p.book_possess_id}`}
                             cols={24}
                             rows={2}
-                            value={p.remarks || ''}
+                            value={p.remarks ?? ''}
                             className={`${styleItems} text-sm`}
                             onChange={(e) => handlePossessChange(p.book_possess_id, 'remarks', e.target.value)}
                           />
@@ -465,7 +467,7 @@ export default function EditBook({ book }: { book: any }) {
                             id={`possess_image_url-${p.book_possess_id}`}
                             type="text"
                             size={23}
-                            value={p.image_url || ''}
+                            value={p.image_url ?? ''}
                             className={`${styleItems} text-sm`}
                             onChange={(e) => handlePossessChange(p.book_possess_id, 'image_url', e.target.value)}
                           />

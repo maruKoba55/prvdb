@@ -7,8 +7,8 @@ import { supabaseClient } from '@/lib/Client';
 import { BookSearch, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { useSystemConstant, useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
-import { isbnHyphen10 } from '@/utils/isbnHyphen10';
-import { isbnHyphenate } from '@/utils/isbnHyphenate';
+import { isbnHyphen10 } from '@/utils/MyBooks/isbnHyphen10';
+import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 
 export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; bookIdList: number[] }) {
   const supabase = supabaseClient();

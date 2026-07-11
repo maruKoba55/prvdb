@@ -2,15 +2,17 @@
 'use client';
 import React, { createContext, useContext } from 'react';
 import { SystemConstant } from '@/utils/getSystemConstants';
-import { BookRoleMaster } from '@/utils/getBookRole';
-import { BookClassMaster } from '@/utils/getBookClass';
-import { BookFormMaster } from '@/utils/getBookForm';
+import { BookRoleMaster } from '@/utils/MyBooks/getBookRole';
+import { BookClassMaster } from '@/utils/MyBooks/getBookClass';
+import { BookFormMaster } from '@/utils/MyBooks/getBookForm';
+import { PublisherList } from '@/utils/MyBooks/getPublisherList';
 
 interface AppContextType {
   constants: SystemConstant[];
   bookRoleMaster: BookRoleMaster[];
   bookClassMaster: BookClassMaster[];
   bookFormMaster: BookFormMaster[];
+  publisherList: PublisherList[];
 }
 const AppContext = createContext<AppContextType | null>(null);
 
@@ -20,13 +22,15 @@ export function AppContextProvider({
   initialConstants,
   initialBookRoleMaster,
   initialBookClassMaster,
-  initialBookFormMaster
+  initialBookFormMaster,
+  initialPublisherList
 }: {
   children: React.ReactNode;
   initialConstants: SystemConstant[];
   initialBookRoleMaster: BookRoleMaster[];
   initialBookClassMaster: BookClassMaster[];
   initialBookFormMaster: BookFormMaster[];
+  initialPublisherList: PublisherList[];
 }) {
   return (
     <AppContext.Provider
@@ -34,7 +38,8 @@ export function AppContextProvider({
         constants: initialConstants,
         bookRoleMaster: initialBookRoleMaster,
         bookClassMaster: initialBookClassMaster,
-        bookFormMaster: initialBookFormMaster
+        bookFormMaster: initialBookFormMaster,
+        publisherList: initialPublisherList
       }}
     >
       {children}
@@ -60,7 +65,7 @@ export function useSystemConstant(constantName: string): number | string | boole
   }
 }
 
-// 各種マスタ用フック
+// 各種マスタ、リスト用フック
 export function useBookRoleMaster(): BookRoleMaster[] {
   const context = useContext(AppContext);
   if (!context) {
@@ -81,4 +86,11 @@ export function useBookFormMaster(): BookFormMaster[] {
     throw new Error('useBookFormMaster must be used within a AppContextProvider');
   }
   return context.bookFormMaster;
+}
+export function usePublisherList(): PublisherList[] {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('usePublisherList must be used within a AppContextProvider');
+  }
+  return context.publisherList;
 }

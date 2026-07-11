@@ -1,13 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useSearchParams } from 'next/navigation';
+import { BookSearch, BookX, CalendarSearch, Eraser, LogIn, LogOut, Plus, TextSearch, Toolbox, X } from 'lucide-react';
 import { supabaseClient } from '@/lib/Client';
-import { BookSearch, BookX, CalendarSearch, Eraser, LogIn, LogOut, Plus, TextSearch, Toolbox } from 'lucide-react';
 import { EditProfile } from '@/components/editProfile';
 import { CommonButton } from '@/components/ui/button';
-import { useSystemConstant, useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
-import { isbnHyphenate } from '@/utils/isbnHyphenate';
+import {
+  useSystemConstant,
+  useBookRoleMaster,
+  useBookClassMaster,
+  useBookFormMaster,
+  usePublisherList
+} from '@/context/AppContext';
+import { usePublisherIncrementalSearch } from '@/hooks/MyBooks/PublisherIncrementalSearch';
+import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 
 const initialFormState = {
@@ -28,26 +36,19 @@ const initialFormState = {
   read_st_to: ''
 };
 
-export function SearchBooks() {
+export default function SearchBooks() {
   const supabase = supabaseClient();
   const [formData, setFormData] = useState(initialFormState);
+  const searchParams = useSearchParams();
+  const user = searchParams.get('user');
 
-  // ユーザー取得
-  const [user, setUser] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (data && data.user) setUser(data.user.id);
-    };
-    fetchUser();
-  }, []);
-
-  // システム変数、各種マスタ取得（カスタムフック）
+  // システム変数、各種マスタ、リスト取得（カスタムフック）
   const sqlLimit = parseInt(useSystemConstant('sqlLimit') as string) || 0;
   const supabaseMaxRows = parseInt(useSystemConstant('supabaseMaxRows') as string) || 0;
   const bookRoleMaster = useBookRoleMaster();
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
+  const publisherList = usePublisherList();
 
   //検索件数上限の設定
   let dbSearchMax = 0;
@@ -274,6 +275,31 @@ export function SearchBooks() {
       bookform_cd: e.target.value // ここでbookform_cdが取得される
     });
   };
+  // 出版社 select用
+  const {
+    isOpen,
+    setIsOpen,
+    activeIndex,
+    setActiveIndex,
+    listRef,
+    filteredList,
+    handleInputKeyDown,
+    handleListKeyDown
+  } = usePublisherIncrementalSearch(publisherList, formData.publisher || '', (value: string) =>
+    handleChangeF('publisher', value)
+  );
+  const handleSelectPublisher = (publisherName: string) => {
+    handleChangeF('publisher', publisherName);
+    setIsOpen(false);
+    setActiveIndex(-1);
+  };
+  // フォーカスが移ったら（e.relatedTarget）リストを閉じる
+  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
 
   const screenMinW = 1100; //画面最小幅
 
@@ -346,19 +372,66 @@ export function SearchBooks() {
                 </label>
               </div>
             </div>
-            <div className="flex items-center mt-2 ml-2">
-              <label htmlFor="publisher" className="inline-block w-16 text-justify">
-                出版社
-              </label>
-              <input
-                id="publisher"
-                className={styleItems}
-                type="text"
-                size={36}
-                value={formData.publisher}
-                onChange={handleChange}
-              />
-              <span className="ml-2">から始まる（先頭一致）</span>
+            <div className="flex mt-2 ml-2">
+              <div className="flex items-center relative">
+                <label htmlFor="publisher" className="inline-block w-16 text-justify">
+                  出版社
+                </label>
+                <div className="flex-1 relative mr-2" onBlur={handleBlur}>
+                  <input
+                    id="publisher"
+                    className={`${styleItems} w-full`}
+                    type="text"
+                    size={36}
+                    value={formData.publisher || ''}
+                    onChange={(e) => {
+                      handleChangeF('publisher', e.target.value);
+                      setIsOpen(true);
+                      setActiveIndex(0);
+                    }}
+                    onKeyDown={handleInputKeyDown}
+                    onFocus={() => {
+                      setIsOpen(true);
+                      setActiveIndex(0); // 開いた時、最初の候補を選択
+                    }}
+                    placeholder="自由に入力 または 候補より選択"
+                    autoComplete="off" // ブラウザ固有の履歴出力を防ぐ
+                  />
+                  {isOpen && (
+                    <ul //選択肢リスト（高さを5件分程度に制限）
+                      ref={listRef}
+                      tabIndex={0}
+                      onKeyDown={handleListKeyDown}
+                      className="absolute left-0 top-full z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg"
+                      style={{ maxHeight: '180px', overflowY: 'auto' }}
+                    >
+                      {filteredList.length > 0 ? (
+                        filteredList.map((item: any, index: number) => (
+                          <li
+                            key={item.id}
+                            className="p-2 cursor-pointer text-sm text-gray-700 hover:bg-indigo-50"
+                            style={{
+                              backgroundColor: index === activeIndex ? '#e0e7ff' : 'transparent' // #e0e7ff = bg-indigo-100
+                            }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              handleSelectPublisher(item.publisher);
+                            }}
+                          >
+                            {item.publisher}
+                            {item.reading ? ` ｜ ${item.reading}` : ''}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="p-2 text-sm text-gray-400 italic">
+                          候補無し。必要であれば［データメンテ］で出版社リストに追加してください。
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                </div>
+                <div className="ml-2">から始まる（先頭一致）</div>
+              </div>
             </div>
             <div className="flex items-center mt-2 ml-22">
               <div>

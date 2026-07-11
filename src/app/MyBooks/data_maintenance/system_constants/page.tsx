@@ -1,19 +1,7 @@
 import { supabaseServer } from '@/lib/Server';
 import { getSystemConstants } from '@/utils/getSystemConstants';
+import { defaultConstants } from '@/app/constants'; // システム定数の規定値
 import MainteSystemConstants from './mainte_systemconstans';
-
-//システム定数規定値
-const defaultConstants = [
-  ['sqlLimit', 'numeric', '0', 'データ検索件数の上限（SQLのLIMIT指定）。0でLIMIT無し（supabaseによる制限のみ）'],
-  [
-    'supabaseMaxRows',
-    'numeric',
-    '0',
-    'supabaseによる検索制限値（Project Settings ⇒ Data API）。0にすると、書籍検索画面に検索数上限を表示できない場合あり'
-  ],
-  ['listAlert', 'numeric', '500', 'リスト形式の検索数警告表示件数。0で警告無し'],
-  ['viewAlert', 'numeric', '500', '個別形式の検索数警告表示件数。0で警告無し']
-];
 
 export default async function MainteSystemConstantsPage(props: any) {
   const supabase = await supabaseServer();

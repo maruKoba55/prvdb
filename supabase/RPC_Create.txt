@@ -33,6 +33,7 @@ RETURNS TABLE (
   possessions JSONB
 ) 
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 BEGIN
   RETURN QUERY
@@ -106,6 +107,7 @@ RETURNS TABLE (
   book_id INTEGER
 ) 
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 BEGIN
   RETURN QUERY
@@ -190,6 +192,7 @@ RETURNS TABLE (
   person_name TEXT
 ) 
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 BEGIN
   RETURN QUERY
@@ -244,9 +247,12 @@ $$;
 
 
 -- ■書籍複製
-CREATE OR REPLACE FUNCTION duplicate_book(p_src_book_id INT)
+CREATE OR REPLACE FUNCTION duplicate_book(
+  p_src_book_id INT
+)
 RETURNS INT
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 DECLARE
   v_new_book_id INT;
@@ -301,6 +307,7 @@ CREATE OR REPLACE FUNCTION update_bookclass_cd(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_current_user uuid;
@@ -338,6 +345,7 @@ CREATE OR REPLACE FUNCTION update_role_cd(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_current_user uuid;
@@ -375,6 +383,7 @@ CREATE OR REPLACE FUNCTION update_bookform_cd(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_current_user uuid;
@@ -402,6 +411,34 @@ END;
 $$;
 
 
+-- ■出版社リスト抽出
+CREATE OR REPLACE FUNCTION extract_publisher(
+  p_extract_count INT DEFAULT 1
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_current_user uuid;
+BEGIN
+  v_current_user := auth.uid();
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION 'ユーザーがログインしていません。';
+  END IF;
+  INSERT INTO publisher_list (publisher, user_id)
+  SELECT publisher, user_id
+  FROM books
+  WHERE user_id = v_current_user
+  GROUP BY publisher, user_id
+  HAVING COUNT(*) >= p_extract_count
+  ON CONFLICT (publisher, user_id) 
+  DO NOTHING;     -- 登録済みであれば無視
+END;
+$$;
+
+
 -- ■データ保存
 CREATE OR REPLACE FUNCTION public.backup_books()
 RETURNS void
@@ -420,92 +457,31 @@ BEGIN
   -- (1) スキーマ 'backup2' のテーブルからログインユーザのデータを削除
   CREATE SCHEMA IF NOT EXISTS backup2;
   CREATE TABLE IF NOT EXISTS backup2.bookclass_master (
-    id                  INTEGER
-   ,bookclass_cd        CHAR(03)
-   ,bookclass           TEXT
-   ,selectable          BOOLEAN
-   ,user_id             UUID
-   ,PRIMARY KEY (bookclass_cd, user_id)
+    LIKE public.bookclass_master INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.bookform_master (
-    id                  INTEGER
-   ,bookform_cd         CHAR(03)
-   ,bookform            TEXT
-   ,selectable          BOOLEAN
-   ,user_id             UUID
-   ,PRIMARY KEY (bookform_cd, user_id)
+    LIKE public.bookform_master INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.book_role_master (
-    id                  INTEGER
-   ,role_cd             CHAR(03)
-   ,role_name           TEXT
-   ,selectable          BOOLEAN
-   ,user_id             UUID
-   ,PRIMARY KEY (role_cd, user_id)
+    LIKE public.book_role_master INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.books (
-    book_id             INTEGER      PRIMARY KEY
-   ,isbn10              VARCHAR(10)
-   ,isbn13              VARCHAR(13)
-   ,c_cd                VARCHAR(05)
-   ,ndc                 VARCHAR(10)
-   ,title               TEXT
-   ,original_title      TEXT
-   ,colophon            TEXT
-   ,publisher           TEXT
-   ,publish_series      TEXT
-   ,publish_series_no   TEXT
-   ,first_publish_year  INTEGER
-   ,bookclass_cd        CHAR(03)
-   ,remarks             TEXT
-   ,image_url           TEXT
-   ,user_id             UUID
-   ,UNIQUE (title, publisher, first_publish_year, user_id)
+    LIKE public.books INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.book_possess (
-    book_possess_id     INTEGER      PRIMARY KEY
-   ,book_id             INTEGER
-   ,bookform_cd         CHAR(03)
-   ,get_date            DATE
-   ,dispose_date        DATE
-   ,image_url           TEXT
-   ,remarks             TEXT
-   ,user_id             UUID
-   ,UNIQUE (book_id, bookform_cd, get_date, user_id)
+    LIKE public.book_possess INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.book_role (
-    id                  INTEGER      PRIMARY KEY
-   ,book_id             INTEGER
-   ,role_cd             CHAR(03)
-   ,role_order          INTEGER
-   ,person_name         TEXT
-   ,remarks             TEXT
-   ,user_id             UUID
-   ,UNIQUE (book_id, role_cd, person_name, user_id)
+    LIKE public.book_role INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.book_note (
-    id                  INTEGER      PRIMARY KEY
-   ,book_id             INTEGER
-   ,read_st_date        DATE
-   ,read_ed_date        DATE
-   ,note                TEXT
-   ,user_id             UUID
-   ,UNIQUE (book_id, read_st_date, user_id)
+    LIKE public.book_note INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.system_constants (
-    id                  INTEGER
-   ,constant_name       TEXT
-   ,constant_type       TEXT
-   ,constant_value      TEXT
-   ,remarks             TEXT
-   ,user_id             UUID
-   ,PRIMARY KEY (constant_name, user_id)
+    LIKE public.system_constants INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.profile (
-    id                  INTEGER
-   ,user_id             UUID         PRIMARY KEY
-   ,user_name           TEXT
-   ,profile_icon        BOOLEAN
+    LIKE public.profile INCLUDING ALL
   );
   ALTER TABLE backup2.bookclass_master ENABLE ROW LEVEL SECURITY;
   drop policy if exists "bookclass_master insert : only own user_id" on backup2.bookclass_master;
@@ -898,92 +874,31 @@ BEGIN
   -- (3) スキーマ 'backup1' のテーブルからログインユーザのデータを削除
   CREATE SCHEMA IF NOT EXISTS backup1;
   CREATE TABLE IF NOT EXISTS backup1.bookclass_master (
-    id                  INTEGER
-   ,bookclass_cd        CHAR(03)
-   ,bookclass           TEXT
-   ,selectable          BOOLEAN
-   ,user_id             UUID
-   ,PRIMARY KEY (bookclass_cd, user_id)
+    LIKE public.bookclass_master INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.bookform_master (
-    id                  INTEGER
-   ,bookform_cd         CHAR(03)
-   ,bookform            TEXT
-   ,selectable          BOOLEAN
-   ,user_id             UUID
-   ,PRIMARY KEY (bookform_cd, user_id)
+    LIKE public.bookform_master INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.book_role_master (
-    id                  INTEGER
-   ,role_cd             CHAR(03)
-   ,role_name           TEXT
-   ,selectable          BOOLEAN
-   ,user_id             UUID
-   ,PRIMARY KEY (role_cd, user_id)
+    LIKE public.book_role_master INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.books (
-    book_id             INTEGER      PRIMARY KEY
-   ,isbn10              VARCHAR(10)
-   ,isbn13              VARCHAR(13)
-   ,c_cd                VARCHAR(05)
-   ,ndc                 VARCHAR(10)
-   ,title               TEXT
-   ,original_title      TEXT
-   ,colophon            TEXT
-   ,publisher           TEXT
-   ,publish_series      TEXT
-   ,publish_series_no   TEXT
-   ,first_publish_year  INTEGER
-   ,bookclass_cd        CHAR(03)
-   ,remarks             TEXT
-   ,image_url           TEXT
-   ,user_id             UUID
-   ,UNIQUE (title, publisher, first_publish_year, user_id)
+    LIKE public.books INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.book_possess (
-    book_possess_id     INTEGER      PRIMARY KEY
-   ,book_id             INTEGER
-   ,bookform_cd         CHAR(03)
-   ,get_date            DATE
-   ,dispose_date        DATE
-   ,image_url           TEXT
-   ,remarks             TEXT
-   ,user_id             UUID
-   ,UNIQUE (book_id, bookform_cd, get_date, user_id)
+    LIKE public.book_possess INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.book_role (
-    id                  INTEGER      PRIMARY KEY
-   ,book_id             INTEGER
-   ,role_cd             CHAR(03)
-   ,role_order          INTEGER
-   ,person_name         TEXT
-   ,remarks             TEXT
-   ,user_id             UUID
-   ,UNIQUE (book_id, role_cd, person_name, user_id)
+    LIKE public.book_role INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.book_note (
-    id                  INTEGER      PRIMARY KEY
-   ,book_id             INTEGER
-   ,read_st_date        DATE
-   ,read_ed_date        DATE
-   ,note                TEXT
-   ,user_id             UUID
-   ,UNIQUE (book_id, read_st_date, user_id)
+    LIKE public.book_note INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.system_constants (
-    id                  INTEGER
-   ,constant_name       TEXT
-   ,constant_type       TEXT
-   ,constant_value      TEXT
-   ,remarks             TEXT
-   ,user_id             UUID
-   ,PRIMARY KEY (constant_name, user_id)
+    LIKE public.system_constants INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.profile (
-    id                  INTEGER
-   ,user_id             UUID         PRIMARY KEY
-   ,user_name           TEXT
-   ,profile_icon        BOOLEAN
+    LIKE public.profile INCLUDING ALL
   );
   ALTER TABLE backup1.bookclass_master ENABLE ROW LEVEL SECURITY;
   drop policy if exists "bookclass_master insert : only own user_id" on backup1.bookclass_master;

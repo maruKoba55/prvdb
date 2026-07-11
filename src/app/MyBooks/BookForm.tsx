@@ -1,8 +1,10 @@
 import React from 'react';
 import { Eraser } from 'lucide-react';
-import { BookClassMaster } from '@/utils/getBookClass';
-import { isbnHyphen10 } from '@/utils/isbnHyphen10';
-import { isbnHyphenate } from '@/utils/isbnHyphenate';
+import { usePublisherIncrementalSearch } from '@/hooks/MyBooks/PublisherIncrementalSearch';
+import { BookClassMaster } from '@/utils/MyBooks/getBookClass';
+import { PublisherList } from '@/utils/MyBooks/getPublisherList';
+import { isbnHyphen10 } from '@/utils/MyBooks/isbnHyphen10';
+import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { toWarekiYear } from '@/utils/toWarekiYear';
 import { styleItems } from '@/app/constants';
 
@@ -29,6 +31,7 @@ type Props = {
   bookId: string; // 表示対象の書籍ID
   formData: BookFormData;
   bookClassMaster: BookClassMaster[]; // 書籍分類マスタ
+  publisherList: PublisherList[]; // 出版社リスト
   isReadOnly?: boolean; // 表示専用モード
   totalCount?: number; // 総件数
   currentCount?: number; // 現在件数
@@ -46,6 +49,7 @@ export const BookForm = ({
   bookId,
   formData,
   bookClassMaster,
+  publisherList,
   isReadOnly = false,
   totalCount = 0,
   currentCount = 0,
@@ -59,7 +63,38 @@ export const BookForm = ({
   // 現在選択されている書籍分類を取得（表示モード用）
   const currentClassName =
     bookClassMaster.find((item) => item.bookclass_cd === formData.bookclass_cd)?.bookclass || '（未分類）';
+
+  // 出版社 select用
+  const handleChangePublisher = (selectedValue: string) => {
+    if (onChangeF) {
+      onChangeF('publisher', selectedValue);
+    }
+  };
+  const handleSelectPublisher = (publisherName: string) => {
+    handleChangePublisher(publisherName);
+    setIsOpen(false);
+    setActiveIndex(-1);
+  };
+  const {
+    isOpen,
+    setIsOpen,
+    activeIndex,
+    setActiveIndex,
+    listRef,
+    filteredList,
+    handleInputKeyDown,
+    handleListKeyDown
+  } = usePublisherIncrementalSearch(publisherList, formData.publisher || '', handleChangePublisher);
+  // フォーカスが移ったら（e.relatedTarget）リストを閉じる
+  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  };
+
   const screenMinW = 1100; //画面最小幅
+
   return (
     <div style={{ minWidth: `${screenMinW}px` }} className="w-full">
       <div style={{ width: `${screenMinW + 8}px` }} className="text-center bg-cyan-500">
@@ -80,8 +115,8 @@ export const BookForm = ({
               </div>
             )}
             <div className="flex mt-1">
-              <div className="flex items-center">
-                <label htmlFor="isbn10" className="inline-block w-15">
+              <div className="flex flex-row items-center gap-1">
+                <label htmlFor="isbn10" className="w-[60px] flex-shrink-0">
                   ISBN-10
                 </label>
                 <input
@@ -102,8 +137,8 @@ export const BookForm = ({
                 />
                 {formData.isbn10 && !isbnHyphen10(formData.isbn10) ? <div className="text-red-500 ml-1">?</div> : null}
               </div>
-              <div className="flex items-center ml-4">
-                <label htmlFor="isbn13" className="inline-block w-15">
+              <div className="flex flex-row items-center gap-1 ml-4">
+                <label htmlFor="isbn13" className="w-[60px] flex-shrink-0">
                   ISBN-13
                 </label>
                 <input
@@ -133,7 +168,7 @@ export const BookForm = ({
                   size={5}
                   maxLength={5}
                   readOnly={isReadOnly}
-                  value={formData.c_cd}
+                  value={formData.c_cd ?? ''}
                   onChange={onChange}
                 />
               </div>
@@ -146,13 +181,16 @@ export const BookForm = ({
                   size={8}
                   maxLength={10}
                   readOnly={isReadOnly}
-                  value={formData.ndc}
+                  value={formData.ndc ?? ''}
                   onChange={onChange}
                 />
               </div>
             </div>
-            <div className="flex items-center mt-1">
-              <label htmlFor="title" className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}>
+            <div className="flex flex-row items-center gap-2 mt-1">
+              <label
+                htmlFor="title"
+                className={`w-[60px] flex-shrink-0 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
+              >
                 書　名
               </label>
               <input
@@ -166,23 +204,23 @@ export const BookForm = ({
                 onChange={onChange}
               />
             </div>
-            <div className="flex items-center mt-1">
-              <label htmlFor="original_title" className="inline-block w-15">
+            <div className="flex flex-row items-center gap-2 mt-1">
+              <label htmlFor="original_title" className="w-[60px] flex-shrink-0">
                 原書名
               </label>
               <input
                 id="original_title"
-                className={styleItems}
+                className={`${styleItems} flex-grow`}
                 type="text"
                 size={84}
                 readOnly={isReadOnly}
-                value={formData.original_title}
+                value={formData.original_title ?? ''}
                 onChange={onChange}
               />
             </div>
             <div className="flex mt-1">
-              <div>
-                <label htmlFor="colophon" className="inline-block w-15 align-top">
+              <div className="flex flex-row gap-2">
+                <label htmlFor="colophon" className="w-[60px] flex-shrink-0 align-top">
                   奥　付
                 </label>
                 <textarea
@@ -191,7 +229,7 @@ export const BookForm = ({
                   cols={74}
                   rows={4}
                   readOnly={isReadOnly}
-                  value={formData.colophon}
+                  value={formData.colophon ?? ''}
                   onChange={onChange}
                 ></textarea>
               </div>
@@ -199,7 +237,7 @@ export const BookForm = ({
                 {!isReadOnly ? (
                   <button
                     type="button"
-                    className="py-2 px-3 text-base rounded-md font-semibold bg-blue-300"
+                    className="mt-1 py-2 px-3 text-base rounded-md font-semibold bg-blue-300"
                     onClick={() => onClearField?.('colophon')}
                   >
                     <Eraser size={14} />
@@ -208,24 +246,75 @@ export const BookForm = ({
                 ) : null}
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex flex-row items-center gap-2 mt-1">
               <label
                 htmlFor="publisher"
-                className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
+                className={`w-[60px] flex-shrink-0 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
               >
                 出版社
               </label>
-              <input
-                id="publisher"
-                className={styleItems}
-                type="text"
-                required
-                size={30}
-                readOnly={isReadOnly}
-                value={formData.publisher}
-                onChange={onChange}
-              />
-              {isReadOnly ? '' : <div className="ml-1">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>}
+              {isReadOnly ? (
+                <div className="flex items-center">
+                  <div className={`${styleItems} min-w-[144px]`}>{formData.publisher}</div>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <div className="relative flex-1 mr-2" onBlur={handleBlur}>
+                    <input
+                      id="publisher"
+                      className={`${styleItems} w-full`}
+                      type="text"
+                      size={36}
+                      value={formData.publisher || ''}
+                      onChange={(e) => {
+                        handleChangePublisher(e.target.value);
+                        setIsOpen(true);
+                        setActiveIndex(0);
+                      }}
+                      onKeyDown={handleInputKeyDown}
+                      onFocus={() => {
+                        setIsOpen(true);
+                        setActiveIndex(0); // 開いた時、最初の候補を選択
+                      }}
+                      placeholder="自由に入力 または 候補より選択"
+                      autoComplete="off" // ブラウザ固有の履歴出力を防ぐ
+                    />
+                    {isOpen && (
+                      <ul //選択肢リスト（高さを5件分程度に制限）
+                        ref={listRef}
+                        tabIndex={0}
+                        onKeyDown={handleListKeyDown}
+                        className="absolute left-0 top-full z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg"
+                        style={{ maxHeight: '180px', overflowY: 'auto' }}
+                      >
+                        {filteredList.length > 0 ? (
+                          filteredList.map((item: any, index: number) => (
+                            <li
+                              key={item.id}
+                              className="p-2 cursor-pointer text-sm text-gray-700 hover:bg-indigo-50"
+                              style={{
+                                backgroundColor: index === activeIndex ? '#e0e7ff' : 'transparent' // #e0e7ff = bg-indigo-100
+                              }}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectPublisher(item.publisher);
+                              }}
+                            >
+                              {item.publisher}
+                              {item.reading ? ` ｜ ${item.reading}` : ''}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="p-2 text-sm text-gray-400 italic">
+                            候補無し。必要であれば［データメンテ］で出版社リストに追加してください。
+                          </li>
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="ml-2">※不詳の場合はカッコで括り、（不明）（自費出版）等</div>
+                </div>
+              )}
             </div>
             <div className="flex mt-1 ml-17">
               <div className="flex items-center">
@@ -236,7 +325,7 @@ export const BookForm = ({
                   type="text"
                   size={40}
                   readOnly={isReadOnly}
-                  value={formData.publish_series}
+                  value={formData.publish_series ?? ''}
                   onChange={onChange}
                 />
               </div>
@@ -250,16 +339,16 @@ export const BookForm = ({
                   type="text"
                   size={8}
                   readOnly={isReadOnly}
-                  value={formData.publish_series_no}
+                  value={formData.publish_series_no ?? ''}
                   onChange={onChange}
                 />
               </div>
             </div>
             <div className="flex mt-1">
-              <div className="flex items-center w-4/7">
+              <div className="flex flex-row items-center gap-2 w-4/7">
                 <label
                   htmlFor="first_publish_year"
-                  className={`inline-block w-15 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
+                  className={`w-[60px] flex-shrink-0 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
                 >
                   初版年
                 </label>
@@ -317,8 +406,8 @@ export const BookForm = ({
                 )}
               </div>
             </div>
-            <div className="flex align-top mt-1">
-              <label htmlFor="remarks" className="inline-block w-15 align-top">
+            <div className="flex flex-row gap-2 mt-1">
+              <label htmlFor="remarks" className="w-[60px] flex-shrink-0 align-top">
                 備　考
               </label>
               <textarea
@@ -327,7 +416,7 @@ export const BookForm = ({
                 cols={84}
                 rows={2}
                 readOnly={isReadOnly}
-                value={formData.remarks}
+                value={formData.remarks ?? ''}
                 onChange={onChange}
               ></textarea>
             </div>
@@ -361,7 +450,7 @@ export const BookForm = ({
                   className={`${styleItems} w-full resize-none`}
                   cols={16}
                   rows={2}
-                  value={formData.image_url}
+                  value={formData.image_url ?? ''}
                   onChange={onChange}
                 ></textarea>
                 <label htmlFor="image_url" className="text-sm font-medium text-gray-700 flex justify-end mb-1">

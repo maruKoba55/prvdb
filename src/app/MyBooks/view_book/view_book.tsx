@@ -6,7 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookCopy, Notebook, Pencil, RefreshCw, StepBack, StepForward, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useSystemConstant, useBookClassMaster, useBookFormMaster, useBookRoleMaster } from '@/context/AppContext';
+import {
+  useSystemConstant,
+  useBookClassMaster,
+  useBookFormMaster,
+  useBookRoleMaster,
+  usePublisherList
+} from '@/context/AppContext';
 import { BookForm } from '@/app/MyBooks/BookForm';
 
 export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
@@ -31,21 +37,18 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const isNextDisabled = currentIndex >= bookIds.length - 1;
   const readOnly_f = true;
 
-  // システム変数、マスタ値取得（カスタムフック）
+  // システム変数、マスタ、リスト値取得（カスタムフック）
   const viewAlert = (useSystemConstant('viewAlert') as number) ?? 0;
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
   const bookRoleMaster = useBookRoleMaster();
+  const publisherList = usePublisherList();
 
   // 各ボタンの処理
   //［前］
   const handlePrev = () => {
     if (!isPrevDisabled) {
-      setCurrentIndex((prev) => {
-        const nextIdx = prev - 1;
-        updateUrl(nextIdx); // 更新後の値でURLを書き換え
-        return nextIdx;
-      });
+      setCurrentIndex((prev) => prev - 1);
     }
   };
   useHotkeys(
@@ -59,11 +62,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   // ［次］
   const handleNext = () => {
     if (!isNextDisabled) {
-      setCurrentIndex((prev) => {
-        const nextIdx = prev + 1;
-        updateUrl(nextIdx);
-        return nextIdx;
-      });
+      setCurrentIndex((prev) => prev + 1);
     }
   };
   useHotkeys(
@@ -168,6 +167,9 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
     // historyを書き換え（画面はリロードされない）
     window.history.replaceState(null, '', `?${params.toString()}`);
   };
+  useEffect(() => {
+    updateUrl(currentIndex);
+  }, [currentIndex]);
 
   // bookIdsかcurrentIndexが変わったらデータ取得
   useEffect(() => {
@@ -275,6 +277,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       bookId={book.book_id}
       formData={book}
       bookClassMaster={bookClassMaster}
+      publisherList={publisherList}
       isReadOnly={readOnly_f}
       totalCount={bookIds.length}
       currentCount={currentIndex + 1}
@@ -306,7 +309,13 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
                     <div>入手日：{p.get_date}</div>
                     <div>処分日：{p.dispose_date}</div>
                     <div>備　考：</div>
-                    <textarea className="ml-2" cols={20} rows={3} readOnly={readOnly_f} value={p.remarks}></textarea>
+                    <textarea
+                      className="ml-2"
+                      cols={20}
+                      rows={3}
+                      readOnly={readOnly_f}
+                      value={p.remarks ?? ''}
+                    ></textarea>
                   </div>
                   <div className="flex flex-col">
                     {p.image_url ? (

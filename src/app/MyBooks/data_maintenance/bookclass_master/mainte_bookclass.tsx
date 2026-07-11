@@ -7,7 +7,7 @@ import { supabaseClient } from '@/lib/Client';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { AddBookClassModal } from './AddBookClassModal';
-import { BookClassMaster } from '@/utils/getBookClass';
+import { BookClassMaster } from '@/utils/MyBooks/getBookClass';
 
 export default function MainteBookClass() {
   const supabase = supabaseClient();

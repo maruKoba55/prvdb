@@ -266,6 +266,44 @@ using (
   (auth.uid() = user_id)
 );
 
+drop policy if exists "publisher_list insert : only own user_id" on publisher_list;
+drop policy if exists "publisher_list delete : only own user_id" on publisher_list;
+drop policy if exists "publisher_list update : only own user_id" on publisher_list;
+drop policy if exists "publisher_list select : only own user_id" on publisher_list;
+
+create policy "publisher_list insert : only own user_id"
+on "public"."publisher_list"
+as PERMISSIVE
+for INSERT
+to public
+with check (
+  (auth.uid() = user_id)
+);
+create policy "publisher_list delete : only own user_id"
+on "public"."publisher_list"
+as PERMISSIVE
+for DELETE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "publisher_list update : only own user_id"
+on "public"."publisher_list"
+as PERMISSIVE
+for UPDATE
+to public
+using (
+  (auth.uid() = user_id)
+);
+create policy "publisher_list select : only own user_id"
+on "public"."publisher_list"
+as PERMISSIVE
+for SELECT
+to public
+using (
+  (auth.uid() = user_id)
+);
+
 drop policy if exists "system_constants insert : only own user_id" on system_constants;
 drop policy if exists "system_constants delete : only own user_id" on system_constants;
 drop policy if exists "system_constants update : only own user_id" on system_constants;
