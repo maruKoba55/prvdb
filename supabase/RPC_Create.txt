@@ -1,9 +1,8 @@
--- DROP FUNCTION IF EXISTS search_books_complex;
--- Å¶à¯êîÇïœçXÇµÇΩÇΩÇﬂÇ…ìØñºFUNCTIONÇ™ï°êîë∂ç›Ç∑ÇÈèÍçáÇÕÅAà¯êîÇÃÉäÉXÉgÇïtÇØÇƒÇªÇÍÇºÇÍDROPÇ∑ÇÈÅB
---  Åió·ÅjDROP FUNCTION IF EXISTS search_books(text, text, text, text, text, text, text, text, text, text, text, text, int);
+-- ‚ÄªÂºïÊï∞„ÇíÂ§âÊõ¥„Åó„Åü„Åü„ÇÅ„Å´ÂêåÂêçFUNCTION„ÅåË§áÊï∞Â≠òÂú®„Åô„ÇãÂ†¥Âêà„ÅØ„ÄÅÂºïÊï∞„ÅÆ„É™„Çπ„Éà„Çí‰ªò„Åë„Å¶„Åù„Çå„Åû„ÇåDROP„Åô„Çã„ÄÇ
+--  Ôºà‰æãÔºâDROP FUNCTION IF EXISTS search_books(text, text, text, text, text, text, text, text, text, text, text, text, int);
 
 
--- Å°èëê–â{óóÅAàÍóó
+-- ‚ñ†Êõ∏Á±çÈñ≤Ë¶ß„ÄÅ‰∏ÄË¶ß
 CREATE OR REPLACE FUNCTION search_books(
   p_book_id TEXT DEFAULT NULL,
   p_isbn13 TEXT DEFAULT NULL,
@@ -45,27 +44,27 @@ BEGIN
   LEFT JOIN book_role br ON b.book_id = br.book_id
   LEFT JOIN book_possess bp ON b.book_id = bp.book_id
   WHERE 
-    -- ì¡íËÇÃbook_idÇ™éwíËÇ≥ÇÍÇΩéûÅAëºÇÃèåèÇÕñ¢éwíË
+    -- ÁâπÂÆö„ÅÆbook_id„ÅåÊåáÂÆö„Åï„Çå„ÅüÊôÇ„ÄÅ‰ªñ„ÅÆÊù°‰ª∂„ÅØÊú™ÊåáÂÆö
     (p_book_id IS NULL OR b.book_id = CAST(p_book_id AS INTEGER))
-    -- äÓñ{ÉtÉBÉãÉ^
+    -- Âü∫Êú¨„Éï„Ç£„É´„Çø
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
-    -- èoî≈é–ÅAèoî≈ÉVÉäÅ[ÉYÅFãÛîíèúãéÅAëOï˚àÍív
-    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'Å@',''),' ','') ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'Å@',''),' ','') ILIKE p_publish_series || '%')
-    -- É^ÉCÉgÉãÅFãÛîíèúãéÅAëOï˚àÍív or ïîï™àÍív
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'Å@',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'Å@',''),' ','') ILIKE '%' || p_title || '%' END))
-    -- ñäÑ ÅFë∂ç›Ç∑ÇÈèÍçáÇÃÇ›çiÇËçûÇﬁ = !innerëäìñÅAêlñºÇÕãÛîíèúãé
+    -- Âá∫ÁâàÁ§æ„ÄÅÂá∫Áâà„Ç∑„É™„Éº„Ç∫ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'„ÄÄ',''),' ','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'„ÄÄ',''),' ','') ILIKE p_publish_series || '%')
+    -- „Çø„Ç§„Éà„É´ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥ or ÈÉ®ÂàÜ‰∏ÄËá¥
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE '%' || p_title || '%' END))
+    -- ÂΩπÂâ≤ ÔºöÂ≠òÂú®„Åô„ÇãÂ†¥Âêà„ÅÆ„ÅøÁµû„ÇäËæº„ÇÄ = !innerÁõ∏ÂΩì„ÄÅ‰∫∫Âêç„ÅØÁ©∫ÁôΩÈô§Âéª
     AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'Å@',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'Å@',''),' ','') ILIKE '%' || p_person_name || '%' END))
-    -- ï€óLèÛãµ
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE '%' || p_person_name || '%' END))
+    -- ‰øùÊúâÁä∂Ê≥Å
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
     AND (CASE 
           WHEN p_limit_possess = 'possess' THEN 
-            -- Åuñ¢èàï™ÅvÇ™1Ç¬à»è„ë∂ç›Ç∑ÇÈ
+            -- „ÄåÊú™Âá¶ÂàÜ„Äç„Åå1„Å§‰ª•‰∏äÂ≠òÂú®„Åô„Çã
             EXISTS (SELECT 1 FROM book_possess bp2 WHERE bp2.book_id = b.book_id AND bp2.dispose_date IS NULL)
           WHEN p_limit_possess = 'nonPossess' THEN 
-            -- Åuñ¢èàï™ÅvÇ™1Ç¬Ç‡ë∂ç›ÇµÇ»Ç¢ (ñ¢èäéù or ëSèàï™)
+            -- „ÄåÊú™Âá¶ÂàÜ„Äç„Åå1„Å§„ÇÇÂ≠òÂú®„Åó„Å™„ÅÑ (Êú™ÊâÄÊåÅ or ÂÖ®Âá¶ÂàÜ)
             NOT EXISTS (SELECT 1 FROM book_possess bp2 WHERE bp2.book_id = b.book_id AND bp2.dispose_date IS NULL)
           ELSE true END)
   GROUP BY b.book_id
@@ -87,7 +86,7 @@ END;
 $$;
 
 
--- Å°ñ¢ì«àÍóó
+-- ‚ñ†Êú™Ë™≠‰∏ÄË¶ß
 CREATE OR REPLACE FUNCTION search_books_unread(
   p_isbn13 TEXT DEFAULT NULL,
   p_title TEXT DEFAULT NULL,
@@ -114,32 +113,32 @@ BEGIN
   SELECT 
     b.book_id
   FROM books b
-  -- 1. ï€óLÇµÇƒÇ¢ÇÈÇ±Ç∆ÇämîF (RLSÇ…ÇÊÇËé©ï™ÇÃèäóLï™ÇÃÇ›ëŒè€)
+  -- 1. ‰øùÊúâ„Åó„Å¶„ÅÑ„Çã„Åì„Å®„ÇíÁ¢∫Ë™ç (RLS„Å´„Çà„ÇäËá™ÂàÜ„ÅÆÊâÄÊúâÂàÜ„ÅÆ„ÅøÂØæË±°)
   JOIN book_possess bp ON b.book_id = bp.book_id
   WHERE 
-    -- 2. ÉmÅ[ÉgÇ™Åuë∂ç›ÇµÇ»Ç¢ÅvÇ±Ç∆ÇämîF (NOT EXISTSÇégóp)
+    -- 2. „Éé„Éº„Éà„Åå„ÄåÂ≠òÂú®„Åó„Å™„ÅÑ„Äç„Åì„Å®„ÇíÁ¢∫Ë™ç (NOT EXISTS„Çí‰ΩøÁî®)
     NOT EXISTS (
       SELECT 1 FROM book_note bn WHERE bn.book_id = b.book_id
     )
-    -- 3. ñäÑ/íòé“åüçıÇ™ïKóvÇ»èÍçáÇÃÇ›åãçáÅAêlñºÇÕãÛîíèúãé
+    -- 3. ÂΩπÂâ≤/ËëóËÄÖÊ§úÁ¥¢„ÅåÂøÖË¶Å„Å™Â†¥Âêà„ÅÆ„ÅøÁµêÂêà„ÄÅ‰∫∫Âêç„ÅØÁ©∫ÁôΩÈô§Âéª
     AND (
       (p_role_cd IS NULL AND p_person_name IS NULL) OR
       EXISTS (
         SELECT 1 FROM book_role br 
         WHERE br.book_id = b.book_id
           AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'Å@',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'Å@',''),' ','') ILIKE '%' || p_person_name || '%' END))
+          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE '%' || p_person_name || '%' END))
       )
     )
-    -- 4. ÇªÇÃëºÇÃÉtÉBÉãÉ^
+    -- 4. „Åù„ÅÆ‰ªñ„ÅÆ„Éï„Ç£„É´„Çø
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
-    -- èoî≈é–ÅAèoî≈ÉVÉäÅ[ÉYÅFãÛîíèúãéÅAëOï˚àÍív
-    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'Å@',''),' ','') ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'Å@',''),' ','') ILIKE p_publish_series || '%')
-    -- É^ÉCÉgÉãÅFãÛîíèúãéÅAëOï˚àÍív or ïîï™àÍív
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'Å@',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'Å@',''),' ','') ILIKE '%' || p_title || '%' END))
-    -- ï€óLèÛãµ
+    -- Âá∫ÁâàÁ§æ„ÄÅÂá∫Áâà„Ç∑„É™„Éº„Ç∫ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'„ÄÄ',''),' ','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'„ÄÄ',''),' ','') ILIKE p_publish_series || '%')
+    -- „Çø„Ç§„Éà„É´ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥ or ÈÉ®ÂàÜ‰∏ÄËá¥
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE '%' || p_title || '%' END))
+    -- ‰øùÊúâÁä∂Ê≥Å
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   GROUP BY b.book_id
   ORDER BY 
@@ -160,7 +159,7 @@ END;
 $$;
 
 
--- Å°ÉmÅ[ÉgàÍóóÅiîÕàÕéwíËÅj
+-- ‚ñ†„Éé„Éº„Éà‰∏ÄË¶ßÔºàÁØÑÂõ≤ÊåáÂÆöÔºâ
 CREATE OR REPLACE FUNCTION search_note_range(
   p_read_st_from DATE DEFAULT '0001-01-01',
   p_read_st_to DATE DEFAULT '9999-12-31',
@@ -212,10 +211,10 @@ BEGIN
     br_first.person_name
   FROM book_note bn
   JOIN books b ON bn.book_id = b.book_id
-  -- ä÷òAÉeÅ[ÉuÉãÇÕèåèÇ™Ç†ÇÈèÍçáÇÃÇ›çiÇËçûÇﬂÇÈÇÊÇ§LEFT JOIN
+  -- Èñ¢ÈÄ£„ÉÜ„Éº„Éñ„É´„ÅØÊù°‰ª∂„Åå„ÅÇ„ÇãÂ†¥Âêà„ÅÆ„ÅøÁµû„ÇäËæº„ÇÅ„Çã„Çà„ÅÜLEFT JOIN
   LEFT JOIN book_role br ON b.book_id = br.book_id
   LEFT JOIN book_possess bp ON b.book_id = bp.book_id
-  -- book_roleÇÃç≈èâÇÃ1çs
+  -- book_role„ÅÆÊúÄÂàù„ÅÆ1Ë°å
   LEFT JOIN LATERAL (
     SELECT sub_br.role_cd, sub_br.person_name
     FROM book_role sub_br
@@ -224,20 +223,20 @@ BEGIN
     LIMIT 1
   ) br_first ON TRUE
   WHERE
-    -- ì«èëäJénì˙ÇÃîÕàÕéwíËÅiïKê{ëzíËÅj
+    -- Ë™≠Êõ∏ÈñãÂßãÊó•„ÅÆÁØÑÂõ≤ÊåáÂÆöÔºàÂøÖÈ†àÊÉ≥ÂÆöÔºâ
     bn.read_st_date >= p_read_st_from AND bn.read_st_date < p_read_st_to
-    -- èëê–ÅiíPèÉèåèÅj
+    -- Êõ∏Á±çÔºàÂçòÁ¥îÊù°‰ª∂Ôºâ
     AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
     AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
-    -- èoî≈é–ÅAèoî≈ÉVÉäÅ[ÉYÅFãÛîíèúãéÅAëOï˚àÍív
-    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'Å@',''),' ','') ILIKE p_publisher || '%')
-    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'Å@',''),' ','') ILIKE p_publish_series || '%')
-    -- É^ÉCÉgÉãÅFãÛîíèúãéÅAëOï˚àÍív or ïîï™àÍív
-    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'Å@',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'Å@',''),' ','') ILIKE '%' || p_title || '%' END))
-    -- ñäÑÅAêlñºÇÕãÛîíèúãé
+    -- Âá∫ÁâàÁ§æ„ÄÅÂá∫Áâà„Ç∑„É™„Éº„Ç∫ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'„ÄÄ',''),' ','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'„ÄÄ',''),' ','') ILIKE p_publish_series || '%')
+    -- „Çø„Ç§„Éà„É´ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥ or ÈÉ®ÂàÜ‰∏ÄËá¥
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE '%' || p_title || '%' END))
+    -- ÂΩπÂâ≤„ÄÅ‰∫∫Âêç„ÅØÁ©∫ÁôΩÈô§Âéª
     AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
-    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'Å@',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'Å@',''),' ','') ILIKE '%' || p_person_name || '%' END))
-    -- ï€óLèÛãµ
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE '%' || p_person_name || '%' END))
+    -- ‰øùÊúâÁä∂Ê≥Å
     AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
   ORDER BY bn.read_st_date ASC,
     bn.id ASC
@@ -246,7 +245,7 @@ END;
 $$;
 
 
--- Å°èëê–ï°êª
+-- ‚ñ†Êõ∏Á±çË§áË£Ω
 CREATE OR REPLACE FUNCTION duplicate_book(
   p_src_book_id INT
 )
@@ -259,7 +258,7 @@ DECLARE
   v_timestamp_suffix TEXT;
 BEGIN
   v_timestamp_suffix := '_' || to_char(NOW(), 'YYYYMMDDHH24MISS');
-  -- (1) booksÇï°êªÅièëñºÇ…É^ÉCÉÄÉXÉ^ÉìÉvïtâ¡ÅGUNIQUEêßñÒâÒîÅj
+  -- (1) books„ÇíË§áË£ΩÔºàÊõ∏Âêç„Å´„Çø„Ç§„É†„Çπ„Çø„É≥„Éó‰ªòÂä†ÔºõUNIQUEÂà∂Á¥ÑÂõûÈÅøÔºâ
   INSERT INTO books (
       isbn10, isbn13, c_cd, ndc, title, original_title, colophon, 
       publisher, publish_series, publish_series_no, first_publish_year, 
@@ -271,11 +270,11 @@ BEGIN
       bookclass_cd, remarks, image_url, user_id
   FROM books
   WHERE book_id = p_src_book_id
-  RETURNING book_id INTO v_new_book_id; -- ÉRÉsÅ[êÊbook_id
+  RETURNING book_id INTO v_new_book_id; -- „Ç≥„Éî„ÉºÂÖàbook_id
   IF v_new_book_id IS NULL THEN
-      RAISE EXCEPTION 'éwíËÇ≥ÇÍÇΩ book_id (%) Ç™å©Ç¬Ç©ÇËÇ‹ÇπÇÒÅB', p_src_book_id;
+      RAISE EXCEPTION 'ÊåáÂÆö„Åï„Çå„Åü book_id (%) „ÅåË¶ã„Å§„Åã„Çä„Åæ„Åõ„Çì„ÄÇ', p_src_book_id;
   END IF;
-  -- (2) book_roleÇï°êª
+  -- (2) book_role„ÇíË§áË£Ω
   INSERT INTO book_role (
       book_id, role_cd, role_order, person_name, remarks, user_id
   )
@@ -283,7 +282,7 @@ BEGIN
       v_new_book_id, role_cd, role_order, person_name, remarks, user_id
   FROM book_role
   WHERE book_id = p_src_book_id;
-  -- (3) book_possessÇï°êªÅiget_dateÇÕñ{ì˙ÅAdispose_dateÇÕè»ó™Åj
+  -- (3) book_possess„ÇíË§áË£ΩÔºàget_date„ÅØÊú¨Êó•„ÄÅdispose_date„ÅØÁúÅÁï•Ôºâ
   INSERT INTO book_possess (
       book_id, bookform_cd, get_date, image_url, remarks, user_id
   )
@@ -291,13 +290,13 @@ BEGIN
       v_new_book_id, bookform_cd, CURRENT_DATE, image_url, remarks, user_id
   FROM book_possess
   WHERE book_id = p_src_book_id;
-  -- (4) ÉRÉsÅ[êÊÇÃ book_id Çï‘ãp
+  -- (4) „Ç≥„Éî„ÉºÂÖà„ÅÆ book_id „ÇíËøîÂç¥
   RETURN v_new_book_id;
 END;
 $$;
 
 
--- Å°èëê–ï™óﬁÉ}ÉXÉ^ÅEï™óﬁÉRÅ[ÉhïœçXóp
+-- ‚ñ†Êõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„ÉªÂàÜÈ°û„Ç≥„Éº„ÉâÂ§âÊõ¥Áî®
 CREATE OR REPLACE FUNCTION update_bookclass_cd(
   old_cd CHAR(3),
   new_cd CHAR(3),
@@ -311,23 +310,23 @@ SET search_path = public
 AS $$
 DECLARE
   v_current_user uuid;
-  v_avoid_error text;  -- ÉRÅ[ÉhÇïœçXÇµÇƒï™óﬁñºÇ™å≥ÇÃÇ‹Ç‹ÇÃéûÅAï™óﬁñºÇÃèdï°ÉGÉâÅ[ÇîÇØÇÈÇΩÇﬂàÍéûìIÇ…ïtâ¡Ç∑ÇÈï∂éöóÒ
+  v_avoid_error text;  -- „Ç≥„Éº„Éâ„ÇíÂ§âÊõ¥„Åó„Å¶ÂàÜÈ°ûÂêç„ÅåÂÖÉ„ÅÆ„Åæ„Åæ„ÅÆÊôÇ„ÄÅÂàÜÈ°ûÂêç„ÅÆÈáçË§á„Ç®„É©„Éº„ÇíÈÅø„Åë„Çã„Åü„ÇÅ‰∏ÄÊôÇÁöÑ„Å´‰ªòÂä†„Åô„ÇãÊñáÂ≠óÂàó
 BEGIN
   v_current_user := auth.uid();
   v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
   IF v_current_user IS NULL THEN
-      RAISE EXCEPTION 'ÉÜÅ[ÉUÅ[Ç™ÉçÉOÉCÉìÇµÇƒÇ¢Ç‹ÇπÇÒÅB';
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
   END IF;
-  -- (1) èëê–ï™óﬁÉ}ÉXÉ^Ç…êVÉRÅ[ÉhÇí«â¡Åiï™óﬁñºÇ…ÉGÉâÅ[îÇØÇÃï∂éöóÒïtâ¡Åj
+  -- (1) Êõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„Å´Êñ∞„Ç≥„Éº„Éâ„ÇíËøΩÂä†ÔºàÂàÜÈ°ûÂêç„Å´„Ç®„É©„ÉºÈÅø„Åë„ÅÆÊñáÂ≠óÂàó‰ªòÂä†Ôºâ
   INSERT INTO bookclass_master (bookclass_cd, bookclass, selectable, user_id)
   VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
-  -- (2) èëê–ÇÃï™óﬁÉRÅ[ÉhÇèëä∑Ç¶
+  -- (2) Êõ∏Á±ç„ÅÆÂàÜÈ°û„Ç≥„Éº„Éâ„ÇíÊõ∏Êèõ„Åà
   UPDATE books SET bookclass_cd = new_cd
   WHERE  bookclass_cd = old_cd AND user_id = v_current_user;
-  -- (3) èëê–ï™óﬁÉ}ÉXÉ^Ç©ÇÁãåÉRÅ[ÉhÇçÌèú
+  -- (3) Êõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„Åã„ÇâÊóß„Ç≥„Éº„Éâ„ÇíÂâäÈô§
   DELETE FROM bookclass_master
   WHERE bookclass_cd = old_cd AND user_id = v_current_user;
-  -- (4) êVÉRÅ[ÉhÇÃèëê–ï™óﬁÉ}ÉXÉ^ÇÃï™óﬁñºÇ©ÇÁÉGÉâÅ[îÇØÇèúãé
+  -- (4) Êñ∞„Ç≥„Éº„Éâ„ÅÆÊõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„ÅÆÂàÜÈ°ûÂêç„Åã„Çâ„Ç®„É©„ÉºÈÅø„Åë„ÇíÈô§Âéª
   UPDATE bookclass_master
   SET bookclass = REGEXP_REPLACE(bookclass, v_avoid_error || '$', '', 'g')
   WHERE bookclass_cd = new_cd AND user_id = v_current_user;
@@ -335,7 +334,7 @@ END;
 $$;
 
 
--- Å°èëê–ñäÑÉ}ÉXÉ^ÅEñäÑÉRÅ[ÉhïœçXóp
+-- ‚ñ†Êõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„ÉªÂΩπÂâ≤„Ç≥„Éº„ÉâÂ§âÊõ¥Áî®
 CREATE OR REPLACE FUNCTION update_role_cd(
   old_cd CHAR(3),
   new_cd CHAR(3),
@@ -349,23 +348,23 @@ SET search_path = public
 AS $$
 DECLARE
   v_current_user uuid;
-  v_avoid_error text;  -- ÉRÅ[ÉhÇïœçXÇµÇƒñäÑñºÇ™å≥ÇÃÇ‹Ç‹ÇÃéûÅAñäÑñºÇÃèdï°ÉGÉâÅ[ÇîÇØÇÈÇΩÇﬂàÍéûìIÇ…ïtâ¡Ç∑ÇÈï∂éöóÒ
+  v_avoid_error text;  -- „Ç≥„Éº„Éâ„ÇíÂ§âÊõ¥„Åó„Å¶ÂΩπÂâ≤Âêç„ÅåÂÖÉ„ÅÆ„Åæ„Åæ„ÅÆÊôÇ„ÄÅÂΩπÂâ≤Âêç„ÅÆÈáçË§á„Ç®„É©„Éº„ÇíÈÅø„Åë„Çã„Åü„ÇÅ‰∏ÄÊôÇÁöÑ„Å´‰ªòÂä†„Åô„ÇãÊñáÂ≠óÂàó
 BEGIN
   v_current_user := auth.uid();
   v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
   IF v_current_user IS NULL THEN
-      RAISE EXCEPTION 'ÉÜÅ[ÉUÅ[Ç™ÉçÉOÉCÉìÇµÇƒÇ¢Ç‹ÇπÇÒÅB';
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
   END IF;
-  -- (1) èëê–ñäÑÉ}ÉXÉ^Ç…êVÉRÅ[ÉhÇí«â¡ÅiñäÑñºÇ…ÉGÉâÅ[îÇØÇÃï∂éöóÒïtâ¡Åj
+  -- (1) Êõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„Å´Êñ∞„Ç≥„Éº„Éâ„ÇíËøΩÂä†ÔºàÂΩπÂâ≤Âêç„Å´„Ç®„É©„ÉºÈÅø„Åë„ÅÆÊñáÂ≠óÂàó‰ªòÂä†Ôºâ
   INSERT INTO book_role_master (role_cd, role_name, selectable, user_id)
   VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
-  -- (2) èëê–ÇÃñäÑÉRÅ[ÉhÇèëä∑Ç¶
+  -- (2) Êõ∏Á±ç„ÅÆÂΩπÂâ≤„Ç≥„Éº„Éâ„ÇíÊõ∏Êèõ„Åà
   UPDATE book_role SET role_cd = new_cd
   WHERE  role_cd = old_cd AND user_id = v_current_user;
-  -- (3) èëê–ñäÑÉ}ÉXÉ^Ç©ÇÁãåÉRÅ[ÉhÇçÌèú
+  -- (3) Êõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„Åã„ÇâÊóß„Ç≥„Éº„Éâ„ÇíÂâäÈô§
   DELETE FROM book_role_master
   WHERE role_cd = old_cd AND user_id = v_current_user;
-  -- (4) êVÉRÅ[ÉhÇÃèëê–ñäÑÉ}ÉXÉ^ÇÃñäÑñºÇ©ÇÁÉGÉâÅ[îÇØÇèúãé
+  -- (4) Êñ∞„Ç≥„Éº„Éâ„ÅÆÊõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„ÅÆÂΩπÂâ≤Âêç„Åã„Çâ„Ç®„É©„ÉºÈÅø„Åë„ÇíÈô§Âéª
   UPDATE book_role_master
   SET role_name = REGEXP_REPLACE(role_name, v_avoid_error || '$', '', 'g')
   WHERE role_cd = new_cd AND user_id = v_current_user;
@@ -373,7 +372,7 @@ END;
 $$;
 
 
--- Å°èëê–å`ë‘É}ÉXÉ^ÅEå`ë‘ÉRÅ[ÉhïœçXóp
+-- ‚ñ†Êõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„ÉªÂΩ¢ÊÖã„Ç≥„Éº„ÉâÂ§âÊõ¥Áî®
 CREATE OR REPLACE FUNCTION update_bookform_cd(
   old_cd CHAR(3),
   new_cd CHAR(3),
@@ -387,23 +386,23 @@ SET search_path = public
 AS $$
 DECLARE
   v_current_user uuid;
-  v_avoid_error text;  -- ÉRÅ[ÉhÇïœçXÇµÇƒå`ë‘ñºÇ™å≥ÇÃÇ‹Ç‹ÇÃéûÅAå`ë‘ñºÇÃèdï°ÉGÉâÅ[ÇîÇØÇÈÇΩÇﬂàÍéûìIÇ…ïtâ¡Ç∑ÇÈï∂éöóÒ
+  v_avoid_error text;  -- „Ç≥„Éº„Éâ„ÇíÂ§âÊõ¥„Åó„Å¶ÂΩ¢ÊÖãÂêç„ÅåÂÖÉ„ÅÆ„Åæ„Åæ„ÅÆÊôÇ„ÄÅÂΩ¢ÊÖãÂêç„ÅÆÈáçË§á„Ç®„É©„Éº„ÇíÈÅø„Åë„Çã„Åü„ÇÅ‰∏ÄÊôÇÁöÑ„Å´‰ªòÂä†„Åô„ÇãÊñáÂ≠óÂàó
 BEGIN
   v_current_user := auth.uid();
   v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
   IF v_current_user IS NULL THEN
-      RAISE EXCEPTION 'ÉÜÅ[ÉUÅ[Ç™ÉçÉOÉCÉìÇµÇƒÇ¢Ç‹ÇπÇÒÅB';
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
   END IF;
-  -- (1) èëê–å`ë‘É}ÉXÉ^Ç…êVÉRÅ[ÉhÇí«â¡Åiå`ë‘ñºÇ…ÉGÉâÅ[îÇØÇÃï∂éöóÒïtâ¡Åj
+  -- (1) Êõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„Å´Êñ∞„Ç≥„Éº„Éâ„ÇíËøΩÂä†ÔºàÂΩ¢ÊÖãÂêç„Å´„Ç®„É©„ÉºÈÅø„Åë„ÅÆÊñáÂ≠óÂàó‰ªòÂä†Ôºâ
   INSERT INTO bookform_master (bookform_cd, bookform, selectable, user_id)
   VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
-  -- (2) èëê–ÇÃå`ë‘ÉRÅ[ÉhÇèëä∑Ç¶
+  -- (2) Êõ∏Á±ç„ÅÆÂΩ¢ÊÖã„Ç≥„Éº„Éâ„ÇíÊõ∏Êèõ„Åà
   UPDATE book_possess SET bookform_cd = new_cd
   WHERE  bookform_cd = old_cd AND user_id = v_current_user;
-  -- (3) èëê–å`ë‘É}ÉXÉ^Ç©ÇÁãåÉRÅ[ÉhÇçÌèú
+  -- (3) Êõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„Åã„ÇâÊóß„Ç≥„Éº„Éâ„ÇíÂâäÈô§
   DELETE FROM bookform_master
   WHERE bookform_cd = old_cd AND user_id = v_current_user;
-  -- (4) êVÉRÅ[ÉhÇÃèëê–å`ë‘É}ÉXÉ^ÇÃå`ë‘ñºÇ©ÇÁÉGÉâÅ[îÇØÇèúãé
+  -- (4) Êñ∞„Ç≥„Éº„Éâ„ÅÆÊõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„ÅÆÂΩ¢ÊÖãÂêç„Åã„Çâ„Ç®„É©„ÉºÈÅø„Åë„ÇíÈô§Âéª
   UPDATE bookform_master
   SET bookform = REGEXP_REPLACE(bookform, v_avoid_error || '$', '', 'g')
   WHERE bookform_cd = new_cd AND user_id = v_current_user;
@@ -411,7 +410,7 @@ END;
 $$;
 
 
--- Å°èoî≈é–ÉäÉXÉgíäèo
+-- ‚ñ†Âá∫ÁâàÁ§æ„É™„Çπ„ÉàÊäΩÂá∫
 CREATE OR REPLACE FUNCTION extract_publisher(
   p_extract_count INT DEFAULT 1
 )
@@ -425,7 +424,7 @@ DECLARE
 BEGIN
   v_current_user := auth.uid();
   IF v_current_user IS NULL THEN
-      RAISE EXCEPTION 'ÉÜÅ[ÉUÅ[Ç™ÉçÉOÉCÉìÇµÇƒÇ¢Ç‹ÇπÇÒÅB';
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
   END IF;
   INSERT INTO publisher_list (publisher, user_id)
   SELECT publisher, user_id
@@ -434,16 +433,16 @@ BEGIN
   GROUP BY publisher, user_id
   HAVING COUNT(*) >= p_extract_count
   ON CONFLICT (publisher, user_id) 
-  DO NOTHING;     -- ìoò^çœÇ›Ç≈Ç†ÇÍÇŒñ≥éã
+  DO NOTHING;     -- ÁôªÈå≤Ê∏à„Åø„Åß„ÅÇ„Çå„Å∞ÁÑ°Ë¶ñ
 END;
 $$;
 
 
--- Å°ÉfÅ[É^ï€ë∂
+-- ‚ñ†„Éá„Éº„Çø‰øùÂ≠ò
 CREATE OR REPLACE FUNCTION public.backup_books()
 RETURNS void
 LANGUAGE plpgsql
-SECURITY DEFINER -- ÉçÉOÉCÉìÉÜÅ[ÉUÅ[ÇÃå†å¿Ç…ä÷ÇÌÇÁÇ∏ÉeÅ[ÉuÉãëÄçÏÇé¿çs
+SECURITY DEFINER -- „É≠„Ç∞„Ç§„É≥„É¶„Éº„Ç∂„Éº„ÅÆÊ®©Èôê„Å´Èñ¢„Çè„Çâ„Åö„ÉÜ„Éº„Éñ„É´Êìç‰Ωú„ÇíÂÆüË°å
 AS $$
 DECLARE
   v_current_user uuid;
@@ -452,9 +451,9 @@ DECLARE
 BEGIN
   v_current_user := auth.uid();
   IF v_current_user IS NULL THEN
-      RAISE EXCEPTION 'ÉÜÅ[ÉUÅ[Ç™ÉçÉOÉCÉìÇµÇƒÇ¢Ç‹ÇπÇÒÅB';
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
   END IF;
-  -- (1) ÉXÉLÅ[É} 'backup2' ÇÃÉeÅ[ÉuÉãÇ©ÇÁÉçÉOÉCÉìÉÜÅ[ÉUÇÃÉfÅ[É^ÇçÌèú
+  -- (1) „Çπ„Ç≠„Éº„Éû 'backup2' „ÅÆ„ÉÜ„Éº„Éñ„É´„Åã„Çâ„É≠„Ç∞„Ç§„É≥„É¶„Éº„Ç∂„ÅÆ„Éá„Éº„Çø„ÇíÂâäÈô§
   CREATE SCHEMA IF NOT EXISTS backup2;
   CREATE TABLE IF NOT EXISTS backup2.bookclass_master (
     LIKE public.bookclass_master INCLUDING ALL
@@ -866,7 +865,7 @@ BEGIN
   DELETE FROM backup2.book_role_master WHERE user_id = v_current_user;
   DELETE FROM backup2.bookform_master WHERE user_id = v_current_user;
   DELETE FROM backup2.bookclass_master WHERE user_id = v_current_user;
-  -- (2) ÉXÉLÅ[É} 'backup1' ÇÃäeÉeÅ[ÉuÉãÇ©ÇÁ 'backup2' Ç…ÉRÉsÅ[
+  -- (2) „Çπ„Ç≠„Éº„Éû 'backup1' „ÅÆÂêÑ„ÉÜ„Éº„Éñ„É´„Åã„Çâ 'backup2' „Å´„Ç≥„Éî„Éº
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'bookclass_master') THEN
         INSERT INTO backup2.bookclass_master (id, bookclass_cd, bookclass, selectable, user_id)
         SELECT id, bookclass_cd, bookclass, selectable, user_id
@@ -917,7 +916,7 @@ BEGIN
       SELECT id, user_id, user_name, profile_icon
       FROM backup1.profile WHERE user_id = v_current_user;
   END IF;
-  -- (3) ÉXÉLÅ[É} 'backup1' ÇÃÉeÅ[ÉuÉãÇ©ÇÁÉçÉOÉCÉìÉÜÅ[ÉUÇÃÉfÅ[É^ÇçÌèú
+  -- (3) „Çπ„Ç≠„Éº„Éû 'backup1' „ÅÆ„ÉÜ„Éº„Éñ„É´„Åã„Çâ„É≠„Ç∞„Ç§„É≥„É¶„Éº„Ç∂„ÅÆ„Éá„Éº„Çø„ÇíÂâäÈô§
   CREATE SCHEMA IF NOT EXISTS backup1;
   CREATE TABLE IF NOT EXISTS backup1.bookclass_master (
     LIKE public.bookclass_master INCLUDING ALL
@@ -1329,7 +1328,7 @@ BEGIN
   DELETE FROM backup1.book_role_master WHERE user_id = v_current_user;
   DELETE FROM backup1.bookform_master WHERE user_id = v_current_user;
   DELETE FROM backup1.bookclass_master WHERE user_id = v_current_user;
-  -- (4) ÉXÉLÅ[É} 'public' ÇÃäeÉeÅ[ÉuÉãÇ©ÇÁ 'backup1' Ç…ÉRÉsÅ[
+  -- (4) „Çπ„Ç≠„Éº„Éû 'public' „ÅÆÂêÑ„ÉÜ„Éº„Éñ„É´„Åã„Çâ 'backup1' „Å´„Ç≥„Éî„Éº
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookclass_master') THEN
       INSERT INTO backup1.bookclass_master (id, bookclass_cd, bookclass, selectable, user_id)
       SELECT id, bookclass_cd, bookclass, selectable, user_id
@@ -1380,10 +1379,1414 @@ BEGIN
       SELECT id, user_id, user_name, profile_icon
       FROM public.profile WHERE user_id = v_current_user;
   END IF;
-  -- (5) ÉoÉbÉNÉAÉbÉvóöóÇï€ë∂
+  -- (5) „Éê„ÉÉ„ÇØ„Ç¢„ÉÉ„ÉóÂ±•Ê≠¥„Çí‰øùÂ≠ò
   INSERT INTO public.backup_history (data_name, backup_date, user_id)
   VALUES ('books', CURRENT_TIMESTAMP, v_current_user);
-  -- (6) ç≈å√ÇÃÉoÉbÉNÉAÉbÉvóöóÇçÌèúÅi3åèà»è„ë∂ç›Ç∑ÇÈèÍçáÅj
+  -- (6) ÊúÄÂè§„ÅÆ„Éê„ÉÉ„ÇØ„Ç¢„ÉÉ„ÉóÂ±•Ê≠¥„ÇíÂâäÈô§Ôºà3‰ª∂‰ª•‰∏äÂ≠òÂú®„Åô„ÇãÂ†¥ÂêàÔºâ
+  SELECT COUNT(*) INTO v_history_count
+  FROM public.backup_history
+  WHERE data_name = 'books'
+    AND user_id = v_current_user;
+  IF v_history_count >= 3 THEN
+      SELECT id INTO v_oldest_id
+      FROM public.backup_history
+      WHERE data_name = 'books'
+        AND user_id = v_current_user
+      ORDER BY backup_date ASC, id ASC
+      LIMIT 1;
+      IF v_oldest_id IS NOT NULL THEN
+          DELETE FROM public.backup_history WHERE id = v_oldest_id;
+      END IF;
+  END IF;
+END;
+$$;
+=======
+-- DROP FUNCTION IF EXISTS search_books_complex;
+-- ‚ÄªÂºïÊï∞„ÇíÂ§âÊõ¥„Åó„Åü„Åü„ÇÅ„Å´ÂêåÂêçFUNCTION„ÅåË§áÊï∞Â≠òÂú®„Åô„ÇãÂ†¥Âêà„ÅØ„ÄÅÂºïÊï∞„ÅÆ„É™„Çπ„Éà„Çí‰ªò„Åë„Å¶„Åù„Çå„Åû„ÇåDROP„Åô„Çã„ÄÇ
+--  Ôºà‰æãÔºâDROP FUNCTION IF EXISTS search_books(text, text, text, text, text, text, text, text, text, text, text, text, int);
+
+
+-- ‚ñ†Êõ∏Á±çÈñ≤Ë¶ß„ÄÅ‰∏ÄË¶ß
+CREATE OR REPLACE FUNCTION search_books(
+  p_book_id TEXT DEFAULT NULL,
+  p_isbn13 TEXT DEFAULT NULL,
+  p_title TEXT DEFAULT NULL,
+  p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_publisher TEXT DEFAULT NULL,
+  p_publish_series TEXT DEFAULT NULL,
+  p_role_cd TEXT DEFAULT NULL,
+  p_person_name TEXT DEFAULT NULL,
+  p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_bookclass_cd TEXT DEFAULT NULL,
+  p_bookform_cd TEXT DEFAULT NULL,
+  p_limit_possess TEXT DEFAULT 'noLimit',   -- 'possess', 'nonPossess', 'noLimit'
+  p_display_order TEXT DEFAULT 'publish',   -- 'publish', 'get'
+  p_sort_option TEXT DEFAULT 'asc',   -- 'asc', 'desc'
+  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:limit
+)
+RETURNS TABLE (
+  book_id INTEGER,
+  isbn13 VARCHAR(13),
+  title TEXT,
+  publisher TEXT,
+  publish_series TEXT,
+  first_publish_year INTEGER,
+  bookclass_cd CHAR(03),
+  roles JSONB,
+  possessions JSONB
+) 
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    b.book_id, b.isbn13, b.title, b.publisher, b.publish_series, b.first_publish_year, b.bookclass_cd,
+    COALESCE(jsonb_agg(DISTINCT jsonb_build_object('role_cd', br.role_cd, 'person_name', br.person_name)) FILTER (WHERE br.id IS NOT NULL), '[]') as roles,
+    COALESCE(jsonb_agg(DISTINCT jsonb_build_object('bookform_cd', bp.bookform_cd, 'get_date', bp.get_date, 'dispose_date', bp.dispose_date)) FILTER (WHERE bp.book_possess_id IS NOT NULL), '[]') as possessions
+  FROM books b
+  LEFT JOIN book_role br ON b.book_id = br.book_id
+  LEFT JOIN book_possess bp ON b.book_id = bp.book_id
+  WHERE 
+    -- ÁâπÂÆö„ÅÆbook_id„ÅåÊåáÂÆö„Åï„Çå„ÅüÊôÇ„ÄÅ‰ªñ„ÅÆÊù°‰ª∂„ÅØÊú™ÊåáÂÆö
+    (p_book_id IS NULL OR b.book_id = CAST(p_book_id AS INTEGER))
+    -- Âü∫Êú¨„Éï„Ç£„É´„Çø
+    AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
+    -- Âá∫ÁâàÁ§æ„ÄÅÂá∫Áâà„Ç∑„É™„Éº„Ç∫ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'„ÄÄ',''),' ','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'„ÄÄ',''),' ','') ILIKE p_publish_series || '%')
+    -- „Çø„Ç§„Éà„É´ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥ or ÈÉ®ÂàÜ‰∏ÄËá¥
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE '%' || p_title || '%' END))
+    -- ÂΩπÂâ≤ ÔºöÂ≠òÂú®„Åô„ÇãÂ†¥Âêà„ÅÆ„ÅøÁµû„ÇäËæº„ÇÄ = !innerÁõ∏ÂΩì„ÄÅ‰∫∫Âêç„ÅØÁ©∫ÁôΩÈô§Âéª
+    AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE '%' || p_person_name || '%' END))
+    -- ‰øùÊúâÁä∂Ê≥Å
+    AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
+    AND (CASE 
+          WHEN p_limit_possess = 'possess' THEN 
+            -- „ÄåÊú™Âá¶ÂàÜ„Äç„Åå1„Å§‰ª•‰∏äÂ≠òÂú®„Åô„Çã
+            EXISTS (SELECT 1 FROM book_possess bp2 WHERE bp2.book_id = b.book_id AND bp2.dispose_date IS NULL)
+          WHEN p_limit_possess = 'nonPossess' THEN 
+            -- „ÄåÊú™Âá¶ÂàÜ„Äç„Åå1„Å§„ÇÇÂ≠òÂú®„Åó„Å™„ÅÑ (Êú™ÊâÄÊåÅ or ÂÖ®Âá¶ÂàÜ)
+            NOT EXISTS (SELECT 1 FROM book_possess bp2 WHERE bp2.book_id = b.book_id AND bp2.dispose_date IS NULL)
+          ELSE true END)
+  GROUP BY b.book_id
+  ORDER BY 
+    CASE WHEN p_sort_option = 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' THEN b.publisher ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn13    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn10    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.title     ELSE NULL END ASC, 
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' THEN b.publisher ELSE NULL END DESC, 
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn13    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn10    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.title     ELSE NULL END DESC
+  LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
+END;
+$$;
+
+
+-- ‚ñ†Êú™Ë™≠‰∏ÄË¶ß
+CREATE OR REPLACE FUNCTION search_books_unread(
+  p_isbn13 TEXT DEFAULT NULL,
+  p_title TEXT DEFAULT NULL,
+  p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_publisher TEXT DEFAULT NULL,
+  p_publish_series TEXT DEFAULT NULL,
+  p_role_cd TEXT DEFAULT NULL,
+  p_person_name TEXT DEFAULT NULL,
+  p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_bookclass_cd TEXT DEFAULT NULL,
+  p_bookform_cd TEXT DEFAULT NULL,
+  p_display_order TEXT DEFAULT 'publish',   -- 'publish', 'get'
+  p_sort_option TEXT DEFAULT 'asc',   -- 'asc', 'desc'
+  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:limit
+)
+RETURNS TABLE (
+  book_id INTEGER
+) 
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    b.book_id
+  FROM books b
+  -- 1. ‰øùÊúâ„Åó„Å¶„ÅÑ„Çã„Åì„Å®„ÇíÁ¢∫Ë™ç (RLS„Å´„Çà„ÇäËá™ÂàÜ„ÅÆÊâÄÊúâÂàÜ„ÅÆ„ÅøÂØæË±°)
+  JOIN book_possess bp ON b.book_id = bp.book_id
+  WHERE 
+    -- 2. „Éé„Éº„Éà„Åå„ÄåÂ≠òÂú®„Åó„Å™„ÅÑ„Äç„Åì„Å®„ÇíÁ¢∫Ë™ç (NOT EXISTS„Çí‰ΩøÁî®)
+    NOT EXISTS (
+      SELECT 1 FROM book_note bn WHERE bn.book_id = b.book_id
+    )
+    -- 3. ÂΩπÂâ≤/ËëóËÄÖÊ§úÁ¥¢„ÅåÂøÖË¶Å„Å™Â†¥Âêà„ÅÆ„ÅøÁµêÂêà„ÄÅ‰∫∫Âêç„ÅØÁ©∫ÁôΩÈô§Âéª
+    AND (
+      (p_role_cd IS NULL AND p_person_name IS NULL) OR
+      EXISTS (
+        SELECT 1 FROM book_role br 
+        WHERE br.book_id = b.book_id
+          AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+          AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE '%' || p_person_name || '%' END))
+      )
+    )
+    -- 4. „Åù„ÅÆ‰ªñ„ÅÆ„Éï„Ç£„É´„Çø
+    AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
+    -- Âá∫ÁâàÁ§æ„ÄÅÂá∫Áâà„Ç∑„É™„Éº„Ç∫ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'„ÄÄ',''),' ','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'„ÄÄ',''),' ','') ILIKE p_publish_series || '%')
+    -- „Çø„Ç§„Éà„É´ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥ or ÈÉ®ÂàÜ‰∏ÄËá¥
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE '%' || p_title || '%' END))
+    -- ‰øùÊúâÁä∂Ê≥Å
+    AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
+  GROUP BY b.book_id
+  ORDER BY 
+    CASE WHEN p_sort_option = 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END ASC ,
+    CASE WHEN p_sort_option = 'asc' THEN b.publisher ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn13    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.isbn10    ELSE NULL END ASC, 
+    CASE WHEN p_sort_option = 'asc' THEN b.title     ELSE NULL END ASC, 
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order =  'publish' THEN b.first_publish_year ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' AND p_display_order <> 'publish' THEN MIN(bp.get_date) ELSE NULL END DESC ,
+    CASE WHEN p_sort_option <> 'asc' THEN b.publisher ELSE NULL END DESC, 
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn13    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.isbn10    ELSE NULL END DESC,
+    CASE WHEN p_sort_option <> 'asc' THEN b.title     ELSE NULL END DESC
+  LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
+END;
+$$;
+
+
+-- ‚ñ†„Éé„Éº„Éà‰∏ÄË¶ßÔºàÁØÑÂõ≤ÊåáÂÆöÔºâ
+CREATE OR REPLACE FUNCTION search_note_range(
+  p_read_st_from DATE DEFAULT '0001-01-01',
+  p_read_st_to DATE DEFAULT '9999-12-31',
+  p_isbn13 TEXT DEFAULT NULL,
+  p_title TEXT DEFAULT NULL,
+  p_title_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_publisher TEXT DEFAULT NULL,
+  p_publish_series TEXT DEFAULT NULL,
+  p_role_cd TEXT DEFAULT NULL,
+  p_person_name TEXT DEFAULT NULL,
+  p_person_search_type TEXT DEFAULT 'top', -- 'top' or 'part'
+  p_bookclass_cd TEXT DEFAULT NULL,
+  p_bookform_cd TEXT DEFAULT NULL,
+  p_select_limit INT DEFAULT 0  -- 0:no limit, 1~:limit
+)
+RETURNS TABLE (
+  note_id INTEGER,
+  book_id INTEGER,
+  read_st_date DATE,
+  read_ed_date DATE,
+  note TEXT,
+  isbn13 VARCHAR(13),
+  title TEXT,
+  publisher TEXT,
+  publish_series TEXT,
+  first_publish_year INTEGER,
+  bookclass_cd CHAR(03),
+  role_cd CHAR(03),
+  person_name TEXT
+) 
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT
+    bn.id AS note_id,
+    bn.book_id,
+    bn.read_st_date,
+    bn.read_ed_date,
+    bn.note,
+    b.isbn13,
+    b.title,
+    b.publisher,
+    b.publish_series,
+    b.first_publish_year,
+    b.bookclass_cd,
+    br_first.role_cd,
+    br_first.person_name
+  FROM book_note bn
+  JOIN books b ON bn.book_id = b.book_id
+  -- Èñ¢ÈÄ£„ÉÜ„Éº„Éñ„É´„ÅØÊù°‰ª∂„Åå„ÅÇ„ÇãÂ†¥Âêà„ÅÆ„ÅøÁµû„ÇäËæº„ÇÅ„Çã„Çà„ÅÜLEFT JOIN
+  LEFT JOIN book_role br ON b.book_id = br.book_id
+  LEFT JOIN book_possess bp ON b.book_id = bp.book_id
+  -- book_role„ÅÆÊúÄÂàù„ÅÆ1Ë°å
+  LEFT JOIN LATERAL (
+    SELECT sub_br.role_cd, sub_br.person_name
+    FROM book_role sub_br
+    WHERE sub_br.book_id = b.book_id
+    ORDER BY sub_br.role_cd ASC, sub_br.role_order ASC
+    LIMIT 1
+  ) br_first ON TRUE
+  WHERE
+    -- Ë™≠Êõ∏ÈñãÂßãÊó•„ÅÆÁØÑÂõ≤ÊåáÂÆöÔºàÂøÖÈ†àÊÉ≥ÂÆöÔºâ
+    bn.read_st_date >= p_read_st_from AND bn.read_st_date < p_read_st_to
+    -- Êõ∏Á±çÔºàÂçòÁ¥îÊù°‰ª∂Ôºâ
+    AND (p_isbn13 IS NULL OR b.isbn13 = p_isbn13)
+    AND (p_bookclass_cd IS NULL OR b.bookclass_cd = p_bookclass_cd)
+    -- Âá∫ÁâàÁ§æ„ÄÅÂá∫Áâà„Ç∑„É™„Éº„Ç∫ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥
+    AND (p_publisher IS NULL OR REPLACE(REPLACE(b.publisher,'„ÄÄ',''),' ','') ILIKE p_publisher || '%')
+    AND (p_publish_series IS NULL OR REPLACE(REPLACE(b.publish_series,'„ÄÄ',''),' ','') ILIKE p_publish_series || '%')
+    -- „Çø„Ç§„Éà„É´ÔºöÁ©∫ÁôΩÈô§Âéª„ÄÅÂâçÊñπ‰∏ÄËá¥ or ÈÉ®ÂàÜ‰∏ÄËá¥
+    AND (p_title IS NULL OR (CASE WHEN p_title_search_type = 'top' THEN REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE p_title || '%' ELSE REPLACE(REPLACE(b.title,'„ÄÄ',''),' ','') ILIKE '%' || p_title || '%' END))
+    -- ÂΩπÂâ≤„ÄÅ‰∫∫Âêç„ÅØÁ©∫ÁôΩÈô§Âéª
+    AND (p_role_cd IS NULL OR br.role_cd = p_role_cd)
+    AND (p_person_name IS NULL OR (CASE WHEN p_person_search_type = 'top' THEN REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE p_person_name || '%' ELSE REPLACE(REPLACE(br.person_name,'„ÄÄ',''),' ','') ILIKE '%' || p_person_name || '%' END))
+    -- ‰øùÊúâÁä∂Ê≥Å
+    AND (p_bookform_cd IS NULL OR bp.bookform_cd = p_bookform_cd)
+  ORDER BY bn.read_st_date ASC,
+    bn.id ASC
+  LIMIT (CASE WHEN p_select_limit <= 0 THEN NULL ELSE p_select_limit END);
+END;
+$$;
+
+
+-- ‚ñ†Êõ∏Á±çË§áË£Ω
+CREATE OR REPLACE FUNCTION duplicate_book(
+  p_src_book_id INT
+)
+RETURNS INT
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_new_book_id INT;
+  v_timestamp_suffix TEXT;
+BEGIN
+  v_timestamp_suffix := '_' || to_char(NOW(), 'YYYYMMDDHH24MISS');
+  -- (1) books„ÇíË§áË£ΩÔºàÊõ∏Âêç„Å´„Çø„Ç§„É†„Çπ„Çø„É≥„Éó‰ªòÂä†ÔºõUNIQUEÂà∂Á¥ÑÂõûÈÅøÔºâ
+  INSERT INTO books (
+      isbn10, isbn13, c_cd, ndc, title, original_title, colophon, 
+      publisher, publish_series, publish_series_no, first_publish_year, 
+      bookclass_cd, remarks, image_url, user_id
+  )
+  SELECT 
+      isbn10, isbn13, c_cd, ndc, title || v_timestamp_suffix, original_title, colophon, 
+      publisher, publish_series, publish_series_no, first_publish_year, 
+      bookclass_cd, remarks, image_url, user_id
+  FROM books
+  WHERE book_id = p_src_book_id
+  RETURNING book_id INTO v_new_book_id; -- „Ç≥„Éî„ÉºÂÖàbook_id
+  IF v_new_book_id IS NULL THEN
+      RAISE EXCEPTION 'ÊåáÂÆö„Åï„Çå„Åü book_id (%) „ÅåË¶ã„Å§„Åã„Çä„Åæ„Åõ„Çì„ÄÇ', p_src_book_id;
+  END IF;
+  -- (2) book_role„ÇíË§áË£Ω
+  INSERT INTO book_role (
+      book_id, role_cd, role_order, person_name, remarks, user_id
+  )
+  SELECT 
+      v_new_book_id, role_cd, role_order, person_name, remarks, user_id
+  FROM book_role
+  WHERE book_id = p_src_book_id;
+  -- (3) book_possess„ÇíË§áË£ΩÔºàget_date„ÅØÊú¨Êó•„ÄÅdispose_date„ÅØÁúÅÁï•Ôºâ
+  INSERT INTO book_possess (
+      book_id, bookform_cd, get_date, image_url, remarks, user_id
+  )
+  SELECT 
+      v_new_book_id, bookform_cd, CURRENT_DATE, image_url, remarks, user_id
+  FROM book_possess
+  WHERE book_id = p_src_book_id;
+  -- (4) „Ç≥„Éî„ÉºÂÖà„ÅÆ book_id „ÇíËøîÂç¥
+  RETURN v_new_book_id;
+END;
+$$;
+
+
+-- ‚ñ†Êõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„ÉªÂàÜÈ°û„Ç≥„Éº„ÉâÂ§âÊõ¥Áî®
+CREATE OR REPLACE FUNCTION update_bookclass_cd(
+  old_cd CHAR(3),
+  new_cd CHAR(3),
+  new_name TEXT,
+  new_selectable BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_avoid_error text;  -- „Ç≥„Éº„Éâ„ÇíÂ§âÊõ¥„Åó„Å¶ÂàÜÈ°ûÂêç„ÅåÂÖÉ„ÅÆ„Åæ„Åæ„ÅÆÊôÇ„ÄÅÂàÜÈ°ûÂêç„ÅÆÈáçË§á„Ç®„É©„Éº„ÇíÈÅø„Åë„Çã„Åü„ÇÅ‰∏ÄÊôÇÁöÑ„Å´‰ªòÂä†„Åô„ÇãÊñáÂ≠óÂàó
+BEGIN
+  v_current_user := auth.uid();
+  v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
+  END IF;
+  -- (1) Êõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„Å´Êñ∞„Ç≥„Éº„Éâ„ÇíËøΩÂä†ÔºàÂàÜÈ°ûÂêç„Å´„Ç®„É©„ÉºÈÅø„Åë„ÅÆÊñáÂ≠óÂàó‰ªòÂä†Ôºâ
+  INSERT INTO bookclass_master (bookclass_cd, bookclass, selectable, user_id)
+  VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
+  -- (2) Êõ∏Á±ç„ÅÆÂàÜÈ°û„Ç≥„Éº„Éâ„ÇíÊõ∏Êèõ„Åà
+  UPDATE books SET bookclass_cd = new_cd
+  WHERE  bookclass_cd = old_cd AND user_id = v_current_user;
+  -- (3) Êõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„Åã„ÇâÊóß„Ç≥„Éº„Éâ„ÇíÂâäÈô§
+  DELETE FROM bookclass_master
+  WHERE bookclass_cd = old_cd AND user_id = v_current_user;
+  -- (4) Êñ∞„Ç≥„Éº„Éâ„ÅÆÊõ∏Á±çÂàÜÈ°û„Éû„Çπ„Çø„ÅÆÂàÜÈ°ûÂêç„Åã„Çâ„Ç®„É©„ÉºÈÅø„Åë„ÇíÈô§Âéª
+  UPDATE bookclass_master
+  SET bookclass = REGEXP_REPLACE(bookclass, v_avoid_error || '$', '', 'g')
+  WHERE bookclass_cd = new_cd AND user_id = v_current_user;
+END;
+$$;
+
+
+-- ‚ñ†Êõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„ÉªÂΩπÂâ≤„Ç≥„Éº„ÉâÂ§âÊõ¥Áî®
+CREATE OR REPLACE FUNCTION update_role_cd(
+  old_cd CHAR(3),
+  new_cd CHAR(3),
+  new_name TEXT,
+  new_selectable BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_avoid_error text;  -- „Ç≥„Éº„Éâ„ÇíÂ§âÊõ¥„Åó„Å¶ÂΩπÂâ≤Âêç„ÅåÂÖÉ„ÅÆ„Åæ„Åæ„ÅÆÊôÇ„ÄÅÂΩπÂâ≤Âêç„ÅÆÈáçË§á„Ç®„É©„Éº„ÇíÈÅø„Åë„Çã„Åü„ÇÅ‰∏ÄÊôÇÁöÑ„Å´‰ªòÂä†„Åô„ÇãÊñáÂ≠óÂàó
+BEGIN
+  v_current_user := auth.uid();
+  v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
+  END IF;
+  -- (1) Êõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„Å´Êñ∞„Ç≥„Éº„Éâ„ÇíËøΩÂä†ÔºàÂΩπÂâ≤Âêç„Å´„Ç®„É©„ÉºÈÅø„Åë„ÅÆÊñáÂ≠óÂàó‰ªòÂä†Ôºâ
+  INSERT INTO book_role_master (role_cd, role_name, selectable, user_id)
+  VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
+  -- (2) Êõ∏Á±ç„ÅÆÂΩπÂâ≤„Ç≥„Éº„Éâ„ÇíÊõ∏Êèõ„Åà
+  UPDATE book_role SET role_cd = new_cd
+  WHERE  role_cd = old_cd AND user_id = v_current_user;
+  -- (3) Êõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„Åã„ÇâÊóß„Ç≥„Éº„Éâ„ÇíÂâäÈô§
+  DELETE FROM book_role_master
+  WHERE role_cd = old_cd AND user_id = v_current_user;
+  -- (4) Êñ∞„Ç≥„Éº„Éâ„ÅÆÊõ∏Á±çÂΩπÂâ≤„Éû„Çπ„Çø„ÅÆÂΩπÂâ≤Âêç„Åã„Çâ„Ç®„É©„ÉºÈÅø„Åë„ÇíÈô§Âéª
+  UPDATE book_role_master
+  SET role_name = REGEXP_REPLACE(role_name, v_avoid_error || '$', '', 'g')
+  WHERE role_cd = new_cd AND user_id = v_current_user;
+END;
+$$;
+
+
+-- ‚ñ†Êõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„ÉªÂΩ¢ÊÖã„Ç≥„Éº„ÉâÂ§âÊõ¥Áî®
+CREATE OR REPLACE FUNCTION update_bookform_cd(
+  old_cd CHAR(3),
+  new_cd CHAR(3),
+  new_name TEXT,
+  new_selectable BOOLEAN
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_avoid_error text;  -- „Ç≥„Éº„Éâ„ÇíÂ§âÊõ¥„Åó„Å¶ÂΩ¢ÊÖãÂêç„ÅåÂÖÉ„ÅÆ„Åæ„Åæ„ÅÆÊôÇ„ÄÅÂΩ¢ÊÖãÂêç„ÅÆÈáçË§á„Ç®„É©„Éº„ÇíÈÅø„Åë„Çã„Åü„ÇÅ‰∏ÄÊôÇÁöÑ„Å´‰ªòÂä†„Åô„ÇãÊñáÂ≠óÂàó
+BEGIN
+  v_current_user := auth.uid();
+  v_avoid_error := to_char(NOW(), 'YYYYMMDDHH24MISS');
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
+  END IF;
+  -- (1) Êõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„Å´Êñ∞„Ç≥„Éº„Éâ„ÇíËøΩÂä†ÔºàÂΩ¢ÊÖãÂêç„Å´„Ç®„É©„ÉºÈÅø„Åë„ÅÆÊñáÂ≠óÂàó‰ªòÂä†Ôºâ
+  INSERT INTO bookform_master (bookform_cd, bookform, selectable, user_id)
+  VALUES (new_cd, new_name || v_avoid_error, new_selectable, v_current_user);
+  -- (2) Êõ∏Á±ç„ÅÆÂΩ¢ÊÖã„Ç≥„Éº„Éâ„ÇíÊõ∏Êèõ„Åà
+  UPDATE book_possess SET bookform_cd = new_cd
+  WHERE  bookform_cd = old_cd AND user_id = v_current_user;
+  -- (3) Êõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„Åã„ÇâÊóß„Ç≥„Éº„Éâ„ÇíÂâäÈô§
+  DELETE FROM bookform_master
+  WHERE bookform_cd = old_cd AND user_id = v_current_user;
+  -- (4) Êñ∞„Ç≥„Éº„Éâ„ÅÆÊõ∏Á±çÂΩ¢ÊÖã„Éû„Çπ„Çø„ÅÆÂΩ¢ÊÖãÂêç„Åã„Çâ„Ç®„É©„ÉºÈÅø„Åë„ÇíÈô§Âéª
+  UPDATE bookform_master
+  SET bookform = REGEXP_REPLACE(bookform, v_avoid_error || '$', '', 'g')
+  WHERE bookform_cd = new_cd AND user_id = v_current_user;
+END;
+$$;
+
+
+-- ‚ñ†Âá∫ÁâàÁ§æ„É™„Çπ„ÉàÊäΩÂá∫
+CREATE OR REPLACE FUNCTION extract_publisher(
+  p_extract_count INT DEFAULT 1
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_current_user uuid;
+BEGIN
+  v_current_user := auth.uid();
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
+  END IF;
+  INSERT INTO publisher_list (publisher, user_id)
+  SELECT publisher, user_id
+  FROM books
+  WHERE user_id = v_current_user
+  GROUP BY publisher, user_id
+  HAVING COUNT(*) >= p_extract_count
+  ON CONFLICT (publisher, user_id) 
+  DO NOTHING;     -- ÁôªÈå≤Ê∏à„Åø„Åß„ÅÇ„Çå„Å∞ÁÑ°Ë¶ñ
+END;
+$$;
+
+
+-- ‚ñ†„Éá„Éº„Çø‰øùÂ≠ò
+CREATE OR REPLACE FUNCTION public.backup_books()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER -- „É≠„Ç∞„Ç§„É≥„É¶„Éº„Ç∂„Éº„ÅÆÊ®©Èôê„Å´Èñ¢„Çè„Çâ„Åö„ÉÜ„Éº„Éñ„É´Êìç‰Ωú„ÇíÂÆüË°å
+AS $$
+DECLARE
+  v_current_user uuid;
+  v_history_count integer;
+  v_oldest_id integer;
+BEGIN
+  v_current_user := auth.uid();
+  IF v_current_user IS NULL THEN
+      RAISE EXCEPTION '„É¶„Éº„Ç∂„Éº„Åå„É≠„Ç∞„Ç§„É≥„Åó„Å¶„ÅÑ„Åæ„Åõ„Çì„ÄÇ';
+  END IF;
+  -- (1) „Çπ„Ç≠„Éº„Éû 'backup2' „ÅÆ„ÉÜ„Éº„Éñ„É´„Åã„Çâ„É≠„Ç∞„Ç§„É≥„É¶„Éº„Ç∂„ÅÆ„Éá„Éº„Çø„ÇíÂâäÈô§
+  CREATE SCHEMA IF NOT EXISTS backup2;
+  CREATE TABLE IF NOT EXISTS backup2.bookclass_master (
+    LIKE public.bookclass_master INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.bookform_master (
+    LIKE public.bookform_master INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_role_master (
+    LIKE public.book_role_master INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.books (
+    LIKE public.books INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_possess (
+    LIKE public.book_possess INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_role (
+    LIKE public.book_role INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.book_note (
+    LIKE public.book_note INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.publisher_list (
+    LIKE public.publisher_list INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.system_constants (
+    LIKE public.system_constants INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup2.profile (
+    LIKE public.profile INCLUDING ALL
+  );
+  ALTER TABLE backup2.bookclass_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookclass_master insert : only own user_id" on backup2.bookclass_master;
+  drop policy if exists "bookclass_master delete : only own user_id" on backup2.bookclass_master;
+  drop policy if exists "bookclass_master update : only own user_id" on backup2.bookclass_master;
+  drop policy if exists "bookclass_master select : only own user_id" on backup2.bookclass_master;
+  create policy "bookclass_master insert : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master delete : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master update : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master select : only own user_id"
+  on "backup2"."bookclass_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.bookform_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookform_master insert : only own user_id" on backup2.bookform_master;
+  drop policy if exists "bookform_master delete : only own user_id" on backup2.bookform_master;
+  drop policy if exists "bookform_master update : only own user_id" on backup2.bookform_master;
+  drop policy if exists "bookform_master select : only own user_id" on backup2.bookform_master;
+  create policy "bookform_master insert : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master delete : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master update : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master select : only own user_id"
+  on "backup2"."bookform_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_role_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role_master insert : only own user_id" on backup2.book_role_master;
+  drop policy if exists "book_role_master delete : only own user_id" on backup2.book_role_master;
+  drop policy if exists "book_role_master update : only own user_id" on backup2.book_role_master;
+  drop policy if exists "book_role_master select : only own user_id" on backup2.book_role_master;
+  create policy "book_role_master insert : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master delete : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master update : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master select : only own user_id"
+  on "backup2"."book_role_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.books ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "books insert : only own user_id" on backup2.books;
+  drop policy if exists "books delete : only own user_id" on backup2.books;
+  drop policy if exists "books update : only own user_id" on backup2.books;
+  drop policy if exists "books select : only own user_id" on backup2.books;
+  create policy "books insert : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "books delete : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books update : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books select : only own user_id"
+  on "backup2"."books"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_possess ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_possess insert : only own user_id" on backup2.book_possess;
+  drop policy if exists "book_possess delete : only own user_id" on backup2.book_possess;
+  drop policy if exists "book_possess update : only own user_id" on backup2.book_possess;
+  drop policy if exists "book_possess select : only own user_id" on backup2.book_possess;
+  create policy "book_possess insert : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess delete : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess update : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess select : only own user_id"
+  on "backup2"."book_possess"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_role ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role insert : only own user_id" on backup2.book_role;
+  drop policy if exists "book_role delete : only own user_id" on backup2.book_role;
+  drop policy if exists "book_role update : only own user_id" on backup2.book_role;
+  drop policy if exists "book_role select : only own user_id" on backup2.book_role;
+  create policy "book_role insert : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role delete : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role update : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role select : only own user_id"
+  on "backup2"."book_role"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.book_note ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_note insert : only own user_id" on backup2.book_note;
+  drop policy if exists "book_note delete : only own user_id" on backup2.book_note;
+  drop policy if exists "book_note update : only own user_id" on backup2.book_note;
+  drop policy if exists "book_note select : only own user_id" on backup2.book_note;
+  create policy "book_note insert : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note delete : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note update : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note select : only own user_id"
+  on "backup2"."book_note"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.publisher_list ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "publisher_list insert : only own user_id" on backup2.publisher_list;
+  drop policy if exists "publisher_list delete : only own user_id" on backup2.publisher_list;
+  drop policy if exists "publisher_list update : only own user_id" on backup2.publisher_list;
+  drop policy if exists "publisher_list select : only own user_id" on backup2.publisher_list;
+  create policy "publisher_list insert : only own user_id"
+  on "backup2"."publisher_list"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "publisher_list delete : only own user_id"
+  on "backup2"."publisher_list"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "publisher_list update : only own user_id"
+  on "backup2"."publisher_list"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "publisher_list select : only own user_id"
+  on "backup2"."publisher_list"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.system_constants ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "system_constants insert : only own user_id" on backup2.system_constants;
+  drop policy if exists "system_constants delete : only own user_id" on backup2.system_constants;
+  drop policy if exists "system_constants update : only own user_id" on backup2.system_constants;
+  drop policy if exists "system_constants select : only own user_id" on backup2.system_constants;
+  create policy "system_constants insert : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants delete : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants update : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants select : only own user_id"
+  on "backup2"."system_constants"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup2.profile ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "profile insert : only own user_id" on backup2.profile;
+  drop policy if exists "profile delete : only own user_id" on backup2.profile;
+  drop policy if exists "profile update : only own user_id" on backup2.profile;
+  drop policy if exists "profile select : only own user_id" on backup2.profile;
+  create policy "profile insert : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "profile delete : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile update : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile select : only own user_id"
+  on "backup2"."profile"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  DELETE FROM backup2.profile WHERE user_id = v_current_user;
+  DELETE FROM backup2.system_constants WHERE user_id = v_current_user;
+  DELETE FROM backup2.publisher_list WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_note WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_role WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_possess WHERE user_id = v_current_user;
+  DELETE FROM backup2.books WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_role_master WHERE user_id = v_current_user;
+  DELETE FROM backup2.bookform_master WHERE user_id = v_current_user;
+  DELETE FROM backup2.bookclass_master WHERE user_id = v_current_user;
+  -- (2) „Çπ„Ç≠„Éº„Éû 'backup1' „ÅÆÂêÑ„ÉÜ„Éº„Éñ„É´„Åã„Çâ 'backup2' „Å´„Ç≥„Éî„Éº
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'bookclass_master') THEN
+        INSERT INTO backup2.bookclass_master (id, bookclass_cd, bookclass, selectable, user_id)
+        SELECT id, bookclass_cd, bookclass, selectable, user_id
+        FROM backup1.bookclass_master WHERE user_id = v_current_user;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'bookform_master') THEN
+        INSERT INTO backup2.bookform_master (id, bookform_cd, bookform, selectable, user_id)
+        SELECT id, bookform_cd, bookform, selectable, user_id
+        FROM backup1.bookform_master WHERE user_id = v_current_user;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_role_master') THEN
+        INSERT INTO backup2.book_role_master (id, role_cd, role_name, selectable, user_id)
+        SELECT id, role_cd, role_name, selectable, user_id
+        FROM backup1.book_role_master WHERE user_id = v_current_user;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'books') THEN
+        INSERT INTO backup2.books (book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id)
+      SELECT book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id
+      FROM backup1.books WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_possess') THEN
+      INSERT INTO backup2.book_possess (book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id)
+      SELECT book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+      FROM backup1.book_possess WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_role') THEN
+      INSERT INTO backup2.book_role (id, book_id, role_cd, role_order, person_name, remarks, user_id)
+      SELECT id, book_id, role_cd, role_order, person_name, remarks, user_id
+      FROM backup1.book_role WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_note') THEN
+      INSERT INTO backup2.book_note (id, book_id, read_st_date, read_ed_date, note, user_id)
+      SELECT id, book_id, read_st_date, read_ed_date, note, user_id
+      FROM backup1.book_note WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'publisher_list') THEN
+      INSERT INTO backup2.publisher_list (id, publisher, reading, remarks, user_id)
+      SELECT id, publisher, reading, remarks, user_id
+      FROM backup1.publisher_list WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'system_constants') THEN
+      INSERT INTO backup2.system_constants (id, constant_name, constant_type, constant_value, remarks, user_id)
+      SELECT id, constant_name, constant_type, constant_value, remarks, user_id
+      FROM backup1.system_constants WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'profile') THEN
+      INSERT INTO backup2.profile (id, user_id, user_name, profile_icon)
+      SELECT id, user_id, user_name, profile_icon
+      FROM backup1.profile WHERE user_id = v_current_user;
+  END IF;
+  -- (3) „Çπ„Ç≠„Éº„Éû 'backup1' „ÅÆ„ÉÜ„Éº„Éñ„É´„Åã„Çâ„É≠„Ç∞„Ç§„É≥„É¶„Éº„Ç∂„ÅÆ„Éá„Éº„Çø„ÇíÂâäÈô§
+  CREATE SCHEMA IF NOT EXISTS backup1;
+  CREATE TABLE IF NOT EXISTS backup1.bookclass_master (
+    LIKE public.bookclass_master INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.bookform_master (
+    LIKE public.bookform_master INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_role_master (
+    LIKE public.book_role_master INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.books (
+    LIKE public.books INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_possess (
+    LIKE public.book_possess INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_role (
+    LIKE public.book_role INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.book_note (
+    LIKE public.book_note INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.publisher_list (
+    LIKE public.publisher_list INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.system_constants (
+    LIKE public.system_constants INCLUDING ALL
+  );
+  CREATE TABLE IF NOT EXISTS backup1.profile (
+    LIKE public.profile INCLUDING ALL
+  );
+  ALTER TABLE backup1.bookclass_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookclass_master insert : only own user_id" on backup1.bookclass_master;
+  drop policy if exists "bookclass_master delete : only own user_id" on backup1.bookclass_master;
+  drop policy if exists "bookclass_master update : only own user_id" on backup1.bookclass_master;
+  drop policy if exists "bookclass_master select : only own user_id" on backup1.bookclass_master;
+  create policy "bookclass_master insert : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master delete : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master update : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookclass_master select : only own user_id"
+  on "backup1"."bookclass_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.bookform_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "bookform_master insert : only own user_id" on backup1.bookform_master;
+  drop policy if exists "bookform_master delete : only own user_id" on backup1.bookform_master;
+  drop policy if exists "bookform_master update : only own user_id" on backup1.bookform_master;
+  drop policy if exists "bookform_master select : only own user_id" on backup1.bookform_master;
+  create policy "bookform_master insert : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master delete : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master update : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "bookform_master select : only own user_id"
+  on "backup1"."bookform_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_role_master ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role_master insert : only own user_id" on backup1.book_role_master;
+  drop policy if exists "book_role_master delete : only own user_id" on backup1.book_role_master;
+  drop policy if exists "book_role_master update : only own user_id" on backup1.book_role_master;
+  drop policy if exists "book_role_master select : only own user_id" on backup1.book_role_master;
+  create policy "book_role_master insert : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master delete : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master update : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role_master select : only own user_id"
+  on "backup1"."book_role_master"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.books ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "books insert : only own user_id" on backup1.books;
+  drop policy if exists "books delete : only own user_id" on backup1.books;
+  drop policy if exists "books update : only own user_id" on backup1.books;
+  drop policy if exists "books select : only own user_id" on backup1.books;
+  create policy "books insert : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "books delete : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books update : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "books select : only own user_id"
+  on "backup1"."books"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_possess ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_possess insert : only own user_id" on backup1.book_possess;
+  drop policy if exists "book_possess delete : only own user_id" on backup1.book_possess;
+  drop policy if exists "book_possess update : only own user_id" on backup1.book_possess;
+  drop policy if exists "book_possess select : only own user_id" on backup1.book_possess;
+  create policy "book_possess insert : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess delete : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess update : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_possess select : only own user_id"
+  on "backup1"."book_possess"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_role ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_role insert : only own user_id" on backup1.book_role;
+  drop policy if exists "book_role delete : only own user_id" on backup1.book_role;
+  drop policy if exists "book_role update : only own user_id" on backup1.book_role;
+  drop policy if exists "book_role select : only own user_id" on backup1.book_role;
+  create policy "book_role insert : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role delete : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role update : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_role select : only own user_id"
+  on "backup1"."book_role"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.book_note ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_note insert : only own user_id" on backup1.book_note;
+  drop policy if exists "book_note delete : only own user_id" on backup1.book_note;
+  drop policy if exists "book_note update : only own user_id" on backup1.book_note;
+  drop policy if exists "book_note select : only own user_id" on backup1.book_note;
+  create policy "book_note insert : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note delete : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note update : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "book_note select : only own user_id"
+  on "backup1"."book_note"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.publisher_list ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "publisher_list insert : only own user_id" on backup1.publisher_list;
+  drop policy if exists "publisher_list delete : only own user_id" on backup1.publisher_list;
+  drop policy if exists "publisher_list update : only own user_id" on backup1.publisher_list;
+  drop policy if exists "publisher_list select : only own user_id" on backup1.publisher_list;
+  create policy "publisher_list insert : only own user_id"
+  on "backup1"."publisher_list"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "publisher_list delete : only own user_id"
+  on "backup1"."publisher_list"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "publisher_list update : only own user_id"
+  on "backup1"."publisher_list"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "publisher_list select : only own user_id"
+  on "backup1"."publisher_list"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.system_constants ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "system_constants insert : only own user_id" on backup1.system_constants;
+  drop policy if exists "system_constants delete : only own user_id" on backup1.system_constants;
+  drop policy if exists "system_constants update : only own user_id" on backup1.system_constants;
+  drop policy if exists "system_constants select : only own user_id" on backup1.system_constants;
+  create policy "system_constants insert : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants delete : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants update : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "system_constants select : only own user_id"
+  on "backup1"."system_constants"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  ALTER TABLE backup1.profile ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "profile insert : only own user_id" on backup1.profile;
+  drop policy if exists "profile delete : only own user_id" on backup1.profile;
+  drop policy if exists "profile update : only own user_id" on backup1.profile;
+  drop policy if exists "profile select : only own user_id" on backup1.profile;
+  create policy "profile insert : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for INSERT
+  to public
+  with check (
+    (auth.uid() = user_id)
+  );
+  create policy "profile delete : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for DELETE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile update : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for UPDATE
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  create policy "profile select : only own user_id"
+  on "backup1"."profile"
+  as PERMISSIVE
+  for SELECT
+  to public
+  using (
+    (auth.uid() = user_id)
+  );
+  DELETE FROM backup1.profile WHERE user_id = v_current_user;
+  DELETE FROM backup1.system_constants WHERE user_id = v_current_user;
+  DELETE FROM backup1.publisher_list WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_note WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_role WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_possess WHERE user_id = v_current_user;
+  DELETE FROM backup1.books WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_role_master WHERE user_id = v_current_user;
+  DELETE FROM backup1.bookform_master WHERE user_id = v_current_user;
+  DELETE FROM backup1.bookclass_master WHERE user_id = v_current_user;
+  -- (4) „Çπ„Ç≠„Éº„Éû 'public' „ÅÆÂêÑ„ÉÜ„Éº„Éñ„É´„Åã„Çâ 'backup1' „Å´„Ç≥„Éî„Éº
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookclass_master') THEN
+      INSERT INTO backup1.bookclass_master (id, bookclass_cd, bookclass, selectable, user_id)
+      SELECT id, bookclass_cd, bookclass, selectable, user_id
+      FROM public.bookclass_master WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'bookform_master') THEN
+      INSERT INTO backup1.bookform_master (id, bookform_cd, bookform, selectable, user_id)
+      SELECT id, bookform_cd, bookform, selectable, user_id
+      FROM public.bookform_master WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_role_master') THEN
+      INSERT INTO backup1.book_role_master (id, role_cd, role_name, selectable, user_id)
+      SELECT id, role_cd, role_name, selectable, user_id
+      FROM public.book_role_master WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'books') THEN
+      INSERT INTO backup1.books (book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id)
+      SELECT book_id, isbn10, isbn13, c_cd, ndc, title, original_title, colophon, publisher, publish_series, publish_series_no, first_publish_year, bookclass_cd, remarks, image_url, user_id
+      FROM public.books WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_possess') THEN
+      INSERT INTO backup1.book_possess (book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id)
+      SELECT book_possess_id, book_id, bookform_cd, get_date, dispose_date, image_url, remarks, user_id
+      FROM public.book_possess WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_role') THEN
+      INSERT INTO backup1.book_role (id, book_id, role_cd, role_order, person_name, remarks, user_id)
+      SELECT id, book_id, role_cd, role_order, person_name, remarks, user_id
+      FROM public.book_role WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_note') THEN
+      INSERT INTO backup1.book_note (id, book_id, read_st_date, read_ed_date, note, user_id)
+      SELECT id, book_id, read_st_date, read_ed_date, note, user_id
+      FROM public.book_note WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'publisher_list') THEN
+      INSERT INTO backup1.publisher_list (id, publisher, reading, remarks, user_id)
+      SELECT id, publisher, reading, remarks, user_id
+      FROM public.publisher_list WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'system_constants') THEN
+      INSERT INTO backup1.system_constants (id, constant_name, constant_type, constant_value, remarks, user_id)
+      SELECT id, constant_name, constant_type, constant_value, remarks, user_id
+      FROM public.system_constants WHERE user_id = v_current_user;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profile') THEN
+      INSERT INTO backup1.profile (id, user_id, user_name, profile_icon)
+      SELECT id, user_id, user_name, profile_icon
+      FROM public.profile WHERE user_id = v_current_user;
+  END IF;
+  -- (5) „Éê„ÉÉ„ÇØ„Ç¢„ÉÉ„ÉóÂ±•Ê≠¥„Çí‰øùÂ≠ò
+  INSERT INTO public.backup_history (data_name, backup_date, user_id)
+  VALUES ('books', CURRENT_TIMESTAMP, v_current_user);
+  -- (6) ÊúÄÂè§„ÅÆ„Éê„ÉÉ„ÇØ„Ç¢„ÉÉ„ÉóÂ±•Ê≠¥„ÇíÂâäÈô§Ôºà3‰ª∂‰ª•‰∏äÂ≠òÂú®„Åô„ÇãÂ†¥ÂêàÔºâ
   SELECT COUNT(*) INTO v_history_count
   FROM public.backup_history
   WHERE data_name = 'books'
