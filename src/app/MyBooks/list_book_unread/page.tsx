@@ -5,7 +5,7 @@ type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function ListBookPage({ searchParams }: PageProps) {
+export default async function ListBookUnreadPage({ searchParams }: PageProps) {
   const supabase = await supabaseServer();
   const params = await searchParams;
 

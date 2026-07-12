@@ -4,23 +4,16 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  // if "next" is in param, use it as the redirect URL
-  let next = searchParams.get('next') ?? '/';
-  if (!next.startsWith('/')) {
-    // if "next" is not a relative URL, use the default
-    next = '/';
+
+  if (!code) {
+    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
   }
 
-  if (code) {
-    const supabase = await supabaseServer();
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  const supabase = await supabaseServer();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
     console.log('exchangeCodeForSession');
-    console.dir({ data, error }, { depth: null });
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
   }
-
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  return NextResponse.redirect(`${origin}/auth/update-password`);
 }
