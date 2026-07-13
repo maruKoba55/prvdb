@@ -12,8 +12,9 @@ export async function GET(request: Request) {
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    console.log('exchangeCodeForSession');
+    console.log('Error at exchangeCodeForSession');
+    console.error(error);
     return NextResponse.redirect(`${origin}/auth/auth-code-error`);
   }
-  return NextResponse.redirect(`${origin}/auth/update-password`);
+  return NextResponse.redirect(`${origin}/auth/post-auth`);
 }
