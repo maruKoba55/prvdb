@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 
-export default function ApplicationSelect() {
+export default function ApplicationSelectPage() {
   const supabase = supabaseClient();
   const router = useRouter();
   //  ユーザー取得

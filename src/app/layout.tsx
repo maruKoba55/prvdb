@@ -9,7 +9,7 @@ import { getPublisherList } from '@/utils/MyBooks/getPublisherList';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '書籍管理',
+  title: '書籍管理【開発】',
   description: 'Database for My Bookshelf'
 };
 
