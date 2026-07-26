@@ -13,14 +13,22 @@ import { styleItems } from '@/app/constants';
 export default function MaintePublisher() {
   const supabase = supabaseClient();
   const searchParams = useSearchParams();
-  const user = searchParams.get('user');
   const [data, setData] = useState<PublisherList[]>([]);
   const [loading, setLoading] = useState(true);
-  // 編集状態の管理
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<PublisherList | null>(null);
   const [extractCount, setExtractCount] = useState<number>(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // 各ボタンの処理
   // ［編集開始］
@@ -224,7 +232,7 @@ export default function MaintePublisher() {
         </div>
         <div className="flex mt-1 ml-2">
           ※リストの追加・削除・変更は、
-          <span className="font-bold text-red-500">トップページを更新したタイミングで選択肢に反映</span>されます。
+          <span className="font-bold text-red-500">書籍管理のトップページ更新時に選択肢に反映</span>されます。
         </div>
         <div className="flex mt-1 ml-2">※読みを登録した出版社は選択リストの上位に並びます。 </div>
       </div>

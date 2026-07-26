@@ -5,8 +5,8 @@ import MainteSystemConstants from './mainte_systemconstans';
 
 export default async function MainteSystemConstantsPage(props: any) {
   const supabase = await supabaseServer();
-  const searchParams = await props?.searchParams;
-  const user = searchParams?.user;
+  const { data, error } = await supabase.auth.getUser();
+  const user = data?.user?.id;
 
   // 登録済みのシステム定数をすべて取得
   let constants = await getSystemConstants('all');

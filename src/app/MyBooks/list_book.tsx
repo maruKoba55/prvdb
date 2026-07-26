@@ -6,24 +6,32 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookSearch, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useSystemConstant, useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/AppContext';
+import { useSystemConstant } from '@/context/AppContext';
+import { useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/MyBooks/MyBooksContext';
 import { isbnHyphen10 } from '@/utils/MyBooks/isbnHyphen10';
 import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 
 export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; bookIdList: number[] }) {
   const supabase = supabaseClient();
   const router = useRouter();
-
   const searchParams = useSearchParams();
   const bookclass_cd = searchParams.get('bookclass_cd');
   const bookform_cd = searchParams.get('bookform_cd');
   const limit_possess = searchParams.get('limit_possess');
   const display_order = searchParams.get('display_order');
   const sort_option = searchParams.get('sort_option');
-  const user = searchParams.get('user');
-
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // 読み込み状態を管理
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // システム変数、マスタ値取得（カスタムフック）
   const listAlert = (useSystemConstant('listAlert') as number) ?? 0;

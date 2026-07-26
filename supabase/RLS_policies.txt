@@ -1,4 +1,4 @@
-笆繝ｭ繧ｰ繧､繝ｳ繝ｦ繝ｼ繧ｶ繝ｼ縺ｮ縺ｿ縺ｫ謫堺ｽ懊ｒ險ｱ蜿ｯ
+■ログインユーザーのみに操作を許可
 
 drop policy if exists "bookclass_master insert : only own user_id" on bookclass_master;
 drop policy if exists "bookclass_master delete : only own user_id" on bookclass_master;

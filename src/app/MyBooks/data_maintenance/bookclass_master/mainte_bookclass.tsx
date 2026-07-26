@@ -12,13 +12,21 @@ import { BookClassMaster } from '@/utils/MyBooks/getBookClass';
 export default function MainteBookClass() {
   const supabase = supabaseClient();
   const searchParams = useSearchParams();
-  const user = searchParams.get('user');
   const [data, setData] = useState<BookClassMaster[]>([]);
   const [loading, setLoading] = useState(true);
-  // 編集状態の管理
   const [editingCd, setEditingCd] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<BookClassMaster | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // 各ボタンの処理
   // ［閉じる］
@@ -247,7 +255,7 @@ export default function MainteBookClass() {
         </div>
         <div className="flex mt-1 ml-2">
           ※分類の追加・削除・変更は、
-          <span className="font-bold text-red-500">トップページを更新したタイミングで選択肢に反映</span>されます。
+          <span className="font-bold text-red-500">書籍管理のトップページ更新時に選択肢に反映</span>されます。
         </div>
         <div className="flex ml-2">※書籍に付与している分類の変更は慎重に行ってください。</div>
         <div className="flex ml-6">

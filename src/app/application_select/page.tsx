@@ -21,10 +21,7 @@ export default function ApplicationSelectPage() {
   //  userの取得後、書籍管理（MyBooks）に遷移
   useEffect(() => {
     if (!user) return;
-    const params = new URLSearchParams({
-      user: user
-    });
-    router.push(`/MyBooks/?${params.toString()}`);
+    router.push(`/MyBooks/`);
   }, [user, router]);
 
   return <div>読み込み中...</div>;

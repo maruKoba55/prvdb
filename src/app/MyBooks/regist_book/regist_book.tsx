@@ -1,16 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Eraser, Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { useBookClassMaster, usePublisherList } from '@/context/MyBooks/MyBooksContext';
 import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
-import { useBookClassMaster, usePublisherList } from '@/context/AppContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 
 export default function RegistBook() {
+  const supabase = supabaseClient();
+  const router = useRouter();
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
+
   // マスタ値取得（カスタムフック）
   const bookClassMaster = useBookClassMaster();
   const defaultClassCd = bookClassMaster.find((item: any) => item.selectable)?.bookclass_cd || '';
@@ -32,11 +45,6 @@ export default function RegistBook() {
     remarks: '',
     image_url: ''
   };
-
-  const supabase = supabaseClient();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const user = searchParams.get('user');
   const [formData, setFormData] = useState(initialFormState);
   const [registeredBook, setRegisteredBook] = useState<any>(null);
 
@@ -72,13 +80,7 @@ export default function RegistBook() {
             `『${insertedData.title}』（${insertedData.publisher}、${insertedData.first_publish_year}）を登録しました。編集画面に移動します。`
           )
         ) {
-          window.close();
-          const windowName = `edit_book_window_${insertedData.book_id || 'new'}`;
-          const params = new URLSearchParams({
-            book_id: insertedData?.book_id.toString() || '',
-            user: user || ''
-          });
-          window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');
+          router.push(`/MyBooks/edit_book?book_id=${insertedData.book_id.toString()}`);
         }
       }
     } catch (error: any) {

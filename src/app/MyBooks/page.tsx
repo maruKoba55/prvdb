@@ -1,9 +1,9 @@
-import SearchBooks from './search_books';
+import MyBooksHome from './mybooks_home';
 
 export default async function MyBooksPage() {
   return (
     <div>
-      <SearchBooks />
+      <MyBooksHome />
     </div>
   );
 }

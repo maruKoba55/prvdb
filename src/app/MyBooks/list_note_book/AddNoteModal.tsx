@@ -28,6 +28,17 @@ export function AddNoteModal({
 }) {
   const supabase = supabaseClient();
   const [loading, setLoading] = useState(false);
+
+  // 本日日付（日本時間）
+  const todayJapan = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+    .format(new Date())
+    .replace(/\//g, '-');
+
   const [formData, setFormData] = useState({
     read_st_date: todayLocal,
     read_ed_date: '',

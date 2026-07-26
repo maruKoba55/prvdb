@@ -12,13 +12,21 @@ import { BookFormMaster } from '@/utils/MyBooks/getBookForm';
 export default function MainteBookForm() {
   const supabase = supabaseClient();
   const searchParams = useSearchParams();
-  const user = searchParams.get('user');
   const [data, setData] = useState<BookFormMaster[]>([]);
   const [loading, setLoading] = useState(true);
-  // 編集状態の管理
   const [editingCd, setEditingCd] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<BookFormMaster | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // 各ボタンの処理
   // ［閉じる］
@@ -253,7 +261,7 @@ export default function MainteBookForm() {
         </div>
         <div className="flex mt-1 ml-2">
           ※形態の追加・削除・変更は、
-          <span className="font-bold text-red-500">トップページを更新したタイミングで選択肢に反映</span>されます。
+          <span className="font-bold text-red-500">書籍管理のトップページ更新時に選択肢に反映</span>されます。
         </div>
         <div className="flex ml-2">※書籍に付与している形態の変更は慎重に行ってください。</div>
         <div className="flex ml-6">

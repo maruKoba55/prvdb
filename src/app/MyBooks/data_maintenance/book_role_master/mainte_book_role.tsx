@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
@@ -11,14 +10,21 @@ import { BookRoleMaster } from '@/utils/MyBooks/getBookRole';
 
 export default function MainteBookRole() {
   const supabase = supabaseClient();
-  const searchParams = useSearchParams();
-  const user = searchParams.get('user');
   const [data, setData] = useState<BookRoleMaster[]>([]);
   const [loading, setLoading] = useState(true);
-  // 編集状態の管理
   const [editingCd, setEditingCd] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<BookRoleMaster | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // 各ボタンの処理
   // ［閉じる］
@@ -253,7 +259,7 @@ export default function MainteBookRole() {
         </div>
         <div className="flex mt-1 ml-2">
           ※役割の追加・削除・変更は、
-          <span className="font-bold text-red-500">トップページを更新したタイミングで選択肢に反映</span>されます。
+          <span className="font-bold text-red-500">書籍管理のトップページ更新時に選択肢に反映</span>されます。
         </div>
         <div className="flex ml-2">※人・団体に付与している役割の変更は慎重に行ってください。</div>
         <div className="flex ml-6">

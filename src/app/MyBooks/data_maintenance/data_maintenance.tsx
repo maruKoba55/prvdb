@@ -2,24 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookImage, Building, DatabaseBackup, FolderPen, Landmark, UserCheck, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 
 export default function DataMaint() {
   const supabase = supabaseClient();
-  const searchParams = useSearchParams();
-  const user = searchParams.get('user');
 
   // 各ボタンの処理
   // ［書籍役割マスタ］
   const handleBookRoleMaster = () => {
-    const params = new URLSearchParams({
-      user: user || ''
-    });
     const win = window.open(
-      `/MyBooks/data_maintenance/book_role_master/?${params.toString()}`,
+      '/MyBooks/data_maintenance/book_role_master/?',
       'book_role_master_window',
       'width=800,height=820'
     );
@@ -27,11 +21,8 @@ export default function DataMaint() {
   };
   // ［書籍形態マスタ］
   const handleBookFormMaster = () => {
-    const params = new URLSearchParams({
-      user: user || ''
-    });
     const win = window.open(
-      `/MyBooks/data_maintenance/bookform_master/?${params.toString()}`,
+      '/MyBooks/data_maintenance/bookform_master/?',
       'bookform_master_window',
       'width=800,height=820'
     );
@@ -39,11 +30,8 @@ export default function DataMaint() {
   };
   // ［書籍分類マスタ］
   const handleBookClassMaster = () => {
-    const params = new URLSearchParams({
-      user: user || ''
-    });
     const win = window.open(
-      `/MyBooks/data_maintenance/bookclass_master/?${params.toString()}`,
+      '/MyBooks/data_maintenance/bookclass_master/?',
       'bookclass_master_window',
       'width=800,height=820'
     );
@@ -51,11 +39,8 @@ export default function DataMaint() {
   };
   // ［出版社リスト］
   const handlePublisherList = () => {
-    const params = new URLSearchParams({
-      user: user || ''
-    });
     const win = window.open(
-      `/MyBooks/data_maintenance/publisher_list/?${params.toString()}`,
+      '/MyBooks/data_maintenance/publisher_list/?',
       'publisher_list_window',
       'width=830,height=870'
     );
@@ -63,11 +48,8 @@ export default function DataMaint() {
   };
   // ［システム定数］
   const handleSystemConstants = () => {
-    const params = new URLSearchParams({
-      user: user || ''
-    });
     const win = window.open(
-      `/MyBooks/data_maintenance/system_constants/?${params.toString()}`,
+      '/MyBooks/data_maintenance/system_constants/?',
       'system_constants_window',
       'width=800,height=640'
     );

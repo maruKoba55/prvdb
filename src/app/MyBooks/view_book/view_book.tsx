@@ -6,26 +6,24 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { BookCopy, Notebook, Pencil, RefreshCw, StepBack, StepForward, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
+import { useSystemConstant } from '@/context/AppContext';
 import {
-  useSystemConstant,
   useBookClassMaster,
   useBookFormMaster,
   useBookRoleMaster,
   usePublisherList
-} from '@/context/AppContext';
+} from '@/context/MyBooks/MyBooksContext';
 import { BookForm } from '@/app/MyBooks/BookForm';
 
 export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const supabase = supabaseClient();
   const router = useRouter();
-
   const searchParams = useSearchParams();
   const bookclass_cd = searchParams.get('bookclass_cd');
   const bookform_cd = searchParams.get('bookform_cd');
   const limit_possess = searchParams.get('limit_possess');
   const display_order = searchParams.get('display_order');
   const sort_option = searchParams.get('sort_option');
-  const user = searchParams.get('user');
 
   const queryIndex = Number(searchParams.get('index')) || 0; //現在のインデックス（なければ0）
   const [currentIndex, setCurrentIndex] = useState(queryIndex); //URLからの取得を初期値とする
@@ -36,6 +34,16 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const isPrevDisabled = currentIndex <= 0;
   const isNextDisabled = currentIndex >= bookIds.length - 1;
   const readOnly_f = true;
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // システム変数、マスタ、リスト値取得（カスタムフック）
   const viewAlert = (useSystemConstant('viewAlert') as number) ?? 0;
@@ -130,14 +138,23 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       !confirm(`『${book.title}』（${book.publisher}）を複製し、編集画面を開きます。書名の他、適宜に修正してください。`)
     )
       return;
+    //  仮の編集画面を用意
+    //  （RPCの戻りを待ってwindow.openすると空振りする場合がある）
+    const windowName = `edit_book_window_${new Date().toString()}`;
+    const editWindow = window.open('', windowName, 'width=1110,height=880');
+    //  RPCでデータを複製
     const { data: newBookId, error } = await supabase.rpc('duplicate_book', { p_src_book_id: book.book_id });
     if (!error) {
-      const windowName = `edit_book_window_${newBookId || 'new'}`;
       const params = new URLSearchParams({
-        book_id: newBookId.toString() || '',
-        user: user || ''
+        book_id: newBookId.toString() || ''
       });
-      window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');
+      if (editWindow) {
+        editWindow.location.href = `/MyBooks/edit_book?${params.toString()}`;
+      } else {
+        alert('データを複製しましたが、編集画面を開けませんでした。');
+      }
+      //      const windowName = `edit_book_window_${newBookId || 'new'}`;
+      //      window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');
     } else {
       console.error(error);
       alert(`複製失敗 code=${error.code} : ${error.message}`);

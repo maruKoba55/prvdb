@@ -4,16 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { supabaseClient } from '@/lib/Client';
 import { Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useBookFormMaster } from '@/context/AppContext';
+import { useBookFormMaster } from '@/context/MyBooks/MyBooksContext';
 import { styleItems } from '@/app/constants';
 import Image from 'next/image';
-
-// 本日日付（ローカル）
-const todayLocal = [
-  new Date().getFullYear(),
-  String(new Date().getMonth() + 1).padStart(2, '0'),
-  String(new Date().getDate()).padStart(2, '0')
-].join('-');
 
 export function AddPossessModal({
   bookId,
@@ -28,15 +21,26 @@ export function AddPossessModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const supabase = supabaseClient();
+  const [loading, setLoading] = useState(false);
+
   // マスタ取得（カスタムフック）
   const bookFormMaster = useBookFormMaster();
   const defaultFormCd = bookFormMaster.find((item: any) => item.selectable)?.bookform_cd || '';
 
-  const supabase = supabaseClient();
-  const [loading, setLoading] = useState(false);
+  // 本日日付（日本時間）
+  const todayJapan = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+    .format(new Date())
+    .replace(/\//g, '-');
+
   const [formData, setFormData] = useState({
     bookform_cd: defaultFormCd,
-    get_date: todayLocal,
+    get_date: todayJapan,
     dispose_date: '',
     remarks: '',
     image_url: '',

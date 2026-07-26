@@ -4,17 +4,15 @@ import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { Pencil, Save, RefreshCw, Trash2, X } from 'lucide-react';
+import { Pencil, Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { SystemConstant } from '@/utils/getSystemConstants';
 
 export default function MainteSystemConstants({ constantAdd }: { constantAdd: boolean }) {
   const supabase = supabaseClient();
   const searchParams = useSearchParams();
-  const user = searchParams.get('user');
   const [data, setData] = useState<SystemConstant[]>([]);
   const [loading, setLoading] = useState(true);
-  // 編集状態の管理
   const [editingName, setEditingName] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<SystemConstant | null>(null);
 
@@ -192,7 +190,7 @@ export default function MainteSystemConstants({ constantAdd }: { constantAdd: bo
         </div>
         <div className="flex mt-1 ml-2">
           ※定数値の変更は、
-          <span className="font-bold text-red-500">トップページを更新したタイミングでシステムに反映</span>されます。
+          <span className="font-bold text-red-500">トップページ更新時にシステムに反映</span>されます。
         </div>
         <div className="flex mt-1 ml-2">※ 【システム管理者向け】システム定数の規定値は下記コード中に記述</div>
         <div className="flex ml-8">\app\constants.ts</div>

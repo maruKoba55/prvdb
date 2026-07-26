@@ -1,46 +1,53 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSearchParams } from 'next/navigation';
 import { BookSearch, BookX, CalendarSearch, Eraser, LogIn, LogOut, Plus, TextSearch, Toolbox, X } from 'lucide-react';
 import { supabaseClient } from '@/lib/Client';
 import { EditProfile } from '@/components/editProfile';
 import { CommonButton } from '@/components/ui/button';
+import { useSystemConstant } from '@/context/AppContext';
 import {
-  useSystemConstant,
   useBookRoleMaster,
   useBookClassMaster,
   useBookFormMaster,
   usePublisherList
-} from '@/context/AppContext';
+} from '@/context/MyBooks/MyBooksContext';
 import { usePublisherIncrementalSearch } from '@/hooks/MyBooks/PublisherIncrementalSearch';
 import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 
-const initialFormState = {
-  isbn13: '',
-  title: '',
-  titleSearch: 'top',
-  publisher: '',
-  publish_series: '',
-  role_cd: '',
-  person_name: '',
-  personSearch: 'top',
-  bookclass_cd: '',
-  bookform_cd: '',
-  limitPossess: 'noLimit',
-  bookOrder: 'publish',
-  sortOption: 'asc',
-  read_st_from: '',
-  read_st_to: ''
-};
-
-export default function SearchBooks() {
+export default function MyBooksHome() {
   const supabase = supabaseClient();
+
+  const initialFormState = {
+    isbn13: '',
+    title: '',
+    titleSearch: 'top',
+    publisher: '',
+    publish_series: '',
+    role_cd: '',
+    person_name: '',
+    personSearch: 'top',
+    bookclass_cd: '',
+    bookform_cd: '',
+    limitPossess: 'noLimit',
+    bookOrder: 'publish',
+    sortOption: 'asc',
+    read_st_from: '',
+    read_st_to: ''
+  };
   const [formData, setFormData] = useState(initialFormState);
-  const searchParams = useSearchParams();
-  const user = searchParams.get('user');
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // システム変数、各種マスタ、リスト取得（カスタムフック）
   const sqlLimit = parseInt(useSystemConstant('sqlLimit') as string) || 0;
@@ -99,8 +106,7 @@ export default function SearchBooks() {
       limit_possess: formData.limitPossess || '',
       display_order: formData.bookOrder || '',
       sort_option: formData.sortOption || '',
-      sqlLimit: sqlLimit.toString() || '0',
-      user: user || ''
+      sqlLimit: sqlLimit.toString() || '0'
     });
     const win = window.open(`/MyBooks/view_book?${params.toString()}`, windowName, 'width=1110,height=880');
     if (win) win.focus();
@@ -123,8 +129,7 @@ export default function SearchBooks() {
       limit_possess: formData.limitPossess || '',
       display_order: formData.bookOrder || '',
       sort_option: formData.sortOption || '',
-      sqlLimit: sqlLimit.toString() || '0',
-      user: user || ''
+      sqlLimit: sqlLimit.toString() || '0'
     });
     const win = window.open(`/MyBooks/list_book?${params.toString()}`, windowName, 'width=1080,height=600');
     if (win) win.focus();
@@ -177,8 +182,7 @@ export default function SearchBooks() {
       bookform_cd: formData.bookform_cd || '',
       display_order: formData.bookOrder || '',
       sort_option: formData.sortOption || '',
-      sqlLimit: sqlLimit.toString() || '0',
-      user: user || ''
+      sqlLimit: sqlLimit.toString() || '0'
     });
     const win = window.open(`/MyBooks/list_book_unread?${params.toString()}`, windowName, 'width=1080,height=600');
     if (win) win.focus();
@@ -189,10 +193,7 @@ export default function SearchBooks() {
       alert('書籍に割り当てる【分類】が存在しません。書籍新規登録の前に、［データメンテ］から分類を追加してください。');
       return;
     }
-    const params = new URLSearchParams({
-      user: user || ''
-    });
-    const win = window.open(`/MyBooks/regist_book?${params.toString()}`, 'regist_book_window', 'width=1120,height=640');
+    const win = window.open(`/MyBooks/regist_book?`, 'regist_book_window', 'width=1120,height=880');
     if (win) win.focus();
   };
   useHotkeys('alt+r', (event) => {
@@ -201,10 +202,7 @@ export default function SearchBooks() {
   });
   // ［データメンテ］
   const handleDataMaint = () => {
-    const params = new URLSearchParams({
-      user: user || ''
-    });
-    const win = window.open(`/MyBooks/data_maintenance?${params.toString()}`, 'data_maintenance_window');
+    const win = window.open(`/MyBooks/data_maintenance?`, 'data_maintenance_window');
     if (win) win.focus();
   };
   useHotkeys('alt+m', (event) => {

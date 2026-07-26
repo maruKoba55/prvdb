@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Plus, Save, RefreshCw, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useBookRoleMaster, useBookClassMaster, useBookFormMaster, usePublisherList } from '@/context/AppContext';
+import {
+  useBookRoleMaster,
+  useBookClassMaster,
+  useBookFormMaster,
+  usePublisherList
+} from '@/context/MyBooks/MyBooksContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 import { AddRoleModal } from './AddRoleModal';
 import { AddPossessModal } from './AddPossessModal';
@@ -18,7 +23,6 @@ export default function EditBook({ book }: { book: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookId = searchParams.get('book_id');
-  const user = searchParams.get('user');
   const [formData, setFormData] = useState(book);
   const [deleteRoles, setDeleteRoles] = useState<number[]>([]);
   const [deletePossessions, setDeletePossessions] = useState<number[]>([]);
@@ -32,6 +36,16 @@ export default function EditBook({ book }: { book: any }) {
   if (!formData) {
     return null;
   }
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();

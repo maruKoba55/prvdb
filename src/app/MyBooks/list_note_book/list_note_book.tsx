@@ -7,7 +7,8 @@ import { supabaseClient } from '@/lib/Client';
 import { Pencil, Save, X, Plus, Trash2 } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { AddNoteModal } from './AddNoteModal';
-import { useSystemConstant, useBookRoleMaster } from '@/context/AppContext';
+import { useSystemConstant } from '@/context/AppContext';
+import { useBookRoleMaster } from '@/context/MyBooks/MyBooksContext';
 
 type BookNote = {
   id: number;
@@ -25,13 +26,21 @@ export default function ListNoteBook() {
   const bookTitle = searchParams.get('title');
   const roleCd = searchParams.get('role_cd');
   const personName = searchParams.get('person_name');
-  const user = searchParams.get('user');
-
   const [notes, setNotes] = useState<BookNote[]>([]);
   const [Loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<BookNote>>({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
 
   // 各ボタンの処理
   // ［ノート追加］
