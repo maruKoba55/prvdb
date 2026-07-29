@@ -1,8 +1,14 @@
+import type { Metadata } from 'next';
 import { MyBooksContextProvider } from '@/context/MyBooks/MyBooksContext';
 import { getBookRole } from '@/utils/MyBooks/getBookRole';
 import { getBookClass } from '@/utils/MyBooks/getBookClass';
 import { getBookForm } from '@/utils/MyBooks/getBookForm';
 import { getPublisherList } from '@/utils/MyBooks/getPublisherList';
+
+export const metadata: Metadata = {
+  title: '書籍管理',
+  description: 'Database for My Bookshelf'
+};
 
 export default async function MyBooksLayout({ children }: { children: React.ReactNode }) {
   // マスタ、リスト類をすべて取得

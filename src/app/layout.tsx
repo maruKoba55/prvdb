@@ -5,8 +5,8 @@ import { getSystemConstants } from '@/utils/getSystemConstants';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '書籍管理',
-  description: 'Database for My Bookshelf'
+  title: '私用データベース',
+  description: 'My Database'
 };
 
 // 日本語フォントの設定
