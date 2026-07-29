@@ -46,6 +46,16 @@ export default function ListNoteRange() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<RangeNote>>({});
 
+  // user取得
+  const [user, setUser] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data && data.user) setUser(data.user.id);
+    };
+    fetchUser();
+  }, []);
+
   // システム変数、マスタ値取得（カスタムフック）
   const sqlLimit = parseInt(useSystemConstant('sqlLimit') as string) || 0;
   const supabaseMaxRows = parseInt(useSystemConstant('supabaseMaxRows') as string) || 0;
@@ -53,6 +63,32 @@ export default function ListNoteRange() {
   const bookRoleMaster = useBookRoleMaster();
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
+
+  // 書名クリック時の処理
+  const handleBookView = (book_id: string) => {
+    const windowName = `view_book_window_${book_id}`;
+    const params = {
+      book_id: book_id,
+      isbn13: '',
+      title: '',
+      title_search_type: '',
+      publisher: '',
+      publish_series: '',
+      role_cd: '',
+      person_name: '',
+      person_search_type: '',
+      bookclass_cd: '',
+      bookform_cd: '',
+      limit_possess: '',
+      display_order: '',
+      sort_option: '',
+      sqlLimit: '0',
+      user: user || ''
+    };
+    const queryString = new URLSearchParams(params).toString();
+    const win = window.open(`/MyBooks/view_book?${queryString}`, windowName, 'width=1110,height=880');
+    if (win) win.focus();
+  };
 
   // 各ボタンの処理
   // ［閉じる］
@@ -250,7 +286,14 @@ export default function ListNoteRange() {
                         <div className="flex">
                           <div className="flex text-white bg-gray-400 min-w-9 align-top justify-end p-1"> {i + 1}</div>
                           <div className="p-1 font-bold text-blue-600">
-                            『{note.title}』
+                            『
+                            <span
+                              className="underline underline-offset-2 cursor-pointer hover:text-blue-800"
+                              onClick={() => handleBookView(note.book_id.toString())}
+                            >
+                              {note.title}
+                            </span>
+                            』
                             {note.role_cd && note.person_name
                               ? `　${bookRoleMaster.find((item: any) => item.role_cd === note.role_cd)?.role_name || null}：${note.person_name.replace(/\s+/g, '')}`
                               : ''}

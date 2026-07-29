@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
-import { BookSearch, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { useSystemConstant } from '@/context/AppContext';
 import { useBookRoleMaster, useBookClassMaster, useBookFormMaster } from '@/context/MyBooks/MyBooksContext';
@@ -39,8 +39,7 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
 
-  // 各ボタンの処理
-  //［書籍閲覧］
+  // 書名クリック時の処理
   const handleBookView = (book_id: string) => {
     const windowName = `view_book_window_${book_id}`;
     const params = {
@@ -65,7 +64,7 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
     const win = window.open(`/MyBooks/view_book?${queryString}`, windowName, 'width=1110,height=880');
     if (win) win.focus();
   };
-  //［閉じる］
+  //［閉じる］ボタンの処理
   const handleClose = () => {
     window.close();
   };
@@ -88,7 +87,7 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
         return;
       }
     }
-  }, []); // 第2引数を空配列にすることで「初回のみ」実行
+  }, []);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -189,21 +188,19 @@ export default function ListBook({ titleAdd, bookIdList }: { titleAdd: string; b
       </div>
       {books.map((book, i) => (
         <div key={book.book_id} className="flex border rounded shadow-sm mx-2 p-1 ">
-          <div className="flex flex-col min-w-9 text-white bg-gray-400">
-            <div className="flex justify-end p-1"> {i + 1}</div>
-            <div className="flex justify-center mt-1">
-              <button
-                onClick={() => handleBookView(book.book_id)}
-                className="text-blue-600 hover:text-blue-800"
-                title="書籍閲覧"
-              >
-                <BookSearch size={20} />
-              </button>
-            </div>
-          </div>
+          <div className="flex min-w-9 text-white bg-gray-400 justify-end p-1">{i + 1}</div>
           <div className="ml-2">
             <div>
-              <span className="font-bold text-lg">『{book.title}』</span>
+              <div className="font-bold text-lg ">
+                『
+                <span
+                  className="underline underline-offset-2 cursor-pointer hover:text-blue-800"
+                  onClick={() => handleBookView(book.book_id)}
+                >
+                  {book.title}
+                </span>
+                』
+              </div>
               {book.isbn13 || book.isbn10 ? (
                 <span className="ml-2">
                   ISBN
