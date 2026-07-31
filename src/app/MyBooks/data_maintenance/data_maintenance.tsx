@@ -184,7 +184,7 @@ export default function DataMaint() {
               />
             </div>
             <div className="flex flex-col justify-center ml-1">： </div>
-            <div className="flex flex-col justify-center ml-1">書籍管理システムで参照する定数の調整</div>
+            <div className="flex flex-col justify-center ml-1">私用ＤＢ全システムに共通する定数の調整</div>
           </div>
           <div className="flex mt-3">
             <div className="flex flex-col justify-center w-40">
