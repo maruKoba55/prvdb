@@ -95,9 +95,9 @@ export default function LoginForm() {
   if (!isMounted) return null;
 
   return (
-    <div style={{ width: 740 }}>
-      <div style={{ width: 740 }} className="text-center text-3xl font-bold underline bg-cyan-500">
-        ログイン選択
+    <div style={{ width: 800 }}>
+      <div style={{ width: 800 }} className="text-center text-3xl font-bold underline bg-cyan-500">
+        私用ＤＢ／ログイン選択
       </div>
       <div className="flex flex-col border-solid border-2 rounded-lg m-3 p-2">
         <div className="flex text-xl font-bold text-blue-500 m-1">Googleでログイン</div>
@@ -119,7 +119,7 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <label htmlFor="password" className="inline-block ml-3">
+          <label htmlFor="password" className="inline-block ml-4">
             password：
           </label>
           <input
@@ -137,13 +137,18 @@ export default function LoginForm() {
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
-        <div className="flex justify-center gap-12 mt-2">
+        <div className="flex justify-center items-center mt-2">
           <CommonButton label="e-mailでログイン" variant="outline" onClick={signInMail} />
-          <CommonButton label="ユーザー新規登録" variant="outline" onClick={signUpMail} />
         </div>
         <div className="flex flex-col border-t border-dotted mt-2 py-2">
           <div className="flex justify-center items-center gap-2">
-            登録済みの e-mail に対する password をお忘れですか？
+            新規ユーザーを作成しますか？ e-mail、passwordを指定して
+            <CommonButton label="ユーザー登録" variant="outline" onClick={signUpMail} />
+          </div>
+        </div>
+        <div className="flex flex-col border-t border-dotted mt-2 py-2">
+          <div className="flex justify-center items-center gap-2">
+            e-mail に対する password をお忘れですか？
             <CommonButton
               label={sending ? '送信中...' : '再設定メールを送信'}
               variant="outline"

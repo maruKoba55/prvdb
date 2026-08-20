@@ -87,7 +87,7 @@ export default function MainteSystemConstants({ constantAdd }: { constantAdd: bo
 
   return (
     <div>
-      <div className="text-center text-3xl font-bold underline bg-cyan-500">書籍管理／データメンテナンス</div>
+      <div className="text-center text-3xl font-bold underline bg-cyan-500">私用ＤＢ／データメンテナンス</div>
       <div className="flex flex-col border-solid border-2 rounded-lg m-3 p-1">
         <div className="text-xl font-bold text-blue-500 m-1">システム定数</div>
         {constantAdd ? (
@@ -190,7 +190,7 @@ export default function MainteSystemConstants({ constantAdd }: { constantAdd: bo
         </div>
         <div className="flex mt-1 ml-2">
           ※定数値の変更は、
-          <span className="font-bold text-red-500">トップページ更新時にシステムに反映</span>されます。
+          <span className="font-bold text-red-500">私用ＤＢのトップページ更新時に反映</span>されます。
         </div>
         <div className="flex mt-1 ml-2">※ 【システム管理者向け】システム定数の規定値は下記コード中に記述</div>
         <div className="flex ml-8">\app\constants.ts</div>

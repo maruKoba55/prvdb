@@ -49,7 +49,7 @@ export default function DataMaint() {
   // ［システム定数］
   const handleSystemConstants = () => {
     const win = window.open(
-      '/MyBooks/data_maintenance/system_constants/?',
+      '/common/data_maintenance/system_constants/?',
       'system_constants_window',
       'width=800,height=640'
     );

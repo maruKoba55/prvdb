@@ -151,7 +151,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       if (editWindow) {
         editWindow.location.href = `/MyBooks/edit_book?${params.toString()}`;
       } else {
-        alert('データを複製しましたが、編集画面を開けませんでした。');
+        alert('仮書名（元の書名＋現在日時）で複製しましたが、編集画面を開けませんでした。');
       }
       //      const windowName = `edit_book_window_${newBookId || 'new'}`;
       //      window.open(`/MyBooks/edit_book?${params.toString()}`, windowName, 'width=1110,height=880');

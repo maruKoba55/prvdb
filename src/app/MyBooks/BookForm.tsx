@@ -323,7 +323,7 @@ export const BookForm = ({
                   id="publish_series"
                   className={styleItems}
                   type="text"
-                  size={40}
+                  size={44}
                   readOnly={isReadOnly}
                   value={formData.publish_series ?? ''}
                   onChange={onChange}
@@ -345,7 +345,7 @@ export const BookForm = ({
               </div>
             </div>
             <div className="flex mt-1">
-              <div className="flex flex-row items-center gap-2 w-4/7">
+              <div className="flex flex-row items-center gap-2 w-[520px]">
                 <label
                   htmlFor="first_publish_year"
                   className={`w-[60px] flex-shrink-0 ${isReadOnly ? '' : 'font-bold text-orange-500'}`}
