@@ -95,7 +95,7 @@ export default function LoginForm() {
   if (!isMounted) return null;
 
   return (
-    <div style={{ width: 810 }}>
+    <div style={{ width: 820 }}>
       <div className="text-center text-3xl font-bold underline bg-cyan-500">私用ＤＢ／ログイン選択</div>
       <div className="flex flex-col border-solid border-2 rounded-lg m-3 p-2">
         <div className="flex text-xl font-bold text-blue-500 m-1">Googleでログイン</div>
