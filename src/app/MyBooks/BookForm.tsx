@@ -1,8 +1,8 @@
 import React from 'react';
 import { Eraser } from 'lucide-react';
-import { usePublisherIncrementalSearch } from '@/hooks/MyBooks/PublisherIncrementalSearch';
+import { useBookPublisherIncrementalSearch } from '@/hooks/MyBooks/BookPublisherIncrementalSearch';
 import { BookClassMaster } from '@/utils/MyBooks/getBookClass';
-import { PublisherList } from '@/utils/MyBooks/getPublisherList';
+import { BookPublisherList } from '@/utils/MyBooks/getBookPublisherList';
 import { isbnHyphen10 } from '@/utils/MyBooks/isbnHyphen10';
 import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { toWarekiYear } from '@/utils/toWarekiYear';
@@ -31,7 +31,7 @@ type Props = {
   bookId: string; // 表示対象の書籍ID
   formData: BookFormData;
   bookClassMaster: BookClassMaster[]; // 書籍分類マスタ
-  publisherList: PublisherList[]; // 出版社リスト
+  bookPublisherList: BookPublisherList[]; // 出版社リスト
   isReadOnly?: boolean; // 表示専用モード
   totalCount?: number; // 総件数
   currentCount?: number; // 現在件数
@@ -49,7 +49,7 @@ export const BookForm = ({
   bookId,
   formData,
   bookClassMaster,
-  publisherList,
+  bookPublisherList,
   isReadOnly = false,
   totalCount = 0,
   currentCount = 0,
@@ -84,7 +84,7 @@ export const BookForm = ({
     filteredList,
     handleInputKeyDown,
     handleListKeyDown
-  } = usePublisherIncrementalSearch(publisherList, formData.publisher || '', handleChangePublisher);
+  } = useBookPublisherIncrementalSearch(bookPublisherList, formData.publisher || '', handleChangePublisher);
   // フォーカスが移ったら（e.relatedTarget）リストを閉じる
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {

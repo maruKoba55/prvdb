@@ -4,13 +4,13 @@ import React, { createContext, useContext } from 'react';
 import { BookRoleMaster } from '@/utils/MyBooks/getBookRole';
 import { BookClassMaster } from '@/utils/MyBooks/getBookClass';
 import { BookFormMaster } from '@/utils/MyBooks/getBookForm';
-import { PublisherList } from '@/utils/MyBooks/getPublisherList';
+import { BookPublisherList } from '@/utils/MyBooks/getBookPublisherList';
 
 interface MyBooksContextType {
   bookRoleMaster: BookRoleMaster[];
   bookClassMaster: BookClassMaster[];
   bookFormMaster: BookFormMaster[];
-  publisherList: PublisherList[];
+  bookPublisherList: BookPublisherList[];
 }
 const MyBooksContext = createContext<MyBooksContextType | null>(null);
 
@@ -20,13 +20,13 @@ export function MyBooksContextProvider({
   initialBookRoleMaster,
   initialBookClassMaster,
   initialBookFormMaster,
-  initialPublisherList
+  initialBookPublisherList
 }: {
   children: React.ReactNode;
   initialBookRoleMaster: BookRoleMaster[];
   initialBookClassMaster: BookClassMaster[];
   initialBookFormMaster: BookFormMaster[];
-  initialPublisherList: PublisherList[];
+  initialBookPublisherList: BookPublisherList[];
 }) {
   return (
     <MyBooksContext.Provider
@@ -34,7 +34,7 @@ export function MyBooksContextProvider({
         bookRoleMaster: initialBookRoleMaster,
         bookClassMaster: initialBookClassMaster,
         bookFormMaster: initialBookFormMaster,
-        publisherList: initialPublisherList
+        bookPublisherList: initialBookPublisherList
       }}
     >
       {children}
@@ -64,10 +64,10 @@ export function useBookFormMaster(): BookFormMaster[] {
   }
   return context.bookFormMaster;
 }
-export function usePublisherList(): PublisherList[] {
+export function useBookPublisherList(): BookPublisherList[] {
   const context = useContext(MyBooksContext);
   if (!context) {
-    throw new Error('usePublisherList must be used within a MyBooksContextProvider');
+    throw new Error('useBookPublisherList must be used within a MyBooksContextProvider');
   }
-  return context.publisherList;
+  return context.bookPublisherList;
 }

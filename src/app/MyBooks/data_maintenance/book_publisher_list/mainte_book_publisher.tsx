@@ -6,17 +6,17 @@ import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { LayersPlus, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { AddPublisherModal } from './AddPublisherModal';
-import { PublisherList } from '@/utils/MyBooks/getPublisherList';
+import { AddBookPublisherModal } from './AddBookPublisherModal';
+import { BookPublisherList } from '@/utils/MyBooks/getBookPublisherList';
 import { styleItems } from '@/app/constants';
 
-export default function MaintePublisher() {
+export default function MainteBookPublisher() {
   const supabase = supabaseClient();
   const searchParams = useSearchParams();
-  const [data, setData] = useState<PublisherList[]>([]);
+  const [data, setData] = useState<BookPublisherList[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<PublisherList | null>(null);
+  const [editForm, setEditForm] = useState<BookPublisherList | null>(null);
   const [extractCount, setExtractCount] = useState<number>(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -32,7 +32,7 @@ export default function MaintePublisher() {
 
   // 各ボタンの処理
   // ［編集開始］
-  const handleEdit = (item: PublisherList) => {
+  const handleEdit = (item: BookPublisherList) => {
     setEditingId(item.id.toString());
     setEditForm({ ...item });
   };
@@ -46,7 +46,7 @@ export default function MaintePublisher() {
     if (!editForm) return;
     const trimmedReading = editForm.reading ? editForm.reading.trim() : '';
     const { error } = await supabase
-      .from('publisher_list')
+      .from('book_publisher_list')
       .update({
         publisher: editForm.publisher.trim(),
         reading: trimmedReading === '' ? null : trimmedReading, // 空白の場合はnullにして読み順の最後に回す
@@ -68,7 +68,7 @@ export default function MaintePublisher() {
   // ［削除］
   const handleDelete = async (id: Number, publisher: string) => {
     if (!confirm(`［${publisher}］を削除しますか？`)) return;
-    const { error } = await supabase.from('publisher_list').delete().eq('id', id);
+    const { error } = await supabase.from('book_publisher_list').delete().eq('id', id);
     if (!error) {
       fetchData(); // 削除成功後、一覧を再取得
     } else {
@@ -101,7 +101,7 @@ export default function MaintePublisher() {
   const fetchData = async () => {
     setLoading(true);
     const { data: result, error } = await supabase
-      .from('publisher_list')
+      .from('book_publisher_list')
       .select('id, publisher, reading, remarks')
       .order('reading', { ascending: true })
       .order('publisher', { ascending: true });
@@ -294,7 +294,7 @@ export default function MaintePublisher() {
       </div>
       {/* 出版社リスト追加 */}
       {isAddModalOpen && (
-        <AddPublisherModal
+        <AddBookPublisherModal
           user={user || ''}
           onClose={() => setIsAddModalOpen(false)}
           onSuccess={() => {

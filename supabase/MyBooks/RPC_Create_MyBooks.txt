@@ -427,7 +427,7 @@ BEGIN
   IF v_current_user IS NULL THEN
       RAISE EXCEPTION 'ユーザーがログインしていません。';
   END IF;
-  INSERT INTO publisher_list (publisher, user_id)
+  INSERT INTO book_publisher_list (publisher, user_id)
   SELECT publisher, user_id
   FROM books
   WHERE user_id = v_current_user
@@ -477,8 +477,8 @@ BEGIN
   CREATE TABLE IF NOT EXISTS backup2.book_note (
     LIKE public.book_note INCLUDING ALL
   );
-  CREATE TABLE IF NOT EXISTS backup2.publisher_list (
-    LIKE public.publisher_list INCLUDING ALL
+  CREATE TABLE IF NOT EXISTS backup2.book_publisher_list (
+    LIKE public.book_publisher_list INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup2.system_constants (
     LIKE public.system_constants INCLUDING ALL
@@ -745,37 +745,37 @@ BEGIN
   using (
     (auth.uid() = user_id)
   );
-  ALTER TABLE backup2.publisher_list ENABLE ROW LEVEL SECURITY;
-  drop policy if exists "publisher_list insert : only own user_id" on backup2.publisher_list;
-  drop policy if exists "publisher_list delete : only own user_id" on backup2.publisher_list;
-  drop policy if exists "publisher_list update : only own user_id" on backup2.publisher_list;
-  drop policy if exists "publisher_list select : only own user_id" on backup2.publisher_list;
-  create policy "publisher_list insert : only own user_id"
-  on "backup2"."publisher_list"
+  ALTER TABLE backup2.book_publisher_list ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_publisher_list insert : only own user_id" on backup2.book_publisher_list;
+  drop policy if exists "book_publisher_list delete : only own user_id" on backup2.book_publisher_list;
+  drop policy if exists "book_publisher_list update : only own user_id" on backup2.book_publisher_list;
+  drop policy if exists "book_publisher_list select : only own user_id" on backup2.book_publisher_list;
+  create policy "book_publisher_list insert : only own user_id"
+  on "backup2"."book_publisher_list"
   as PERMISSIVE
   for INSERT
   to public
   with check (
     (auth.uid() = user_id)
   );
-  create policy "publisher_list delete : only own user_id"
-  on "backup2"."publisher_list"
+  create policy "book_publisher_list delete : only own user_id"
+  on "backup2"."book_publisher_list"
   as PERMISSIVE
   for DELETE
   to public
   using (
     (auth.uid() = user_id)
   );
-  create policy "publisher_list update : only own user_id"
-  on "backup2"."publisher_list"
+  create policy "book_publisher_list update : only own user_id"
+  on "backup2"."book_publisher_list"
   as PERMISSIVE
   for UPDATE
   to public
   using (
     (auth.uid() = user_id)
   );
-  create policy "publisher_list select : only own user_id"
-  on "backup2"."publisher_list"
+  create policy "book_publisher_list select : only own user_id"
+  on "backup2"."book_publisher_list"
   as PERMISSIVE
   for SELECT
   to public
@@ -858,7 +858,7 @@ BEGIN
   );
   DELETE FROM backup2.profile WHERE user_id = v_current_user;
   DELETE FROM backup2.system_constants WHERE user_id = v_current_user;
-  DELETE FROM backup2.publisher_list WHERE user_id = v_current_user;
+  DELETE FROM backup2.book_publisher_list WHERE user_id = v_current_user;
   DELETE FROM backup2.book_note WHERE user_id = v_current_user;
   DELETE FROM backup2.book_role WHERE user_id = v_current_user;
   DELETE FROM backup2.book_possess WHERE user_id = v_current_user;
@@ -902,10 +902,10 @@ BEGIN
       SELECT id, book_id, read_st_date, read_ed_date, note, user_id
       FROM backup1.book_note WHERE user_id = v_current_user;
   END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'publisher_list') THEN
-      INSERT INTO backup2.publisher_list (id, publisher, reading, remarks, user_id)
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'book_publisher_list') THEN
+      INSERT INTO backup2.book_publisher_list (id, publisher, reading, remarks, user_id)
       SELECT id, publisher, reading, remarks, user_id
-      FROM backup1.publisher_list WHERE user_id = v_current_user;
+      FROM backup1.book_publisher_list WHERE user_id = v_current_user;
   END IF;
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'backup1' AND table_name = 'system_constants') THEN
       INSERT INTO backup2.system_constants (id, constant_name, constant_type, constant_value, remarks, user_id)
@@ -940,8 +940,8 @@ BEGIN
   CREATE TABLE IF NOT EXISTS backup1.book_note (
     LIKE public.book_note INCLUDING ALL
   );
-  CREATE TABLE IF NOT EXISTS backup1.publisher_list (
-    LIKE public.publisher_list INCLUDING ALL
+  CREATE TABLE IF NOT EXISTS backup1.book_publisher_list (
+    LIKE public.book_publisher_list INCLUDING ALL
   );
   CREATE TABLE IF NOT EXISTS backup1.system_constants (
     LIKE public.system_constants INCLUDING ALL
@@ -1208,37 +1208,37 @@ BEGIN
   using (
     (auth.uid() = user_id)
   );
-  ALTER TABLE backup1.publisher_list ENABLE ROW LEVEL SECURITY;
-  drop policy if exists "publisher_list insert : only own user_id" on backup1.publisher_list;
-  drop policy if exists "publisher_list delete : only own user_id" on backup1.publisher_list;
-  drop policy if exists "publisher_list update : only own user_id" on backup1.publisher_list;
-  drop policy if exists "publisher_list select : only own user_id" on backup1.publisher_list;
-  create policy "publisher_list insert : only own user_id"
-  on "backup1"."publisher_list"
+  ALTER TABLE backup1.book_publisher_list ENABLE ROW LEVEL SECURITY;
+  drop policy if exists "book_publisher_list insert : only own user_id" on backup1.book_publisher_list;
+  drop policy if exists "book_publisher_list delete : only own user_id" on backup1.book_publisher_list;
+  drop policy if exists "book_publisher_list update : only own user_id" on backup1.book_publisher_list;
+  drop policy if exists "book_publisher_list select : only own user_id" on backup1.book_publisher_list;
+  create policy "book_publisher_list insert : only own user_id"
+  on "backup1"."book_publisher_list"
   as PERMISSIVE
   for INSERT
   to public
   with check (
     (auth.uid() = user_id)
   );
-  create policy "publisher_list delete : only own user_id"
-  on "backup1"."publisher_list"
+  create policy "book_publisher_list delete : only own user_id"
+  on "backup1"."book_publisher_list"
   as PERMISSIVE
   for DELETE
   to public
   using (
     (auth.uid() = user_id)
   );
-  create policy "publisher_list update : only own user_id"
-  on "backup1"."publisher_list"
+  create policy "book_publisher_list update : only own user_id"
+  on "backup1"."book_publisher_list"
   as PERMISSIVE
   for UPDATE
   to public
   using (
     (auth.uid() = user_id)
   );
-  create policy "publisher_list select : only own user_id"
-  on "backup1"."publisher_list"
+  create policy "book_publisher_list select : only own user_id"
+  on "backup1"."book_publisher_list"
   as PERMISSIVE
   for SELECT
   to public
@@ -1321,7 +1321,7 @@ BEGIN
   );
   DELETE FROM backup1.profile WHERE user_id = v_current_user;
   DELETE FROM backup1.system_constants WHERE user_id = v_current_user;
-  DELETE FROM backup1.publisher_list WHERE user_id = v_current_user;
+  DELETE FROM backup1.book_publisher_list WHERE user_id = v_current_user;
   DELETE FROM backup1.book_note WHERE user_id = v_current_user;
   DELETE FROM backup1.book_role WHERE user_id = v_current_user;
   DELETE FROM backup1.book_possess WHERE user_id = v_current_user;
@@ -1365,10 +1365,10 @@ BEGIN
       SELECT id, book_id, read_st_date, read_ed_date, note, user_id
       FROM public.book_note WHERE user_id = v_current_user;
   END IF;
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'publisher_list') THEN
-      INSERT INTO backup1.publisher_list (id, publisher, reading, remarks, user_id)
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'book_publisher_list') THEN
+      INSERT INTO backup1.book_publisher_list (id, publisher, reading, remarks, user_id)
       SELECT id, publisher, reading, remarks, user_id
-      FROM public.publisher_list WHERE user_id = v_current_user;
+      FROM public.book_publisher_list WHERE user_id = v_current_user;
   END IF;
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'system_constants') THEN
       INSERT INTO backup1.system_constants (id, constant_name, constant_type, constant_value, remarks, user_id)

@@ -10,7 +10,7 @@ import {
   useBookRoleMaster,
   useBookClassMaster,
   useBookFormMaster,
-  usePublisherList
+  useBookPublisherList
 } from '@/context/MyBooks/MyBooksContext';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 import { AddRoleModal } from './AddRoleModal';
@@ -174,7 +174,7 @@ export default function EditBook({ book }: { book: any }) {
   const bookRoleMaster = useBookRoleMaster();
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
-  const publisherList = usePublisherList();
+  const bookPublisherList = useBookPublisherList();
 
   // 各ボタンの処理
   // ［画面最新化］
@@ -330,7 +330,7 @@ export default function EditBook({ book }: { book: any }) {
           bookId={formData.book_id}
           formData={formData}
           bookClassMaster={bookClassMaster}
-          publisherList={publisherList}
+          bookPublisherList={bookPublisherList}
           onChange={handleChange}
           onChangeF={handleChangeF}
           onChangeS={handleBookClass}

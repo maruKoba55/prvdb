@@ -11,9 +11,9 @@ import {
   useBookRoleMaster,
   useBookClassMaster,
   useBookFormMaster,
-  usePublisherList
+  useBookPublisherList
 } from '@/context/MyBooks/MyBooksContext';
-import { usePublisherIncrementalSearch } from '@/hooks/MyBooks/PublisherIncrementalSearch';
+import { useBookPublisherIncrementalSearch } from '@/hooks/MyBooks/BookPublisherIncrementalSearch';
 import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { styleItems } from '@/app/constants';
 
@@ -55,7 +55,7 @@ export default function MyBooksHome() {
   const bookRoleMaster = useBookRoleMaster();
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
-  const publisherList = usePublisherList();
+  const bookPublisherList = useBookPublisherList();
 
   //検索件数上限の設定
   let dbSearchMax = 0;
@@ -283,7 +283,7 @@ export default function MyBooksHome() {
     filteredList,
     handleInputKeyDown,
     handleListKeyDown
-  } = usePublisherIncrementalSearch(publisherList, formData.publisher || '', (value: string) =>
+  } = useBookPublisherIncrementalSearch(bookPublisherList, formData.publisher || '', (value: string) =>
     handleChangeF('publisher', value)
   );
   const handleSelectPublisher = (publisherName: string) => {

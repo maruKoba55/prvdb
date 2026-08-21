@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { PublisherList } from '@/utils/MyBooks/getPublisherList';
+import { BookPublisherList } from '@/utils/MyBooks/getBookPublisherList';
 
-export function usePublisherIncrementalSearch(
-  publisherList: PublisherList[],
+export function useBookPublisherIncrementalSearch(
+  bookpublisherList: BookPublisherList[],
   currentValue: string,
   onSelect: (value: string) => void
 ) {
@@ -10,7 +10,7 @@ export function usePublisherIncrementalSearch(
   const [activeIndex, setActiveIndex] = useState(-1); // キーボードで選択中の位置
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const filteredList = publisherList.filter((item) => item.publisher.startsWith(currentValue || ''));
+  const filteredList = bookpublisherList.filter((item) => item.publisher.startsWith(currentValue || ''));
 
   // カーソル上下（activeIndex）に応じてスクロール追従
   useEffect(() => {

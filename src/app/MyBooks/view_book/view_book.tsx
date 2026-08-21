@@ -11,7 +11,7 @@ import {
   useBookClassMaster,
   useBookFormMaster,
   useBookRoleMaster,
-  usePublisherList
+  useBookPublisherList
 } from '@/context/MyBooks/MyBooksContext';
 import { BookForm } from '@/app/MyBooks/BookForm';
 
@@ -50,7 +50,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
   const bookClassMaster = useBookClassMaster();
   const bookFormMaster = useBookFormMaster();
   const bookRoleMaster = useBookRoleMaster();
-  const publisherList = usePublisherList();
+  const bookPublisherList = useBookPublisherList();
 
   // 各ボタンの処理
   //［前］
@@ -294,7 +294,7 @@ export default function ViewBook({ bookIdList }: { bookIdList: number[] }) {
       bookId={book.book_id}
       formData={book}
       bookClassMaster={bookClassMaster}
-      publisherList={publisherList}
+      bookPublisherList={bookPublisherList}
       isReadOnly={readOnly_f}
       totalCount={bookIds.length}
       currentCount={currentIndex + 1}

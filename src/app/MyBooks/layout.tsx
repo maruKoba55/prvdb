@@ -3,7 +3,7 @@ import { MyBooksContextProvider } from '@/context/MyBooks/MyBooksContext';
 import { getBookRole } from '@/utils/MyBooks/getBookRole';
 import { getBookClass } from '@/utils/MyBooks/getBookClass';
 import { getBookForm } from '@/utils/MyBooks/getBookForm';
-import { getPublisherList } from '@/utils/MyBooks/getPublisherList';
+import { getBookPublisherList } from '@/utils/MyBooks/getBookPublisherList';
 
 export const metadata: Metadata = {
   title: '書籍管理',
@@ -15,14 +15,14 @@ export default async function MyBooksLayout({ children }: { children: React.Reac
   const bookRoleMaster = await getBookRole('all');
   const bookClassMaster = await getBookClass('all');
   const bookFormMaster = await getBookForm('all');
-  const publisherList = await getPublisherList();
+  const bookPublisherList = await getBookPublisherList();
 
   return (
     <MyBooksContextProvider
       initialBookRoleMaster={bookRoleMaster ?? []}
       initialBookClassMaster={bookClassMaster ?? []}
       initialBookFormMaster={bookFormMaster ?? []}
-      initialPublisherList={publisherList ?? []}
+      initialBookPublisherList={bookPublisherList ?? []}
     >
       {children}
     </MyBooksContextProvider>

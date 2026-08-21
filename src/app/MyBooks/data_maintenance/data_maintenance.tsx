@@ -40,8 +40,8 @@ export default function DataMaint() {
   // ［出版社リスト］
   const handlePublisherList = () => {
     const win = window.open(
-      '/MyBooks/data_maintenance/publisher_list/?',
-      'publisher_list_window',
+      '/MyBooks/data_maintenance/book_publisher_list/?',
+      'book_publisher_list_window',
       'width=830,height=870'
     );
     if (win) win.focus();

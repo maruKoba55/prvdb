@@ -6,7 +6,7 @@ import { Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
 import { styleItems } from '@/app/constants';
 
-export function AddPublisherModal({
+export function AddBookPublisherModal({
   user,
   onClose,
   onSuccess
@@ -47,7 +47,7 @@ export function AddPublisherModal({
       return;
     }
 
-    const { error } = await supabase.from('publisher_list').insert([insertData]);
+    const { error } = await supabase.from('book_publisher_list').insert([insertData]);
     setLoading(false);
     if (!error) {
       onSuccess();

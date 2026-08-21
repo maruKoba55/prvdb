@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/Client';
 import { Eraser, Save, X } from 'lucide-react';
 import { CommonButton } from '@/components/ui/button';
-import { useBookClassMaster, usePublisherList } from '@/context/MyBooks/MyBooksContext';
+import { useBookClassMaster, useBookPublisherList } from '@/context/MyBooks/MyBooksContext';
 import { isbnHyphenate } from '@/utils/MyBooks/isbnHyphenate';
 import { BookForm, BookFormData } from '@/app/MyBooks/BookForm';
 
@@ -27,7 +27,7 @@ export default function RegistBook() {
   // マスタ値取得（カスタムフック）
   const bookClassMaster = useBookClassMaster();
   const defaultClassCd = bookClassMaster.find((item: any) => item.selectable)?.bookclass_cd || '';
-  const publisherList = usePublisherList();
+  const bookPublisherList = useBookPublisherList();
 
   const initialFormState = {
     isbn10: '',
@@ -196,7 +196,7 @@ export default function RegistBook() {
         bookId={registeredBook ? registeredBook.book_id : ''}
         formData={formData}
         bookClassMaster={bookClassMaster}
-        publisherList={publisherList}
+        bookPublisherList={bookPublisherList}
         onChange={handleChange}
         onChangeF={handleChangeF}
         onChangeS={handleBookClass}
